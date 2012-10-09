@@ -79,9 +79,9 @@
 	NSString *glMatrixPath = [[NSBundle mainBundle] pathForResource:@"gl-matrix-min.js" ofType:nil inDirectory:@"js"];
 	// run all the files
 	runScript([glMatrixPath UTF8String]);
-	NSString *mainPath = [[NSBundle mainBundle] pathForResource:@"chester-test-1.js" ofType:nil inDirectory:@"js"];
+	NSString *mainPath = [[NSBundle mainBundle] pathForResource:@"lesson5.js" ofType:nil inDirectory:@"js"];
 	runScript([mainPath UTF8String]);
-	evalString("setupGame()", NULL, "native-setupGL");
+	evalString("webGLStart()", NULL, "native-setupGL");
 }
 
 - (void)tearDownGL

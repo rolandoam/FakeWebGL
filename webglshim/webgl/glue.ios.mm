@@ -58,6 +58,6 @@ void getDeviceWinSize(int* width, int* height)
 
 	// retina not working yet...
 	float contentScaleFactor = view.contentScaleFactor;
-	*width = bounds.size.width;// * contentScaleFactor;
-	*height = bounds.size.height;// * contentScaleFactor;
+	*width = bounds.size.width * contentScaleFactor;
+	*height = bounds.size.height * contentScaleFactor;
 }

@@ -46,7 +46,7 @@ float getDevicePixelRatio();
 void getDeviceWinSize(int* width, int* height);
 
 // set to zero if you do not want to load chesterGL
-#define CHESTER 1
+#define CHESTER 0
 
 #pragma mark - Platform Specific
 
