@@ -80,12 +80,14 @@
 	// run all the files
 	if (debug) {
 		runScript("js/debugger.js");
-	evalString("startDebugger(['js/polyfill.js', 'js/gl-matrix-min.js', 'js/lesson5.js'], 'webGLStart()')", NULL, "native-setupGL");
+		evalString("startDebugger(['js/polyfill.js', 'js/gl-matrix-min.js', 'js/lesson5.js'], 'webGLStart()')", NULL, "native-setupGL");
 	}
 
 	// three.js
-	runScript("js/three.js");
-	runScript("js/test-three.js");
+//	runScript("js/three.js");
+	runScript("js/chester.js");
+	runScript("js/chester-test-2.js");
+	evalString("setupGame()", NULL, "--");
 }
 
 - (void)tearDownGL
@@ -145,7 +147,14 @@
 	if (obj) {
 		jsval fval = OBJECT_TO_JSVAL(obj);
 		jsval outval;
-		JS_CallFunctionValue(getGlobalContext(), NULL, fval, 0, NULL, &outval);
+		JSContext* cx = getGlobalContext();
+		if (debug) {
+			JSObject* global = getGlobalObject("debug-global");
+			JSAutoCompartment(cx, global);
+			JS_CallFunctionValue(cx, global, fval, 0, NULL, &outval);
+		} else {			
+			JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &outval);
+		}
 	}
 //	struct timeval now;
 //	gettimeofday(&now, NULL);
