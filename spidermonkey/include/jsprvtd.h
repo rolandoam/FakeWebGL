@@ -177,7 +177,7 @@ namespace frontend {
 struct BytecodeEmitter;
 struct Definition;
 class FunctionBox;
-struct ObjectBox;
+class ObjectBox;
 struct Token;
 struct TokenPos;
 struct TokenPtr;
@@ -298,7 +298,7 @@ typedef void
 /* called just before script destruction */
 typedef void
 (* JSDestroyScriptHook)(JSFreeOp *fop,
-                        JSScript  *script,
+                        JSRawScript script,
                         void      *callerdata);
 
 typedef void

@@ -13,6 +13,7 @@
 
 @interface ViewController () {
 	struct timeval lastInfoDisplay;
+	bool debug;
 }
 @property (strong, nonatomic) EAGLContext *context;
 @property (strong, nonatomic) GLKBaseEffect *effect;
@@ -35,6 +36,7 @@
         NSLog(@"Failed to create ES context");
     }
     
+	debug = false;
     GLKView *view = (GLKView *)self.view;
     view.context = self.context;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
@@ -75,13 +77,15 @@
 - (void)setupGL
 {
     [EAGLContext setCurrentContext:self.context];
-	// load js files
-	NSString *glMatrixPath = [[NSBundle mainBundle] pathForResource:@"gl-matrix-min.js" ofType:nil inDirectory:@"js"];
 	// run all the files
-	runScript([glMatrixPath UTF8String]);
-	NSString *mainPath = [[NSBundle mainBundle] pathForResource:@"lesson5.js" ofType:nil inDirectory:@"js"];
-	runScript([mainPath UTF8String]);
-	evalString("webGLStart()", NULL, "native-setupGL");
+	if (debug) {
+		runScript("js/debugger.js");
+	evalString("startDebugger(['js/polyfill.js', 'js/gl-matrix-min.js', 'js/lesson5.js'], 'webGLStart()')", NULL, "native-setupGL");
+	}
+
+	// three.js
+	runScript("js/three.js");
+	runScript("js/test-three.js");
 }
 
 - (void)tearDownGL

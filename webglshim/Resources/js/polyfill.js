@@ -40,7 +40,7 @@ _touchesBegan = function (event) {
 	// log("  " + event.changedTouches[0].pageX + "," + event.changedTouches[0].pageY);
 	for (var i in _touchBeganListeners) {
 		var listener = _touchBeganListeners[i];
-		listener.call(event);
+		listener.call(null, event);
 	}
 };
 _touchesMoved = function (event) {
@@ -48,7 +48,7 @@ _touchesMoved = function (event) {
 	// log("  " + event.changedTouches[0].pageX + "," + event.changedTouches[0].pageY);
 	for (var i in _touchMovedListeners) {
 		var listener = _touchMovedListeners[i];
-		listener.call(event);
+		listener.call(null, event);
 	}
 };
 _touchesEnded = function (event) {
@@ -56,25 +56,87 @@ _touchesEnded = function (event) {
 	// log("  " + event.changedTouches[0].pageX + "," + event.changedTouches[0].pageY);
 	for (var i in _touchEndedListeners) {
 		var listener = _touchEndedListeners[i];
-		listener.call(event);
+		listener.call(null, event);
 	}
 };
 
-window = this;
+var fakeHTML = true;
 
-window.navigator = {
-	platform: "iPhoneOS"
-};
+if (fakeHTML) {
+	window = this;
 
-window.location = {
-	hash: "",
-	host: "",
-	hostname: "",
-	href: "",
-	search: ""
-};
+	window.navigator = {
+		platform: "iPhoneOS"
+	};
 
-window.requestAnimationFrame = requestAnimationFrame;
+	window.location = {
+		hash: "",
+		host: "",
+		hostname: "",
+		href: "",
+		search: ""
+	};
+
+	window.requestAnimationFrame = requestAnimationFrame;
+
+	// Set up a "fake" HTMLElement
+	window.HTMLElement = function( tagName ){
+		this.tagName = tagName;
+		this.children = [];
+	};
+
+	window.HTMLElement.prototype.appendChild = function( element ) {
+		this.children.push( element );
+
+		// If the child is a script element, begin to load it
+		if( element.tagName == 'script' ) {
+			ej.setTimeout( function(){
+				ej.require( element.src );
+				if( element.onload ) {
+					element.onload();
+				}
+			}, 1);
+		}
+	};
+
+	var script = new HTMLElement('script');
+
+	document = {
+		// dummy DOM
+		body: new HTMLElement('body'),
+		getElementById: function (domId) {
+			if (domId == "webgl") {
+				// create a canvas the full size of the window
+				return new ChesterCanvas(window.innerWidth, window.innerHeight);
+			} else {
+				throw "invalid canvas id!";
+			}
+		},
+		getElementsByTagName: function (tag) {
+			if (tag === "script") {
+				return [script];
+			}
+		},
+		addEventListener: function (event, callback, useCapture) {
+			if (event === "touchstart") {
+				_touchBeganListeners.push(callback);
+			} else if (event === "touchmove") {
+				_touchMovedListeners.push(callback);
+			} else if (event === "touchend") {
+				_touchEndedListeners.push(callback);
+			} else {
+				throw "invalid event";
+			}
+		}
+	};
+
+	script.getAttribute = function (attr) {
+		if (attr === "data-main") {
+			return "js/main-built.js";
+		}
+	};
+	script.parentNode = document.body;
+}
 
 console = {
 	log: log,
@@ -83,36 +145,9 @@ console = {
 	warn: log
 };
 
-document = {
-	// dummy DOM
-	body: {
-		appendChild: function () {}
-	},
-	getElementById: function (domId) {
-		if (domId == "webgl") {
-			// create a canvas the full size of the window
-			return new ChesterCanvas(window.innerWidth, window.innerHeight);
-		} else {
-			throw "invalid canvas id!";
-		}
-	},
-
-	addEventListener: function (event, callback, useCapture) {
-		if (event === "touchstart") {
-			_touchBeganListeners.push(callback);
-		} else if (event === "touchmove") {
-			_touchMovedListeners.push(callback);
-		} else if (event === "touchend") {
-			_touchEndedListeners.push(callback);
-		} else {
-			throw "invalid event";
-		}
-	}
-};
-
 // simple replacement for Stats.js
 // https://github.com/mrdoob/stats.js
-window.Stats = function () {
+Stats = function () {
 	var startTime = Date.now(), prevTime = startTime;
 	var ms = 0, msMin = Infinity, msMax = 0;
 	var fps = 0, fpsMin = Infinity, fpsMax = 0;
@@ -135,19 +170,15 @@ window.Stats = function () {
 				msMin = Math.min( msMin, ms );
 				msMax = Math.max( msMax, ms );
 
-				// console.log(ms + ' MS (' + msMin + '-' + msMax + ')');
-				// updateGraph( msGraph, Math.min( 30, 30 - ( ms / 200 ) * 30 ) );
-
 				frames ++;
 
-				if ( time > prevTime + 1000 ) {
+				if ( time > prevTime + 2000 ) {
 
 					fps = Math.round( ( frames * 1000 ) / ( time - prevTime ) );
 					fpsMin = Math.min( fpsMin, fps );
 					fpsMax = Math.max( fpsMax, fps );
 
 					console.log(fps + ' FPS (' + fpsMin + '-' + fpsMax + ')');
-					// updateGraph( fpsGraph, Math.min( 30, 30 - ( fps / 100 ) * 30 ) );
 
 					prevTime = time;
 					frames = 0;

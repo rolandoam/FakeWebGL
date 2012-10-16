@@ -27,6 +27,7 @@
 #define __GLUE_JS__
 
 #include <typeinfo>
+#include <string>
 #include "jsapi.h"
 
 void sc_finalize(JSFreeOp *freeOp, JSObject *obj);
@@ -36,7 +37,8 @@ typedef JSBool(*js_function)(JSContext* cx, unsigned argc, jsval* vp);
 
 JSContext* getGlobalContext();
 void createJSEnvironment();
-bool runScript(const char *path);
+JSObject* getGlobalObject(const char* name);
+bool runScript(const char *path, JSObject* glob = NULL, JSContext* cx = NULL);
 bool evalString(const char *string, jsval *outVal, const char *filename);
 
 size_t readFileInMemory(const char *path, unsigned char **buff);
@@ -44,6 +46,32 @@ JSObject* getRequestAnimationFrameCallback();
 void setRequestAnimationFrameCallback(JSObject* obj);
 float getDevicePixelRatio();
 void getDeviceWinSize(int* width, int* height);
+
+// debug functions
+JSScript* getScript(std::string name);
+JSBool jsGets(JSContext* cx, unsigned argc, jsval* vp);
+JSBool jsPrint(JSContext* cx, unsigned argc, jsval* vp);
+JSBool jsRunInBackgroundThread(JSContext* cx, unsigned argc, jsval* vp);
+JSBool jsGetScript(JSContext* cx, unsigned argc, jsval* vp);
+JSBool jsSetGlobalObject(JSContext* cx, unsigned argc, jsval* vp);
+// this is a server socket
+JSBool jsSocketOpen(JSContext* cx, unsigned argc, jsval* vp);
+JSBool jsSocketRead(JSContext* cx, unsigned argc, jsval* vp);
+JSBool jsSocketWrite(JSContext* cx, unsigned argc, jsval* vp);
+JSBool jsSocketClose(JSContext* cx, unsigned argc, jsval* vp);
+
+// native matrix ops
+
+// multiply 2 4x4 matrices. Store result in res
+void mat4mul(float* matA, float* matB, float* res);
+// multiply a 4x4 matrix with a vec3, res should be a vec3
+void mat4mulvec3(float* matA, float* vec, float* res);
+// translate a 4x4 matrix
+void mat4translate(float* matA, float x, float y, float z);
+// rotate a 4x4 matrix
+void mat4rotate(float* matA, float r, float x, float y, float z);
+// scale a 4x4 matrix
+void mat4scale(float* matA, float scaleX, float scaleY, float scaleZ);
 
 // set to zero if you do not want to load chesterGL
 #define CHESTER 0

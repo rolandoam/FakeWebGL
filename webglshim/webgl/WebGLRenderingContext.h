@@ -145,11 +145,10 @@ public:
 	JS_BINDED_FUNC(WebGLRenderingContext, bindRenderbuffer);
 	JS_BINDED_FUNC(WebGLRenderingContext, bindTexture);
 	void blendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
-	void blendEquation(GLenum mode);
-	void blendEquationSeparate(GLenum modeRGB, GLenum modeAlpha);
+	JS_BINDED_FUNC(WebGLRenderingContext, blendEquation);
+	JS_BINDED_FUNC(WebGLRenderingContext, blendEquationSeparate);
 	JS_BINDED_FUNC(WebGLRenderingContext, blendFunc);
-	void blendFuncSeparate(GLenum srcRGB, GLenum dstRGB,
-						   GLenum srcAlpha, GLenum dstAlpha);
+	JS_BINDED_FUNC(WebGLRenderingContext, blendFuncSeparate);
 
 	// data should be an ArrayBuffer
 	JS_BINDED_FUNC(WebGLRenderingContext, bufferData);
@@ -158,8 +157,8 @@ public:
 	GLenum checkFramebufferStatus(GLenum target);
 	JS_BINDED_FUNC(WebGLRenderingContext, clear);
 	JS_BINDED_FUNC(WebGLRenderingContext, clearColor);
-	void clearDepth(GLclampf depth);
-	void clearStencil(GLint s);
+	JS_BINDED_FUNC(WebGLRenderingContext, clearDepth);
+	JS_BINDED_FUNC(WebGLRenderingContext, clearStencil);
 	void colorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
 	JS_BINDED_FUNC(WebGLRenderingContext, compileShader);
 
@@ -170,17 +169,17 @@ public:
 	JS_BINDED_FUNC(WebGLRenderingContext, createShader);
 	JS_BINDED_FUNC(WebGLRenderingContext, createTexture);
 
-	void cullFace(GLenum mode);
+	JS_BINDED_FUNC(WebGLRenderingContext, cullFace);
 
 	void deleteBuffer(WebGLBuffer buffer);
 	void deleteFramebuffer(WebGLFramebuffer framebuffer);
 	void deleteProgram(WebGLProgram program);
 	void deleteRenderbuffer(WebGLRenderbuffer renderbuffer);
-	void deleteShader(WebGLShader shader);
+	JS_BINDED_FUNC(WebGLRenderingContext, deleteShader);
 	void deleteTexture(WebGLTexture texture);
 
-	void depthFunc(GLenum func);
-	void depthMask(GLboolean flag);
+	JS_BINDED_FUNC(WebGLRenderingContext, depthFunc);
+	JS_BINDED_FUNC(WebGLRenderingContext, depthMask);
 	void depthRange(GLclampf zNear, GLclampf zFar);
 	void detachShader(WebGLProgram program, WebGLShader shader);
 	JS_BINDED_FUNC(WebGLRenderingContext, disable);
@@ -198,24 +197,25 @@ public:
 								 WebGLRenderbuffer renderbuffer);
 	void framebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget,
 							  WebGLTexture texture, GLint level);
-	void frontFace(GLenum mode);
+	JS_BINDED_FUNC(WebGLRenderingContext, frontFace);
 
 	void generateMipmap(GLenum target);
 
 	JS_BINDED_FUNC(WebGLRenderingContext, getAttribLocation);
 
-	GLint getParameter(GLenum pname);
+	JS_BINDED_FUNC(WebGLRenderingContext, getParameter);
 	GLint getBufferParameter(GLenum target, GLenum pname);
 
 	JS_BINDED_FUNC(WebGLRenderingContext, getError);
-
+	JS_BINDED_FUNC(WebGLRenderingContext, getExtension);
+	JS_BINDED_FUNC(WebGLRenderingContext, getShaderInfoLog);
 	JS_BINDED_FUNC(WebGLRenderingContext, getUniformLocation);
 
 	GLint getVertexAttrib(GLuint index, GLenum pname);
 
 	GLsizeiptr getVertexAttribOffset(GLuint index, GLenum pname);
 
-	void lineWidth(GLfloat width);
+	JS_BINDED_FUNC(WebGLRenderingContext, lineWidth);
 	JS_BINDED_FUNC(WebGLRenderingContext, linkProgram);
 	JS_BINDED_FUNC(WebGLRenderingContext, pixelStorei);
 	void polygonOffset(GLfloat factor, GLfloat units);
@@ -232,27 +232,25 @@ public:
 	JS_BINDED_FUNC(WebGLRenderingContext, texParameterf);
 	JS_BINDED_FUNC(WebGLRenderingContext, texParameteri);
 
-	void uniform1f(WebGLUniformLocation location, GLfloat x);
-	void uniform1fv(WebGLUniformLocation location, JSObject* v);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform1f);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform1fv);
 	JS_BINDED_FUNC(WebGLRenderingContext, uniform1i);
-	void uniform1iv(WebGLUniformLocation location, JSObject* v);
-	void uniform2f(WebGLUniformLocation location, GLfloat x, GLfloat y);
-	void uniform2fv(WebGLUniformLocation location, JSObject* v);
-	void uniform2i(WebGLUniformLocation location, GLint x, GLint y);
-	void uniform2iv(WebGLUniformLocation location, JSObject* v);
-	void uniform3f(WebGLUniformLocation location, GLfloat x, GLfloat y, GLfloat z);
-	void uniform3fv(WebGLUniformLocation location, JSObject* v);
-	void uniform3i(WebGLUniformLocation location, GLint x, GLint y, GLint z);
-	void uniform3iv(WebGLUniformLocation location, JSObject* v);
-	void uniform4f(WebGLUniformLocation location, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
-	void uniform4fv(WebGLUniformLocation location, JSObject* v);
-	void uniform4i(WebGLUniformLocation location, GLint x, GLint y, GLint z, GLint w);
-	void uniform4iv(WebGLUniformLocation location, JSObject* v);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform1iv);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform2f);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform2fv);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform2i);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform2iv);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform3f);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform3fv);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform3i);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform3iv);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform4f);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform4fv);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform4i);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniform4iv);
 
-	void uniformMatrix2fv(WebGLUniformLocation location, GLboolean transpose,
-						  JSObject* value);
-	void uniformMatrix3fv(WebGLUniformLocation location, GLboolean transpose,
-						  JSObject* value);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniformMatrix2fv);
+	JS_BINDED_FUNC(WebGLRenderingContext, uniformMatrix3fv);
 	JS_BINDED_FUNC(WebGLRenderingContext, uniformMatrix4fv);
 
 	JS_BINDED_FUNC(WebGLRenderingContext, useProgram);
