@@ -27,6 +27,7 @@
 #import <Foundation/Foundation.h>
 #import "AppDelegate.h"
 #import "ViewController.h"
+#include "glue.math.ios.h"
 
 #define RETINA_PREFIX @"@2x"
 
@@ -66,6 +67,11 @@ void getDeviceWinSize(int* width, int* height)
 // http://closure-library.googlecode.com/svn/docs/closure_goog_vec_mat4.js.source.html
 
 // multiply 2 4x4 matrices. Store result in res
+#if 0
+void mat4mul(float *matA, float *matB, float *res) {
+	NEON_Matrix4Mul(matA, matB, res);
+}
+#else
 void mat4mul(float* mat0, float* mat1, float* resultMat) {
 	float a00 = mat0[0], a10 = mat0[1], a20 = mat0[2], a30 = mat0[3];
 	float a01 = mat0[4], a11 = mat0[5], a21 = mat0[6], a31 = mat0[7];
@@ -97,6 +103,7 @@ void mat4mul(float* mat0, float* mat1, float* resultMat) {
 	resultMat[14] = a20 * b03 + a21 * b13 + a22 * b23 + a23 * b33;
 	resultMat[15] = a30 * b03 + a31 * b13 + a32 * b23 + a33 * b33;
 }
+#endif
 
 // multiply a 4x4 matrix with a vec3, res should be a vec3
 void mat4mulvec3(float* mat, float* vec, float* resultVec) {
