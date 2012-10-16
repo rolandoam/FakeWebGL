@@ -49,11 +49,8 @@ void getDeviceWinSize(int* width, int* height);
 
 // debug functions
 JSScript* getScript(std::string name);
-JSBool jsGets(JSContext* cx, unsigned argc, jsval* vp);
-JSBool jsPrint(JSContext* cx, unsigned argc, jsval* vp);
 JSBool jsRunInBackgroundThread(JSContext* cx, unsigned argc, jsval* vp);
 JSBool jsGetScript(JSContext* cx, unsigned argc, jsval* vp);
-JSBool jsSetGlobalObject(JSContext* cx, unsigned argc, jsval* vp);
 // this is a server socket
 JSBool jsSocketOpen(JSContext* cx, unsigned argc, jsval* vp);
 JSBool jsSocketRead(JSContext* cx, unsigned argc, jsval* vp);

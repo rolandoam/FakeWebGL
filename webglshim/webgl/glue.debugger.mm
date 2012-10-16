@@ -7,10 +7,8 @@
 #include <netdb.h>
 #include "glue.h"
 
-static char* __buf = NULL;
 static bool __pthread_initialized = false;
 static pthread_attr_t __attr;
-FILE *__tmp;
 
 typedef std::vector<pthread_t*> pthread_vec;
 pthread_vec threads;
@@ -75,40 +73,6 @@ JSBool jsGetScript(JSContext* cx, unsigned argc, jsval* vp)
 		JSScript* script = getScript(std::string(cstr));
 		jsval out = OBJECT_TO_JSVAL((JSObject*)script);
 		JS_SET_RVAL(cx, vp, out);
-		JS_free(cx, (void*)cstr);
-	}
-	return JS_TRUE;
-}
-
-JSBool jsGets(JSContext* cx, unsigned argc, jsval* vp)
-{
-	if (!__buf) {
-		__buf = (char*)malloc(1024);
-	}
-	memset(__buf, 0, 1024);
-	if (__tmp == NULL) {
-		// open the fifo
-		__tmp = fopen("/tmp/js.dbg", "r");
-	}
-	if (fgets(__buf, 1023, __tmp)) {
-		JS_BeginRequest(cx);
-		JSString* str = JS_NewStringCopyZ(getGlobalContext(), __buf);
-		jsval strVal = STRING_TO_JSVAL(str);
-		JS_SET_RVAL(cx, vp, strVal);
-		JS_EndRequest(cx);
-	} else {
-		printf("errno: %d\n", errno);
-	}
-	return JS_TRUE;
-}
-
-JSBool jsPrint(JSContext* cx, unsigned argc, jsval* vp)
-{
-	if (argc == 1) {
-		jsval* argv = JS_ARGV(cx, vp);
-		JSString* str = JS_ValueToString(cx, argv[0]);
-		const char* cstr = JS_EncodeString(cx, str);
-		fprintf(stdout, "%s", cstr);
 		JS_free(cx, (void*)cstr);
 	}
 	return JS_TRUE;

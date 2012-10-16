@@ -329,9 +329,6 @@ JSObject* NewGlobalObject(JSContext* cx)
 	JS_DefineFunction(cx, glob, "runScript", jsRunScript, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	
 	// add debug functions
-	JS_DefineFunction(cx, glob, "gets", jsGets, 1, JSPROP_READONLY | JSPROP_PERMANENT);
-	JS_DefineFunction(cx, glob, "print", jsPrint, 1, JSPROP_READONLY | JSPROP_PERMANENT);
-	JS_DefineFunction(cx, glob, "_setGlobalObject", jsSetGlobalObject, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "_getScript", jsGetScript, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "_runInBackgroundThread", jsRunInBackgroundThread, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "_socketOpen", jsSocketOpen, 1, JSPROP_READONLY | JSPROP_PERMANENT);
@@ -438,18 +435,12 @@ void createJSEnvironment() {
 	runtime = JS_NewRuntime(10 * 1024 * 1024);
 	_cx = JS_NewContext(runtime, 10240);
 
-	JS_SetOptions(_cx, JSOPTION_TYPE_INFERENCE);
 	JS_SetVersion(_cx, JSVERSION_LATEST);
-	JS_SetOptions(_cx, JS_GetOptions(_cx) & ~JSOPTION_METHODJIT);
-	JS_SetOptions(_cx, JS_GetOptions(_cx) & ~JSOPTION_METHODJIT_ALWAYS);
+	JS_SetOptions(_cx, JSOPTION_TYPE_INFERENCE);
 	JS_SetOptions(_cx, JS_GetOptions(_cx) | JSOPTION_VAROBJFIX);
 	JS_SetErrorReporter(_cx, reportError);
 	globalObject = NewGlobalObject(_cx);
 
-	// turn debug on
-//	JS_SetDebugMode(cx, JS_TRUE);
-//	JS_DefineDebuggerObject(cx, globalObject);
-	
 	// load the polyfill
 	runScript("js/polyfill.js");
 #if CHESTER
