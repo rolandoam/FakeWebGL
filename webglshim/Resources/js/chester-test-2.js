@@ -2,7 +2,7 @@ function setupGame() {
 	chesterGL.settings.useGoogleAnalytics = false;
 	chesterGL.setup("webgl");
 	var size = chesterGL.viewportSize();
-	var totalBlocks = 100;
+	var totalBlocks = 60;
 
 	chesterGL.loadAsset("texture", "images/star.png");
 	chesterGL.assetsLoaded("texture", function () {
@@ -16,6 +16,7 @@ function setupGame() {
 		var group = new chesterGL.BlockGroup("images/star.png", totalBlocks);
 
 		// add lots of blocks
+		console.log("adding " + totalBlocks + " stars");
 		for (var i=0; i < totalBlocks; i++) {
 			var b = group.createBlock();
 			b.setPosition([Math.random() * size.width, Math.random() * size.height, 0]);
