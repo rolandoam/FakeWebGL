@@ -1,3 +1,10 @@
-var t = new TestClass("something in here");
+var a = "foo";
 
-t.foo();
+var baz = function (bar) {
+	debugger;
+	var j = Math.random();
+	log(bar + ": " + a);
+};
+
+baz("asdf");
+baz(Math.random());

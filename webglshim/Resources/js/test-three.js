@@ -2,8 +2,8 @@
 // http://www.aerotwist.com/tutorials/getting-started-with-three-js/
 
 // set the scene size
-var WIDTH = 400,
-  HEIGHT = 300;
+var WIDTH = innerWidth,
+  HEIGHT = innerHeight;
 
 // set some camera attributes
 var VIEW_ANGLE = 45,
