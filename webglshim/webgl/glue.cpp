@@ -36,6 +36,7 @@
 #include "lodepng.h"
 
 #include "WebGLRenderingContext.h"
+#include "FakeAudio.h"
 
 JSContext *_cx, *dbgCtx;
 JSObject* globalObject;
@@ -354,11 +355,11 @@ JSObject* NewGlobalObject(JSContext* cx)
 	JS_SetProperty(cx, glob, "devicePixelRatio", &pixelRatio);
 
 	// add custom classes
-	TestClass::_js_register(_cx, glob);
 	ChesterCanvas::_js_register(_cx, glob);
 	WebGLRenderingContext::_js_register(_cx, glob);
 	PNGImage::_js_register(_cx, glob);
 	FakeXMLHTTPRequest::_js_register(_cx, glob);
+	FakeAudio::_js_register(_cx, glob);
 
 	return glob;
 }
