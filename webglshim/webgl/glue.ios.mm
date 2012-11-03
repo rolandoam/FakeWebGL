@@ -35,19 +35,18 @@ const char* getFullPathFromRelativePath(const char* path)
 {
 	NSBundle* mainBundle = [NSBundle mainBundle];
 	NSString* aPath = [NSString stringWithUTF8String:path];
-	NSString* extension = [aPath pathExtension];
-	aPath = [aPath stringByDeletingPathExtension];
-	// test for retina version
-	NSString* fullPath = [mainBundle pathForResource:[NSString stringWithFormat:@"%@%@.%@", aPath, RETINA_PREFIX, extension] ofType:nil];
+	NSString* fullPath = [mainBundle pathForResource:aPath ofType:nil];
 	if (!fullPath) {
-		fullPath = [mainBundle pathForResource:[NSString stringWithUTF8String:path] ofType:nil];
+		fullPath = [mainBundle pathForResource:aPath ofType:nil];
 	}
+	if (!fullPath)
+		return "";
 	return [fullPath UTF8String];
 }
 
 float getDevicePixelRatio()
 {
-	return [UIScreen mainScreen].currentMode.pixelAspectRatio;
+	return [[UIScreen mainScreen] scale];
 }
 
 void getDeviceWinSize(int* width, int* height)
