@@ -62,11 +62,14 @@ _touchesEnded = function (event) {
 
 var fakeHTML = true;
 
-if (fakeHTML) {
-	window = this;
+// defining window is not enough for passing the isBrowser test in requirejs, which is a good thing
+window = {
+	devicePixelRatio: devicePixelRatio
+};
 
+if (fakeHTML) {
 	window.navigator = {
-		platform: "iPhoneOS"
+		platform: "iPhoneOS - FakeWebGL"
 	};
 
 	window.location = {
@@ -99,11 +102,11 @@ if (fakeHTML) {
 		}
 	};
 
-	var script = new HTMLElement('script');
+	var script = new window.HTMLElement('script');
 
 	document = {
 		// dummy DOM
-		body: new HTMLElement('body'),
+		body: new window.HTMLElement('body'),
 		getElementById: function (domId) {
 			if (domId == "webgl") {
 				// create a canvas the full size of the window
@@ -125,7 +128,7 @@ if (fakeHTML) {
 			} else if (event === "touchend") {
 				_touchEndedListeners.push(callback);
 			} else {
-				throw "invalid event";
+				throw "invalid event: " + event;
 			}
 		}
 	};
@@ -198,12 +201,17 @@ ChesterCanvas.prototype.__offset = {
 	left: 0
 };
 
+ChesterCanvas.prototype.style = {
+};
+
 Image = PNGImage;
 Image.prototype.addEventListener = function PNGImage_addEventListener(event, callback) {
 	if (event == "load") {
 		this.onload = callback;
+	} else if (event == "error") {
+		this.onerror = callback;
 	} else {
-		throw "invalid event";
+		throw "invalid event: " + event;
 	}
 };
 
