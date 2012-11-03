@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A917DEFF16445A6200026B4A /* audio in Resources */ = {isa = PBXBuildFile; fileRef = A917DEFE16445A6200026B4A /* audio */; };
 		A92CD36C161FD93A002E6A62 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD36B161FD93A002E6A62 /* UIKit.framework */; };
 		A92CD36E161FD93A002E6A62 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD36D161FD93A002E6A62 /* Foundation.framework */; };
 		A92CD370161FD93A002E6A62 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD36F161FD93A002E6A62 /* CoreGraphics.framework */; };
@@ -30,10 +31,16 @@
 		A95C3CE016235B6A00386017 /* images in Resources */ = {isa = PBXBuildFile; fileRef = A95C3CDD16235B6A00386017 /* images */; };
 		A95C3CE116235B6A00386017 /* js in Resources */ = {isa = PBXBuildFile; fileRef = A95C3CDE16235B6A00386017 /* js */; };
 		A95C3CE216235B6A00386017 /* shaders in Resources */ = {isa = PBXBuildFile; fileRef = A95C3CDF16235B6A00386017 /* shaders */; };
+		A98B1B03164424FD00E68C95 /* FakeAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A98B1B01164424FD00E68C95 /* FakeAudio.cpp */; };
+		A98B1B051644256E00E68C95 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A98B1B041644256E00E68C95 /* OpenAL.framework */; };
+		A98B1B0C164436AE00E68C95 /* FakeAudio.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A98B1B0B164436AE00E68C95 /* FakeAudio.ios.mm */; };
+		A98B1B0E164436FA00E68C95 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A98B1B0D164436FA00E68C95 /* AudioToolbox.framework */; };
 		A995BB21162DE4BF00C327D1 /* glue.math.ios.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A995BB1F162DE4BF00C327D1 /* glue.math.ios.cpp */; };
+		A9EB655E162F39B200EFEF45 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = A9EB655D162F39B200EFEF45 /* fonts */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A917DEFE16445A6200026B4A /* audio */ = {isa = PBXFileReference; lastKnownFileType = folder; name = audio; path = webglshim/Resources/audio; sourceTree = "<group>"; };
 		A92CD367161FD93A002E6A62 /* webglshim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = webglshim.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A92CD36B161FD93A002E6A62 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		A92CD36D161FD93A002E6A62 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -65,8 +72,14 @@
 		A95C3CDD16235B6A00386017 /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; name = images; path = webglshim/Resources/images; sourceTree = "<group>"; };
 		A95C3CDE16235B6A00386017 /* js */ = {isa = PBXFileReference; lastKnownFileType = folder; name = js; path = webglshim/Resources/js; sourceTree = "<group>"; };
 		A95C3CDF16235B6A00386017 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = webglshim/Resources/shaders; sourceTree = "<group>"; };
+		A98B1B01164424FD00E68C95 /* FakeAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FakeAudio.cpp; sourceTree = "<group>"; };
+		A98B1B02164424FD00E68C95 /* FakeAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FakeAudio.h; sourceTree = "<group>"; };
+		A98B1B041644256E00E68C95 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
+		A98B1B0B164436AE00E68C95 /* FakeAudio.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FakeAudio.ios.mm; sourceTree = "<group>"; };
+		A98B1B0D164436FA00E68C95 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A995BB1F162DE4BF00C327D1 /* glue.math.ios.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glue.math.ios.cpp; sourceTree = "<group>"; };
 		A995BB20162DE4BF00C327D1 /* glue.math.ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glue.math.ios.h; sourceTree = "<group>"; };
+		A9EB655D162F39B200EFEF45 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = webglshim/Resources/fonts; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +92,8 @@
 				A92CD370161FD93A002E6A62 /* CoreGraphics.framework in Frameworks */,
 				A92CD372161FD93A002E6A62 /* GLKit.framework in Frameworks */,
 				A92CD374161FD93A002E6A62 /* OpenGLES.framework in Frameworks */,
+				A98B1B051644256E00E68C95 /* OpenAL.framework in Frameworks */,
+				A98B1B0E164436FA00E68C95 /* AudioToolbox.framework in Frameworks */,
 				A92CD3B11620C56E002E6A62 /* libz.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -114,6 +129,8 @@
 				A92CD36F161FD93A002E6A62 /* CoreGraphics.framework */,
 				A92CD371161FD93A002E6A62 /* GLKit.framework */,
 				A92CD373161FD93A002E6A62 /* OpenGLES.framework */,
+				A98B1B041644256E00E68C95 /* OpenAL.framework */,
+				A98B1B0D164436FA00E68C95 /* AudioToolbox.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -159,6 +176,9 @@
 				A92CD3B716229C7A002E6A62 /* lodepng.h */,
 				A92CD3A2161FD9C4002E6A62 /* WebGLRenderingContext.cpp */,
 				A92CD3A3161FD9C4002E6A62 /* WebGLRenderingContext.h */,
+				A98B1B01164424FD00E68C95 /* FakeAudio.cpp */,
+				A98B1B02164424FD00E68C95 /* FakeAudio.h */,
+				A98B1B0B164436AE00E68C95 /* FakeAudio.ios.mm */,
 			);
 			name = webgl;
 			path = webglshim/webgl;
@@ -167,6 +187,8 @@
 		A95C3CDC16235B5100386017 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				A917DEFE16445A6200026B4A /* audio */,
+				A9EB655D162F39B200EFEF45 /* fonts */,
 				A95C3CDD16235B6A00386017 /* images */,
 				A95C3CDE16235B6A00386017 /* js */,
 				A95C3CDF16235B6A00386017 /* shaders */,
@@ -234,6 +256,8 @@
 				A95C3CE016235B6A00386017 /* images in Resources */,
 				A95C3CE116235B6A00386017 /* js in Resources */,
 				A95C3CE216235B6A00386017 /* shaders in Resources */,
+				A9EB655E162F39B200EFEF45 /* fonts in Resources */,
+				A917DEFF16445A6200026B4A /* audio in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -253,6 +277,8 @@
 				A95C3CD7162339C700386017 /* glue.ios.mm in Sources */,
 				A93ABBF516249B3C00EAE91B /* glue.debugger.mm in Sources */,
 				A995BB21162DE4BF00C327D1 /* glue.math.ios.cpp in Sources */,
+				A98B1B03164424FD00E68C95 /* FakeAudio.cpp in Sources */,
+				A98B1B0C164436AE00E68C95 /* FakeAudio.ios.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -364,6 +390,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "webglshim/webglshim-Prefix.pch";
 				INFOPLIST_FILE = "webglshim/webglshim-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/webglshim/lame\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ljs_static",
 					"-v",
@@ -379,6 +409,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "webglshim/webglshim-Prefix.pch";
 				INFOPLIST_FILE = "webglshim/webglshim-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/webglshim/lame\"",
+				);
 				OTHER_LDFLAGS = (
 					"-ljs_static",
 					"-v",
