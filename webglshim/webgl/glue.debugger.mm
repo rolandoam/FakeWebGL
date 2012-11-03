@@ -36,34 +36,6 @@ void* bgTask(void* callback)
 	return NULL;
 }
 
-JSBool jsRunInBackgroundThread(JSContext* cx, unsigned argc, jsval* vp)
-{
-	if (!__pthread_initialized) {
-		pthread_attr_init(&__attr);
-		pthread_attr_setdetachstate(&__attr, PTHREAD_CREATE_JOINABLE);
-		__pthread_initialized = true;
-	}
-	// TODO: check for dead threads and join them
-//	pthread_vec::iterator it = threads.begin();
-//	while (it != threads.end()) {
-//		it++;
-//	}
-
-	jsval* argv = JS_ARGV(cx, vp);
-	if (argc == 1 && argv[0].isObject()) {
-		// create a new thread and run gets there
-		JSObject* callback = JSVAL_TO_OBJECT(argv[0]);
-		pthread_t* thread = (pthread_t*)malloc(sizeof(pthread_t));
-		if (pthread_create(thread, &__attr, bgTask, callback) == 0) {
-			threads.push_back(thread);
-			return JS_TRUE;
-		}
-		JS_ReportError(cx, "error trying to create bg thread");
-		return JS_FALSE;
-	}
-	return JS_TRUE;
-}
-
 JSBool jsGetScript(JSContext* cx, unsigned argc, jsval* vp)
 {
 	jsval* argv = JS_ARGV(cx, vp);
