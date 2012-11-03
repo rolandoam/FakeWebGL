@@ -19,7 +19,7 @@ function setupGame() {
 	// create a block
 	var label = new chesterGL.BMFontLabelBlock("fonts/port_lligat", "This is a BM Label");
 	label.setRotation(Math.PI / 4);
-	label.setPosition(30, size.height / 2, 0);
+	label.setPosition(size.width/2, size.height / 2, 0);
 
 	// group.addChild(someBlock);
 
@@ -33,13 +33,14 @@ function setupGame() {
 	group.addChild(atlas);
 
 	// add some action
-	// var dz = 10;
-	// someBlock.setUpdate(function () {
-	// this.setRotation(this.rotation + oneDeg);
-	// this.setPosition([this.position[0], this.position[1], this.position[2] + dz]);
-	// if (this.position[2] >=  200) { dz = -dz; }
-	// if (this.position[2] <= -200) { dz = -dz; }
-	// });
+	var dz = 10,
+		oneDeg = Math.PI / 180.0;
+//	label.setUpdate(function () {
+//		this.setRotation(this.rotation + oneDeg);
+//		this.setPosition([this.position[0], this.position[1], this.position[2] + dz]);
+//		if (this.position[2] >=  200) { dz = -dz; }
+//		if (this.position[2] <= -200) { dz = -dz; }
+//	});
 
 	sceneBlock.addChild(group, label);
 	// sceneBlock.addChild(someBlock);
