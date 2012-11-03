@@ -56,6 +56,7 @@ var beginDebug = function (frame, script) {
 		if (!frame && md) {
 			var codeFound = false, i;
 			offsets = script.getLineOffsets(parseInt(md[1], 10));
+			_socketWrite(socket, "offsets: " + JSON.stringify(offsets) + "\n");
 			for (i=0; i < offsets.lenth; i++) {
 				script.setBreakpoint(offsets[i], breakpointHandler);
 				codeFound = true;
@@ -74,7 +75,7 @@ var beginDebug = function (frame, script) {
 				}
 			}
 			if (!codeFound) {
-				_socketWrite(socket, "invalid offset: " + offset.join(",") + "\n");
+				_socketWrite(socket, "invalid offset: " + offsets.join(",") + "\n");
 			} else {
 				_socketWrite(socket, "socket set at line " + md[1] + " for current file\n");
 			}
@@ -92,7 +93,7 @@ var beginDebug = function (frame, script) {
 			}
 			return;
 		}
-		md = str.match(/^cont(inue)?/);
+		md = str.match(/^c(ontinue)?/);
 		if (md) {
 			stop = true;
 			return;
@@ -103,17 +104,30 @@ var beginDebug = function (frame, script) {
 				k;
 			if (res['return']) {
 				var r = res['return'];
-				if (typeof r === "string") {
-					_socketWrite(socket, "= " + r + "\n");
+				_socketWrite(socket, "* " + (typeof r) + "\n");
+				if (typeof r == "string") {
+					_socketWrite(socket, "~> " + r + "\n");
 				} else {
-					_socketWrite(socket, "= " + JSON.stringify(r) + "\n");
+					var props = r.getOwnPropertyNames();
+					for (k in props) {
+						var desc = r.getOwnPropertyDescriptor(props[k]);
+						_socketWrite(socket, "~> " + props[k] + " = ");
+						if (desc.value) {
+							_socketWrite(socket, "" + desc.value);
+						} else if (desc.get) {
+							_socketWrite(socket, "" + desc.get());
+						} else {
+							_socketWrite(socket, "undefined (no value or getter)");
+						}
+						_socketWrite(socket, "\n");
+					}
 				}
 			} else if (res['throw']) {
 				_socketWrite(socket, "!! got exception: " + res['throw'].message + "\n");
 			} else {
-				_socketWrite(socket, "! invalid return:" + "\n");
+				_socketWrite(socket, "!!! invalid return for eval" + "\n");
 				for (k in res) {
-					_socketWrite(socket, "  " + k + ": " + res[k] + "\n");
+					_socketWrite(socket, "* " + k + ": " + res[k] + "\n");
 				}
 			}
 			return;
@@ -186,7 +200,7 @@ dbg.onError = function (frame, report) {
 
 function startDebugger(files, startFunc) {
 	for (var i in files) {
-		g['eval']("runScript('" + files[i] + "');");
+		g['eval']("require('" + files[i] + "');");
 	}
 	if (startFunc) {
 		g['eval'](startFunc);
