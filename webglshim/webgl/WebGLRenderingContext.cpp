@@ -33,57 +33,6 @@
 
 using namespace std;
 
-#pragma mark - TestClass
-
-JS_BINDED_CLASS_GLUE_IMPL(TestClass)
-
-TestClass::TestClass(std::string something)
-{
-	cout << "TestClass constructor with arg: " + something << endl;
-}
-
-JS_BINDED_CONSTRUCTOR_IMPL(TestClass)
-{
-	if (argc == 1) {
-		jsval *argv = JS_ARGV(cx, vp);
-		JSString *jsstr = JSVAL_TO_STRING(argv[0]);
-		TestClass *cobj = new TestClass(JS_EncodeString(cx, jsstr));
-		printf("this: %p\n", cobj);
-		jsval out;
-		JS_WRAP_OBJECT(TestClass, cobj, out);
-		JS_SET_RVAL(cx, vp, out);
-		return JS_TRUE;
-	}
-	JS_ReportError(cx, "invalid call");
-	return JS_FALSE;
-}
-
-JS_BINDED_FUNC_IMPL(TestClass, foo)
-{
-	printf("in fooooo: %p\n", this);
-	return JS_TRUE;
-}
-
-void TestClass::_js_register(JSContext* cx, JSObject* global)
-{
-	// create the class
-	TestClass::js_class = {
-		"TestClass", JSCLASS_HAS_PRIVATE,
-		JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
-		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, sc_finalize,
-		JSCLASS_NO_OPTIONAL_MEMBERS
-	};
-	static JSPropertySpec props[] = {
-		{0, 0, 0, 0, 0}
-	};
-	static JSFunctionSpec funcs[] = {
-		JS_BINDED_FUNC_FOR_DEF(TestClass, foo),
-		JS_FS_END
-	};
-	TestClass::js_parent = NULL;
-	TestClass::js_proto = JS_InitClass(cx, global, NULL, &TestClass::js_class, TestClass::_js_constructor, 1, props, funcs, NULL, NULL);
-}
-
 #pragma mark - ChesterCanvas
 
 JS_BINDED_CLASS_GLUE_IMPL(ChesterCanvas);
@@ -96,7 +45,7 @@ JS_BINDED_CONSTRUCTOR_IMPL(ChesterCanvas)
 		int h = JSVAL_TO_INT(argv[1]);
 		ChesterCanvas* cobj = new ChesterCanvas(w, h);
 		jsval out;
-		JS_WRAP_OBJECT(ChesterCanvas, cobj, out);
+		JS_WRAP_OBJECT_IN_VAL(ChesterCanvas, cobj, out);
 		JS_SET_RVAL(cx, vp, out);
 		return JS_TRUE;
 	}
@@ -126,7 +75,7 @@ JS_BINDED_FUNC_IMPL(ChesterCanvas, getContext)
 		if (strncmp(cstr, "experimental-webgl", 18) == 0) {
 			WebGLRenderingContext* cobj = new WebGLRenderingContext(this);
 			jsval out;
-			JS_WRAP_OBJECT(WebGLRenderingContext, cobj, out);
+			JS_WRAP_OBJECT_IN_VAL(WebGLRenderingContext, cobj, out);
 			JS_SET_RVAL(cx, vp, out);
 			ok = JS_TRUE;
 		}
@@ -143,7 +92,7 @@ void ChesterCanvas::_js_register(JSContext* cx, JSObject* global)
 	ChesterCanvas::js_class = {
 		"ChesterCanvas", JSCLASS_HAS_PRIVATE,
 		JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
-		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, sc_finalize,
+		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, basic_object_finalize,
 		JSCLASS_NO_OPTIONAL_MEMBERS
 	};
 	static JSPropertySpec props[] = {
@@ -177,7 +126,7 @@ JS_BINDED_CONSTRUCTOR_IMPL(FakeXMLHTTPRequest)
 {
 	FakeXMLHTTPRequest* req = new FakeXMLHTTPRequest();
 	jsval out;
-	JS_WRAP_OBJECT(FakeXMLHTTPRequest, req, out);
+	JS_WRAP_OBJECT_IN_VAL(FakeXMLHTTPRequest, req, out);
 	JS_SET_RVAL(cx, vp, out);
 	return JS_TRUE;
 }
@@ -224,20 +173,15 @@ JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, responseText)
 
 JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, response)
 {
-	if (url.length() > 5) {
-		if (url.compare(url.length() - 5, 5, ".json") == 0) {
-			jsval outVal;
-			JSString* str = JS_NewStringCopyN(cx, (const char*)data, dataSize);
-			if (JS_ParseJSON(cx, JS_GetStringCharsZ(cx, str), dataSize, &outVal)) {
-				vp.set(outVal);
-				return JS_TRUE;
-			}
+	if (url.length() > 5 && url.compare(url.length() - 5, 5, ".json") == 0) {
+		jsval outVal;
+		JSString* str = JS_NewStringCopyN(cx, (const char*)data, dataSize);
+		if (JS_ParseJSON(cx, JS_GetStringCharsZ(cx, str), dataSize, &outVal)) {
+			vp.set(outVal);
+			return JS_TRUE;
 		}
-		vp.set(JSVAL_NULL);
-		return JS_TRUE;
-	} else {
-		return _js_get_responseText(cx, id, vp);
 	}
+	return _js_get_responseText(cx, id, vp);
 }
 
 JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, open)
@@ -270,25 +214,30 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, open)
 
 JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, send)
 {
-	const char* path = getFullPathFromRelativePath(url.c_str());
-	dataSize = readFileInMemory(path, &data);
-	if (dataSize > 0) {
-		if (onreadystateCallback) {
-			readyState = 4;
-			status = 200;
-			jsval fval = OBJECT_TO_JSVAL(onreadystateCallback);
-			jsval out;
-			JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &out);
-		}
+	std::string path = getFullPathFromRelativePath(url.c_str());
+	if (path.empty()) {
+		// file not found
+		readyState = 4;
+		status = 404;
 	} else {
-		printf("Error trying to read '%s'\n", path);
-		if (onreadystateCallback) {
-			readyState = 4;
-			status = 404; // just issue any error
-			jsval fval = OBJECT_TO_JSVAL(onreadystateCallback);
-			jsval out;
-			JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &out);
+		dataSize = readFileInMemory(path.c_str(), &data);
+		if (dataSize > 0) {
+			if (onreadystateCallback) {
+				readyState = 4;
+				status = 200;
+			}
+		} else {
+			printf("Error trying to read '%s'\n", path.c_str());
+			if (onreadystateCallback) {
+				readyState = 4;
+				status = 404; // just issue any error
+			}
 		}
+	}
+	if (onreadystateCallback) {
+		jsval fval = OBJECT_TO_JSVAL(onreadystateCallback);
+		jsval out;
+		JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &out);
 	}
 	return JS_TRUE;
 }
@@ -299,11 +248,11 @@ void FakeXMLHTTPRequest::_js_register(JSContext *cx, JSObject *global)
 	FakeXMLHTTPRequest::js_class = {
 		"XMLHttpRequest", JSCLASS_HAS_PRIVATE,
 		JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
-		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, sc_finalize,
+		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, basic_object_finalize,
 		JSCLASS_NO_OPTIONAL_MEMBERS
 	};
 	static JSPropertySpec props[] = {
-		JS_BINDED_PROP_DEF_GETTER_SETTER(FakeXMLHTTPRequest, onreadystatechange),
+		JS_BINDED_PROP_DEF_ACCESSOR(FakeXMLHTTPRequest, onreadystatechange),
 		JS_BINDED_PROP_DEF_GETTER(FakeXMLHTTPRequest, readyState),
 		JS_BINDED_PROP_DEF_GETTER(FakeXMLHTTPRequest, status),
 		JS_BINDED_PROP_DEF_GETTER(FakeXMLHTTPRequest, responseText),
@@ -321,30 +270,43 @@ void FakeXMLHTTPRequest::_js_register(JSContext *cx, JSObject *global)
 
 #pragma mark - PNGImage
 
-PNGImage::PNGImage()
+PNGImage::PNGImage() :
+	BasicObject(),
+	onloadCallback(getGlobalContext()),
+	onerrorCallback(getGlobalContext())
 {
 	src = "invalid";
-}
-
-PNGImage::~PNGImage()
-{
-	if (onloadCallback) {
-		JS_RemoveObjectRoot(getGlobalContext(), &onloadCallback);
-	}
 }
 
 void PNGImage::loadPNG()
 {
 	std::string fullPath = getFullPathFromRelativePath(src.c_str());
-	unsigned error = lodepng::decode(bytes, width, height, fullPath);
-	if (error) {
-		printf("error %u decoding png: %s\n", error, lodepng_error_text(error));
-		return;
-	}
-	if (onloadCallback) {
-		jsval funcval = OBJECT_TO_JSVAL(onloadCallback);
-		jsval out;
-		JS_CallFunctionValue(getGlobalContext(), NULL, funcval, 0, NULL, &out);
+	if (fullPath.empty()) {
+		printf("PNG: File not found: %s\n", src.c_str());
+		if (onerrorCallback) {
+			jsval funcval = OBJECT_TO_JSVAL(onerrorCallback);
+			jsval out;
+			JSContext* cx = getGlobalContext();
+			// create error: object with a single property
+			JSObject* err = JS_NewObject(cx, NULL, NULL, NULL);
+			JSString* str = JS_NewStringCopyZ(cx, "error");
+			jsval strVal = STRING_TO_JSVAL(str);
+			JS_SetProperty(cx, err, "type", &strVal);
+			jsval errVal = OBJECT_TO_JSVAL(err);
+			// just execute the callback
+			JS_CallFunctionValue(cx, NULL, funcval, 1, &errVal, &out);
+		}
+	} else {
+		unsigned error = lodepng::decode(bytes, width, height, fullPath);
+		if (error) {
+			printf("PNG: error %u decoding png: %s\n", error, lodepng_error_text(error));
+			return;
+		}
+		if (onloadCallback) {
+			jsval funcval = OBJECT_TO_JSVAL(onloadCallback);
+			jsval out;
+			JS_CallFunctionValue(getGlobalContext(), NULL, funcval, 0, NULL, &out);
+		}
 	}
 }
 
@@ -359,7 +321,7 @@ JS_BINDED_CONSTRUCTOR_IMPL(PNGImage)
 {
 	PNGImage* image = new PNGImage();
 	jsval out;
-	JS_WRAP_OBJECT(PNGImage, image, out);
+	JS_WRAP_OBJECT_IN_VAL(PNGImage, image, out);
 	JS_SET_RVAL(cx, vp, out);
 	return JS_TRUE;
 }
@@ -411,7 +373,25 @@ JS_BINDED_PROP_SET_IMPL(PNGImage, onload)
 	jsval callback = vp.get();
 	if (callback != JSVAL_NULL) {
 		onloadCallback = JSVAL_TO_OBJECT(callback);
-		JS_AddNamedObjectRoot(cx, &onloadCallback, "PNGImage_onloadCallback");
+	}
+	return JS_TRUE;
+}
+
+JS_BINDED_PROP_GET_IMPL(PNGImage, onerror)
+{
+	if (onerrorCallback) {
+		vp.set(OBJECT_TO_JSVAL(onerrorCallback));
+	} else {
+		vp.set(JSVAL_NULL);
+	}
+	return JS_TRUE;
+}
+
+JS_BINDED_PROP_SET_IMPL(PNGImage, onerror)
+{
+	jsval callback = vp.get();
+	if (callback != JSVAL_NULL) {
+		onerrorCallback = JSVAL_TO_OBJECT(callback);
 	}
 	return JS_TRUE;
 }
@@ -422,14 +402,15 @@ void PNGImage::_js_register(JSContext* cx, JSObject* global)
 	PNGImage::js_class = {
 		"PNGImage", JSCLASS_HAS_PRIVATE,
 		JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
-		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, sc_finalize,
+		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, basic_object_finalize,
 		JSCLASS_NO_OPTIONAL_MEMBERS
 	};
 	static JSPropertySpec props[] = {
 		JS_BINDED_PROP_DEF_GETTER(PNGImage, width),
 		JS_BINDED_PROP_DEF_GETTER(PNGImage, height),
-		JS_BINDED_PROP_DEF_GETTER_SETTER(PNGImage, src),
-		JS_BINDED_PROP_DEF_GETTER_SETTER(PNGImage, onload),
+		JS_BINDED_PROP_DEF_ACCESSOR(PNGImage, src),
+		JS_BINDED_PROP_DEF_ACCESSOR(PNGImage, onload),
+		JS_BINDED_PROP_DEF_ACCESSOR(PNGImage, onerror),
 		{0, 0, 0, 0, 0}
 	};
 	static JSFunctionSpec funcs[] = {
@@ -1952,7 +1933,7 @@ void WebGLRenderingContext::_js_register(JSContext* cx, JSObject *global)
 	WebGLRenderingContext::js_class = {
 		"WebGLRenderingContext", JSCLASS_HAS_PRIVATE,
 		JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
-		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, sc_finalize,
+		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, basic_object_finalize,
 		JSCLASS_NO_OPTIONAL_MEMBERS
 	};
 	static JSPropertySpec props[] = {

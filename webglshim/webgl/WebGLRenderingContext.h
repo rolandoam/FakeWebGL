@@ -44,26 +44,35 @@ class JSObject;
 
 class WebGLRenderingContext;
 
-class TestClass
+// basic reference counting
+class BasicObject
 {
-	int x;
-	int y;
+	int references;
 public:
-	TestClass(std::string something);
-	void foo();
+	BasicObject() {
+		references = 1;
+	}
 
-	JS_BINDED_CLASS_GLUE(TestClass);
-	JS_BINDED_CONSTRUCTOR(TestClass);
-	JS_BINDED_FUNC(TestClass, foo);
+	void increaseReferences() {
+		references++;
+	}
+
+	void decreaseReferences() {
+		references--;
+		if (references == 0) {
+			fprintf(stderr, "removing basic object: %p", this);
+			delete this;
+		}
+	}
 };
 
-class ChesterCanvas
+class ChesterCanvas : public BasicObject
 {
 public:
 	int width;
 	int height;
 
-	ChesterCanvas(int w, int h) : width(w), height(h) {};
+	ChesterCanvas(int w, int h) : BasicObject(), width(w), height(h) {};
 	JS_BINDED_CLASS_GLUE(ChesterCanvas);
 	JS_BINDED_CONSTRUCTOR(ChesterCanvas);
 	JS_BINDED_PROP_GET(ChesterCanvas, width);
@@ -71,7 +80,7 @@ public:
 	JS_BINDED_FUNC(ChesterCanvas, getContext);
 };
 
-class FakeXMLHTTPRequest
+class FakeXMLHTTPRequest : public BasicObject
 {
 	std::string url;
 	std::string type;
@@ -82,11 +91,11 @@ class FakeXMLHTTPRequest
 	int status;
 	bool isAsync;
 public:
+	FakeXMLHTTPRequest() : BasicObject () {}
 	~FakeXMLHTTPRequest();
 	JS_BINDED_CLASS_GLUE(FakeXMLHTTPRequest);
 	JS_BINDED_CONSTRUCTOR(FakeXMLHTTPRequest);
-	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, onreadystatechange);
-	JS_BINDED_PROP_SET(FakeXMLHTTPRequest, onreadystatechange);
+	JS_BINDED_PROP_ACCESSOR(FakeXMLHTTPRequest, onreadystatechange);
 	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, readyState);
 	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, status);
 	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, responseText);
@@ -95,11 +104,12 @@ public:
 	JS_BINDED_FUNC(FakeXMLHTTPRequest, send);
 };
 
-class PNGImage
+class PNGImage : public BasicObject
 {
 	std::vector<unsigned char> bytes;
 	std::string src;
-	JSObject* onloadCallback;
+	js::RootedObject onloadCallback;
+	js::RootedObject onerrorCallback;
 
 	void loadPNG();
 
@@ -108,26 +118,24 @@ public:
 	unsigned int height;
 
 	PNGImage();
-    ~PNGImage();
 	unsigned char* getBytes();
 	JS_BINDED_CLASS_GLUE(PNGImage);
 	JS_BINDED_CONSTRUCTOR(PNGImage);
 	JS_BINDED_PROP_GET(PNGImage, width);
 	JS_BINDED_PROP_GET(PNGImage, height);
-	JS_BINDED_PROP_GET(PNGImage, src);
-	JS_BINDED_PROP_SET(PNGImage, src);
-	JS_BINDED_PROP_GET(PNGImage, onload);
-	JS_BINDED_PROP_SET(PNGImage, onload);
+	JS_BINDED_PROP_ACCESSOR(PNGImage, src);
+	JS_BINDED_PROP_ACCESSOR(PNGImage, onload);
+	JS_BINDED_PROP_ACCESSOR(PNGImage, onerror);
 };
 
-class WebGLRenderingContext
+class WebGLRenderingContext : public BasicObject
 {
 public:
 	GLsizei drawingBufferWidth;
 	GLsizei drawingBufferHeight;
 	ChesterCanvas* canvas;
 
-	WebGLRenderingContext(ChesterCanvas* canvas)
+	WebGLRenderingContext(ChesterCanvas* canvas) : BasicObject()
 	{
 		this->canvas = canvas;
 		this->drawingBufferWidth = canvas->width;

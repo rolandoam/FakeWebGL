@@ -30,7 +30,7 @@
 #include <string>
 #include "jsapi.h"
 
-void sc_finalize(JSFreeOp *freeOp, JSObject *obj);
+void basic_object_finalize(JSFreeOp *freeOp, JSObject *obj);
 JSBool jsNewGlobal(JSContext* cx, unsigned argc, jsval* vp);
 
 typedef JSBool(*js_function)(JSContext* cx, unsigned argc, jsval* vp);
@@ -49,7 +49,6 @@ void getDeviceWinSize(int* width, int* height);
 
 // debug functions
 JSScript* getScript(std::string name);
-JSBool jsRunInBackgroundThread(JSContext* cx, unsigned argc, jsval* vp);
 JSBool jsGetScript(JSContext* cx, unsigned argc, jsval* vp);
 // this is a server socket
 JSBool jsSocketOpen(JSContext* cx, unsigned argc, jsval* vp);
@@ -124,7 +123,7 @@ static JSBool klass##_func_##name(JSContext *cx, unsigned argc, jsval *vp) { \
 } \
 JSBool klass::name(JSContext *cx, unsigned argc, jsval *vp)
 
-#define JS_WRAP_OBJECT(klass, cobj, out) \
+#define JS_WRAP_OBJECT_IN_VAL(klass, cobj, out) \
 do { \
 	JSObject *obj = JS_NewObject(cx, &klass::js_class, klass::js_proto, klass::js_parent); \
 	if (obj) { \
@@ -164,10 +163,14 @@ static JSBool _js_set_##klass##_##propName(JSContext *cx, JSHandleObject obj, JS
 } \
 JSBool klass::_js_set_##propName(JSContext *cx, JSHandleId id, JSBool strict, JSMutableHandleValue vp)
 
+#define JS_BINDED_PROP_ACCESSOR(klass, propName) \
+JS_BINDED_PROP_GET(klass, propName); \
+JS_BINDED_PROP_SET(klass, propName);
+
 #define JS_BINDED_PROP_DEF_GETTER(klass, propName) \
 {#propName, 0, JSPROP_ENUMERATE | JSPROP_SHARED, JSOP_WRAPPER(_js_get_##klass##_##propName), NULL}
 
-#define JS_BINDED_PROP_DEF_GETTER_SETTER(klass, propName) \
+#define JS_BINDED_PROP_DEF_ACCESSOR(klass, propName) \
 {#propName, 0, JSPROP_ENUMERATE | JSPROP_SHARED, JSOP_WRAPPER(_js_get_##klass##_##propName), JSOP_WRAPPER(_js_set_##klass##_##propName)}
 
 #define JS_CREATE_UINT_WRAPPED(valOut, propName, val) \

@@ -46,14 +46,24 @@ JSRuntime* runtime;
 std::map<std::string, JSScript*> filename_script;
 std::map<std::string, js::RootedObject*> globals;
 
+void dummy_finalize(JSFreeOp *freeOp, JSObject *obj)
+{
+	return;
+}
+
 static JSClass global_class = {
     "global", JSCLASS_GLOBAL_FLAGS,
     JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
-    JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, sc_finalize,
+    JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, dummy_finalize,
     JSCLASS_NO_OPTIONAL_MEMBERS
 };
 
-void sc_finalize(JSFreeOp *freeOp, JSObject *obj) {
+void basic_object_finalize(JSFreeOp *freeOp, JSObject *obj) {
+	BasicObject* native = (BasicObject*)JS_GetPrivate(obj);
+	native = dynamic_cast<BasicObject*>(native);
+	if (native) {
+		native->decreaseReferences();
+	}
     return;
 }
 
@@ -113,6 +123,9 @@ bool runScript(const char *path, JSObject* glob, JSContext* cx) {
 		rpath = path;
 	} else {
 		rpath = getFullPathFromRelativePath(path);
+		if (rpath.empty()) {
+			return false;
+		}
 	}
 	if (glob == NULL) {
 		glob = globalObject;
@@ -325,13 +338,12 @@ JSObject* NewGlobalObject(JSContext* cx)
 		return NULL;
 
 	JS_DefineFunction(cx, glob, "log", jslog, 0, JSPROP_READONLY | JSPROP_PERMANENT);
-	JS_DefineFunction(cx, glob, "newGlobal", jsNewGlobal, 0, JSPROP_READONLY | JSPROP_PERMANENT);
+	JS_DefineFunction(cx, glob, "newGlobal", jsNewGlobal, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "requestAnimationFrame", jsRequestAnimationFrame, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "runScript", jsRunScript, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	
 	// add debug functions
 	JS_DefineFunction(cx, glob, "_getScript", jsGetScript, 1, JSPROP_READONLY | JSPROP_PERMANENT);
-	JS_DefineFunction(cx, glob, "_runInBackgroundThread", jsRunInBackgroundThread, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "_socketOpen", jsSocketOpen, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "_socketWrite", jsSocketWrite, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "_socketRead", jsSocketRead, 1, JSPROP_READONLY | JSPROP_PERMANENT);
