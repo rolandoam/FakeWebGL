@@ -36,8 +36,6 @@ _touchMovedListeners = [];
 _touchEndedListeners = [];
 
 _touchesBegan = function (event) {
-	// log("got touches began: ");
-	// log("  " + event.changedTouches[0].pageX + "," + event.changedTouches[0].pageY);
 	for (var i in _touchBeganListeners) {
 		var listener = _touchBeganListeners[i];
 		listener.call(null, event);
@@ -60,12 +58,12 @@ _touchesEnded = function (event) {
 	}
 };
 
-var fakeHTML = true;
+var fakeHTML = false;
 
 // defining window is not enough for passing the isBrowser test in requirejs, which is a good thing
-window = {
-	devicePixelRatio: devicePixelRatio
-};
+window = this;
+window.navigator = undefined;
+window.document = undefined;
 
 if (fakeHTML) {
 	window.navigator = {
@@ -102,8 +100,6 @@ if (fakeHTML) {
 		}
 	};
 
-	var script = new window.HTMLElement('script');
-
 	document = {
 		// dummy DOM
 		body: new window.HTMLElement('body'),
@@ -112,7 +108,7 @@ if (fakeHTML) {
 				// create a canvas the full size of the window
 				return new ChesterCanvas(window.innerWidth, window.innerHeight);
 			} else {
-				throw "invalid canvas id!";
+				throw "invalid dom id!";
 			}
 		},
 		getElementsByTagName: function (tag) {
@@ -132,13 +128,6 @@ if (fakeHTML) {
 			}
 		}
 	};
-
-	script.getAttribute = function (attr) {
-		if (attr === "data-main") {
-			return "js/main-built.js";
-		}
-	};
-	script.parentNode = document.body;
 }
 
 console = {
