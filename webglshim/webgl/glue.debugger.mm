@@ -41,11 +41,10 @@ JSBool jsGetScript(JSContext* cx, unsigned argc, jsval* vp)
 	jsval* argv = JS_ARGV(cx, vp);
 	if (argc == 1 && argv[0].isString()) {
 		JSString* str = JSVAL_TO_STRING(argv[0]);
-		const char* cstr = JS_EncodeString(cx, str);
-		JSScript* script = getScript(std::string(cstr));
+		JSStringWrapper wrapper(str);
+		JSScript* script = getScript(wrapper);
 		jsval out = OBJECT_TO_JSVAL((JSObject*)script);
 		JS_SET_RVAL(cx, vp, out);
-		JS_free(cx, (void*)cstr);
 	}
 	return JS_TRUE;
 }
@@ -134,15 +133,11 @@ JSBool jsSocketWrite(JSContext* cx, unsigned argc, jsval* vp)
 	if (argc == 2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		int s;
-		const char* str;
 		
 		s = JSVAL_TO_INT(argv[0]);
 		JSString* jsstr = JS_ValueToString(cx, argv[1]);
-		str = JS_EncodeString(cx, jsstr);
-		
+		JSStringWrapper str(jsstr);		
 		write(s, str, strlen(str));
-		
-		JS_free(cx, (void*)str);
 	}
 	return JS_TRUE;
 }

@@ -20,8 +20,8 @@ public:
 		device = alcOpenDevice(0);
 		context = alcCreateContext(device, NULL);
 		alcMakeContextCurrent(context);
-		// init lame - we only want to decode, so decode only
 	}
+
 	~AudioManager() {
 		alcDestroyContext(context);
 		alcCloseDevice(device);
@@ -67,13 +67,13 @@ ALuint OpenALBuffer::getBufferId()
 
 #pragma mark - FakeAudio
 
-FakeAudio::FakeAudio() : BasicObject()
+FakeAudio::FakeAudio()
 {
 	readyState = 0;
 	volume = 1.0f;
 }
 
-FakeAudio::FakeAudio(std::string aPath) : BasicObject()
+FakeAudio::FakeAudio(std::string aPath)
 {
 	readyState = 0;
 	volume = 1.0f;
@@ -124,9 +124,8 @@ JS_BINDED_CONSTRUCTOR_IMPL(FakeAudio)
 	jsval* argv = JS_ARGV(cx, vp);
 	if (argc == 1 && argv[0].isString()) {
 		JSString* str = argv[0].toString();
-		const char* cstr = JS_EncodeString(cx, str);
-		audio = new FakeAudio(cstr);
-		JS_free(cx, (void*)cstr);
+		JSStringWrapper wrapper(str);
+		audio = new FakeAudio(wrapper);
 	} else {
 		audio = new FakeAudio();
 	}
@@ -181,14 +180,13 @@ JS_BINDED_PROP_SET_IMPL(FakeAudio, preload)
 {
 	if (vp.isString()) {
 		JSString* str = vp.toString();
-		const char* cstr = JS_EncodeString(cx, str);
-		std::string tmp = cstr;
+		JSStringWrapper wrapper(str);
+		std::string tmp = wrapper;
 		if (tmp == "none") {
 			preload = false;
 		} else if (tmp == "auto" || tmp == "metadata") {
 			preload = true;
 		}
-		JS_free(cx, (void*)cstr);
 	}
 	return JS_TRUE;
 }
@@ -225,12 +223,11 @@ JS_BINDED_PROP_SET_IMPL(FakeAudio, src)
 {
 	if (vp.isString()) {
 		JSString* str = vp.toString();
-		const char* cstr = JS_EncodeString(cx, str);
-		src = cstr;
+		JSStringWrapper wrapper(str);
+		src = (char *)wrapper;
 		if (preload) {
 			loadAudio();
 		}
-		JS_free(cx, (void*)cstr);
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "Invalid source for Audio");
@@ -312,14 +309,13 @@ JS_BINDED_FUNC_IMPL(FakeAudio, canPlayType)
 	JSString* out;
 	if (argc == 1 && argv[0].isString()) {
 		JSString* str = argv[0].toString();
-		const char* cstr = JS_EncodeString(cx, str);
-		std::string tmp = cstr;
+		JSStringWrapper wrapper(str);
+		std::string tmp = wrapper;
 		if (tmp == "audio/mpeg" || tmp == "audio/wav") {
 			out = JS_NewStringCopyZ(cx, "maybe");
 		} else {
 			out = JS_NewStringCopyZ(cx, "");
 		}
-		JS_free(cx, (void*)cstr);
 	} else {
 		out = JS_NewStringCopyZ(cx, "");
 	}

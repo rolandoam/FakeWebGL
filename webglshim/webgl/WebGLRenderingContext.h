@@ -44,35 +44,13 @@ class JSObject;
 
 class WebGLRenderingContext;
 
-// basic reference counting
-class BasicObject
-{
-	int references;
-public:
-	BasicObject() {
-		references = 1;
-	}
-
-	void increaseReferences() {
-		references++;
-	}
-
-	void decreaseReferences() {
-		references--;
-		if (references == 0) {
-			fprintf(stderr, "removing basic object: %p", this);
-			delete this;
-		}
-	}
-};
-
-class ChesterCanvas : public BasicObject
+class ChesterCanvas
 {
 public:
 	int width;
 	int height;
 
-	ChesterCanvas(int w, int h) : BasicObject(), width(w), height(h) {};
+	ChesterCanvas(int w, int h) : width(w), height(h) {};
 	JS_BINDED_CLASS_GLUE(ChesterCanvas);
 	JS_BINDED_CONSTRUCTOR(ChesterCanvas);
 	JS_BINDED_PROP_GET(ChesterCanvas, width);
@@ -80,7 +58,7 @@ public:
 	JS_BINDED_FUNC(ChesterCanvas, getContext);
 };
 
-class FakeXMLHTTPRequest : public BasicObject
+class FakeXMLHTTPRequest
 {
 	std::string url;
 	std::string type;
@@ -91,7 +69,7 @@ class FakeXMLHTTPRequest : public BasicObject
 	int status;
 	bool isAsync;
 public:
-	FakeXMLHTTPRequest() : BasicObject () {}
+	FakeXMLHTTPRequest() {}
 	~FakeXMLHTTPRequest();
 	JS_BINDED_CLASS_GLUE(FakeXMLHTTPRequest);
 	JS_BINDED_CONSTRUCTOR(FakeXMLHTTPRequest);
@@ -104,7 +82,7 @@ public:
 	JS_BINDED_FUNC(FakeXMLHTTPRequest, send);
 };
 
-class PNGImage : public BasicObject
+class PNGImage
 {
 	std::vector<unsigned char> bytes;
 	std::string src;
@@ -128,14 +106,14 @@ public:
 	JS_BINDED_PROP_ACCESSOR(PNGImage, onerror);
 };
 
-class WebGLRenderingContext : public BasicObject
+class WebGLRenderingContext
 {
 public:
 	GLsizei drawingBufferWidth;
 	GLsizei drawingBufferHeight;
 	ChesterCanvas* canvas;
 
-	WebGLRenderingContext(ChesterCanvas* canvas) : BasicObject()
+	WebGLRenderingContext(ChesterCanvas* canvas)
 	{
 		this->canvas = canvas;
 		this->drawingBufferWidth = canvas->width;

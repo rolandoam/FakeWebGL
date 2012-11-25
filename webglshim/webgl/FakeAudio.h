@@ -28,7 +28,7 @@ public:
 	void* getData();
 };
 
-class FakeAudio : public BasicObject
+class FakeAudio
 {
 	int readyState;
 	std::string src;

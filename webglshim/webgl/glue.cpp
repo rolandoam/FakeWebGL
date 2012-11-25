@@ -59,10 +59,9 @@ static JSClass global_class = {
 };
 
 void basic_object_finalize(JSFreeOp *freeOp, JSObject *obj) {
-	BasicObject* native = (BasicObject*)JS_GetPrivate(obj);
-	native = dynamic_cast<BasicObject*>(native);
+	void* native = JS_GetPrivate(obj);
 	if (native) {
-		native->decreaseReferences();
+		delete native;
 	}
     return;
 }
@@ -152,24 +151,22 @@ JSBool jsRunScript(JSContext* cx, unsigned argc, jsval*vp)
 	if (argc >= 1) {
 		jsval* argv = JS_ARGV(cx, vp);
 		JSString* str = JS_ValueToString(cx, argv[0]);
-		const char* path = JS_EncodeString(cx, str);
+		JSStringWrapper path(str);
 		JSBool res = false;
 		if (argc == 2 && argv[1].isString()) {
 			JSString* globalName = JSVAL_TO_STRING(argv[1]);
-			const char* name = JS_EncodeString(cx, globalName);
+			JSStringWrapper name(globalName);
 			js::RootedObject* rootedGlobal = globals[name];
 			if (rootedGlobal) {
-				JS_free(cx, (void*)name);
 				res = runScript(path, rootedGlobal->get());
 			} else {
-				JS_ReportError(cx, "Invalid global object: %s", name);
+				JS_ReportError(cx, "Invalid global object: %s", (char *)name);
 				return JS_FALSE;
 			}
 		} else {
 			JSObject* glob = JS_GetGlobalForScopeChain(cx);
 			res = runScript(path, glob);
 		}
-		JS_free(cx, (void*)path);
 		return res;
 	}
 	return JS_TRUE;
@@ -181,8 +178,8 @@ JSBool jslog(JSContext* cx, uint32_t argc, jsval *vp)
 		jsval* argv = JS_ARGV(cx, vp);
 		JSString *string = JS_ValueToString(cx, argv[0]);
 		if (string) {
-			char *cstr = JS_EncodeString(cx, string);
-			printf("%s\n", cstr);
+			JSStringWrapper wrapper(string);
+			printf("%s\n", (char*)wrapper);
 		}
 	}
 	return JS_TRUE;
@@ -381,7 +378,8 @@ JSBool jsNewGlobal(JSContext* cx, unsigned argc, jsval* vp)
 	if (argc == 1) {
 		jsval *argv = JS_ARGV(cx, vp);
 		JSString *jsstr = JS_ValueToString(cx, argv[0]);
-		std::string key = JS_EncodeString(cx, jsstr);
+		JSStringWrapper wrapper(jsstr);
+		std::string key = (char *)wrapper;
 		js::RootedObject *global = globals[key];
 		if (!global) {
 			global = new js::RootedObject(cx, NewGlobalObject(getGlobalContext()));
@@ -456,7 +454,4 @@ void createJSEnvironment() {
 
 	// load the polyfill
 	runScript("js/polyfill.js");
-#if CHESTER
-	runScript("js/chester.js");
-#endif
 }

@@ -69,9 +69,6 @@ void mat4rotate(float* matA, float r, float x, float y, float z);
 // scale a 4x4 matrix
 void mat4scale(float* matA, float scaleX, float scaleY, float scaleZ);
 
-// set to zero if you do not want to load chesterGL
-#define CHESTER 0
-
 #pragma mark - Platform Specific
 
 typedef enum {
@@ -88,6 +85,54 @@ typedef struct {
 
 const char* getFullPathFromRelativePath(const char* path);
 void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count);
+
+#pragma mark - JSStringWrapper
+
+// just a simple utility to avoid mem leaking when using JSString
+class JSStringWrapper
+{
+	JSString*	string;
+	const char*	buffer;
+public:
+	JSStringWrapper() {
+		buffer = NULL;
+	}
+	JSStringWrapper(JSString* str, JSContext* cx = NULL) {
+		set(str, cx);
+	}
+	JSStringWrapper(jsval val, JSContext* cx = NULL) {
+		set(val, cx);
+	}
+	~JSStringWrapper() {
+		if (buffer) {
+			JS_free(getGlobalContext(), (void*)buffer);
+		}
+	}
+	void set(jsval val, JSContext* cx) {
+		if (val.isString()) {
+			string = val.toString();
+			if (!cx) {
+				cx = getGlobalContext();
+			}
+			buffer = JS_EncodeString(cx, string);
+		} else {
+			buffer = NULL;
+		}
+	}
+	void set(JSString* str, JSContext* cx) {
+		string = str;
+		if (!cx) {
+			cx = getGlobalContext();
+		}
+		buffer = JS_EncodeString(cx, string);
+	}
+	operator std::string() {
+		return std::string(buffer);
+	}
+	operator char*() {
+		return (char*)buffer;
+	}
+};
 
 #pragma mark - Helpful Macros
 

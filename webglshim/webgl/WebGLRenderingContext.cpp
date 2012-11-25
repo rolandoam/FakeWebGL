@@ -70,16 +70,15 @@ JS_BINDED_FUNC_IMPL(ChesterCanvas, getContext)
 	if (argc >= 1) {
 		jsval* argv = JS_ARGV(cx, vp);
 		JSString* str = JS_ValueToString(cx, argv[0]);
-		const char* cstr = JS_EncodeString(cx, str);
+		JSStringWrapper wrapper(str);
 		JSBool ok = JS_FALSE;
-		if (strncmp(cstr, "experimental-webgl", 18) == 0) {
+		if (strncmp(wrapper, "experimental-webgl", 18) == 0) {
 			WebGLRenderingContext* cobj = new WebGLRenderingContext(this);
 			jsval out;
 			JS_WRAP_OBJECT_IN_VAL(WebGLRenderingContext, cobj, out);
 			JS_SET_RVAL(cx, vp, out);
 			ok = JS_TRUE;
 		}
-		JS_free(cx, (void*)cstr);
 		return ok;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -196,15 +195,14 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, open)
 		if (argc > 2) {
 			JS_ValueToBoolean(cx, argv[2], &async);
 		}
-		method = JS_EncodeString(cx, jsMethod);
-		urlstr = JS_EncodeString(cx, jsURL);
-		
+		JSStringWrapper w1(jsMethod);
+		JSStringWrapper w2(jsURL);
+		method = w1;
+		urlstr = w2;
+
 		url = urlstr;
 		readyState = 1;
 		isAsync = async;
-		
-		JS_free(cx, (void*)method);
-		JS_free(cx, (void*)urlstr);
 
 		return JS_TRUE;
 	}
@@ -271,7 +269,6 @@ void FakeXMLHTTPRequest::_js_register(JSContext *cx, JSObject *global)
 #pragma mark - PNGImage
 
 PNGImage::PNGImage() :
-	BasicObject(),
 	onloadCallback(getGlobalContext()),
 	onerrorCallback(getGlobalContext())
 {
@@ -348,13 +345,12 @@ JS_BINDED_PROP_GET_IMPL(PNGImage, src)
 JS_BINDED_PROP_SET_IMPL(PNGImage, src)
 {
 	JSString* jsstr = JS_ValueToString(cx, vp.get());
-	const char* cstr = JS_EncodeString(cx, jsstr);
+	JSStringWrapper wrapper(jsstr);
 	// copy the source
-	if (strlen(cstr) > 0) {
-		src = cstr;
+	if (strlen(wrapper) > 0) {
+		src = (char *)wrapper;
 		loadPNG();
 	}
-	JS_free(cx, (void*)cstr);
 	return JS_TRUE;
 }
 
@@ -466,11 +462,10 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bindAttribLocation)
 		GLuint program;
 		GLuint index;
 		JSString* str = JS_ValueToString(cx, argv[2]);
-		const char* name = JS_EncodeString(cx, str);
+		JSStringWrapper name(str);
 		JS_GET_UINT_WRAPPED(argv[0], "program", program);
 		JS_ValueToECMAUint32(cx, argv[1], &index);
 		glBindAttribLocation(program, index, name);
-		JS_free(cx, (void*)name);
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -999,13 +994,11 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getAttribLocation)
 	if (argc == 2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLuint program;
-		const char* name;
 		JS_GET_UINT_WRAPPED(argv[0], "program", program);
 		JSString* jsname = JS_ValueToString(cx, argv[1]);
-		name = JS_EncodeString(cx, jsname);
+		JSStringWrapper name(jsname);
 		int location = glGetAttribLocation(program, name);
 		JS_SET_RVAL(cx, vp, INT_TO_JSVAL(location));
-		JS_free(cx, (void*)name);
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -1073,10 +1066,9 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getUniformLocation)
 	if (argc == 2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLuint program;
-		const char* name;
 		JS_GET_UINT_WRAPPED(argv[0], "program", program);
 		JSString* str = JS_ValueToString(cx, argv[1]);
-		name = JS_EncodeString(cx, str);
+		JSStringWrapper name(str);
 		int location = glGetUniformLocation(program, name);
 		JS_SET_RVAL(cx, vp, INT_TO_JSVAL(location));
 		JS_free(cx, (void*)name);
@@ -1158,10 +1150,10 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, shaderSource)
 		GLuint shader;
 		JS_ValueToECMAUint32(cx, argv[0], &shader);
 		JSString* jsstr = JS_ValueToString(cx, argv[1]);
-		const char* source = JS_EncodeString(cx, jsstr);
+		JSStringWrapper wrapper(jsstr);
+		const char* source = wrapper;
 		GLint length = strlen(source);
 		glShaderSource(shader, 1, &source, &length);
-		JS_free(cx, (void*)source);
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -1262,6 +1254,9 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, texImage2D)
 			jsimage = JSVAL_TO_OBJECT(argv[5]);
 			if (JS_InstanceOf(cx, jsimage, &PNGImage::js_class, NULL)) {
 				PNGImage* image = (PNGImage*)JS_GetPrivate(jsimage);
+				// NOTE: this is ignoring the format that getBytes() is returning...
+				// we should convert the image to the proper `type` before sending it
+				// to glTexImage2D
 				glTexImage2D(target, level, internalformat, image->width, image->height, 0, format, type, image->getBytes());
 				return JS_TRUE;
 			}
