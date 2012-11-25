@@ -80,7 +80,6 @@
 	// run all the files
 	if (debug) {
 		runScript("js/debugger.js");
-		evalString("startDebugger(['js/polyfill.js', 'js/gl-matrix-min.js', 'js/lesson5.js'], 'webGLStart()')", NULL, "native-setupGL");
 	}
 
 	// three.js
