@@ -185,8 +185,7 @@ public:
 							  WebGLTexture texture, GLint level);
 	JS_BINDED_FUNC(WebGLRenderingContext, frontFace);
 
-	void generateMipmap(GLenum target);
-
+	JS_BINDED_FUNC(WebGLRenderingContext, generateMipmap);
 	JS_BINDED_FUNC(WebGLRenderingContext, getAttribLocation);
 
 	JS_BINDED_FUNC(WebGLRenderingContext, getParameter);

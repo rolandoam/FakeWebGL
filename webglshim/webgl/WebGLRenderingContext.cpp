@@ -984,9 +984,19 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, frontFace)
 	return JS_TRUE;
 }
 
-void WebGLRenderingContext::generateMipmap(GLenum target)
+JS_BINDED_FUNC_IMPL(WebGLRenderingContext, generateMipmap)
 {
-	glGenerateMipmap(target);
+	if (argc == 1) {
+		jsval* argv = JS_ARGV(cx, vp);
+		GLenum target;
+		if (argv[0].isNumber()) {
+			JS_ValueToECMAUint32(cx, argv[0], &target);
+			glGenerateMipmap(target);
+			return JS_TRUE;
+		}
+	}
+	JS_ReportError(cx, "invalid call to generateMipmap");
+	return JS_FALSE;
 }
 
 JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getAttribLocation)
@@ -1071,7 +1081,6 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getUniformLocation)
 		JSStringWrapper name(str);
 		int location = glGetUniformLocation(program, name);
 		JS_SET_RVAL(cx, vp, INT_TO_JSVAL(location));
-		JS_free(cx, (void*)name);
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -1121,13 +1130,14 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, pixelStorei)
 		int32_t param;
 		JS_ValueToECMAUint32(cx, argv[0], &pname);
 		JS_ValueToInt32(cx, argv[1], &param);
-		if (pname == GL_PACK_ALIGNMENT || pname == GL_UNPACK_ALIGNMENT) {
+		if (pname) {
 			glPixelStorei(pname, param);
 			return JS_TRUE;
-		} else {
-			JS_ReportError(cx, "Invalid enum for pixelStorei: %u", pname);
-			return JS_FALSE;
 		}
+//		else {
+//			JS_ReportError(cx, "Invalid enum for pixelStorei: %u", pname);
+//			return JS_FALSE;
+//		}
 	}
 	JS_ReportError(cx, "invalid call");
 	return JS_FALSE;
@@ -1973,6 +1983,7 @@ void WebGLRenderingContext::_js_register(JSContext* cx, JSObject *global)
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, getExtension),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, getShaderInfoLog),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, getUniformLocation),
+		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, generateMipmap),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, getAttribLocation),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, getParameter),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, lineWidth),
