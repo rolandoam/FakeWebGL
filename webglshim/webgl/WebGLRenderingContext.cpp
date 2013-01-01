@@ -26,6 +26,7 @@
 #include <OpenGLES/ES2/gl.h>
 #include <iostream>
 #include <iterator>
+#include <assert.h>
 #include "WebGLRenderingContext.h"
 #include "jsapi.h"
 #include "jsfriendapi.h"
@@ -1376,9 +1377,11 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform1f)
 	if (argc == 2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
-		double x;
-		JS_ValueToNumber(cx, argv[1], &x);
-		glUniform1f(location, x);
+		if (location >= 0) {
+			double x;
+			JS_ValueToNumber(cx, argv[1], &x);
+			glUniform1f(location, x);
+		}
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -1389,6 +1392,9 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform1fv)
 	if (argc == 2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
+		if (location < 0) {
+			return JS_TRUE;
+		}
 		if (argv[1].isObject()) {
 			JSObject* arr = JSVAL_TO_OBJECT(argv[1]);
 			if (JS_IsFloat32Array(arr, cx)) {
@@ -1422,8 +1428,10 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform1i)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
 		GLint x;
-		JS_ValueToInt32(cx, argv[1], &x);
-		glUniform1i(location, x);
+		if (location >= 0) {
+			JS_ValueToInt32(cx, argv[1], &x);
+			glUniform1i(location, x);
+		}
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -1434,6 +1442,9 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform1iv)
 	if (argc == 2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
+		if (location < 0) {
+			return JS_TRUE;
+		}
 		if (argv[1].isObject()) {
 			JSObject* arr = JSVAL_TO_OBJECT(argv[1]);
 			if (JS_IsInt32Array(arr, cx)) {
@@ -1464,11 +1475,13 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform2f)
 	if (argc == 3) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
-		double x;
-		double y;
-		JS_ValueToNumber(cx, argv[1], &x);
-		JS_ValueToNumber(cx, argv[2], &y);
-		glUniform2f(location, x, y);
+		if (location >= 0) {
+			double x;
+			double y;
+			JS_ValueToNumber(cx, argv[1], &x);
+			JS_ValueToNumber(cx, argv[2], &y);
+			glUniform2f(location, x, y);
+		}
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -1479,6 +1492,9 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform2fv)
 	if (argc == 2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
+		if (location < 0) {
+			return JS_TRUE;
+		}
 		if (argv[1].isObject()) {
 			JSObject* arr = JSVAL_TO_OBJECT(argv[1]);
 			if (JS_IsFloat32Array(arr, cx)) {
@@ -1511,11 +1527,13 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform2i)
 	if (argc == 3) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
-		GLint x;
-		GLint y;
-		JS_ValueToInt32(cx, argv[1], &x);
-		JS_ValueToInt32(cx, argv[2], &y);
-		glUniform2i(location, x, y);
+		if (location >= 0) {
+			GLint x;
+			GLint y;
+			JS_ValueToInt32(cx, argv[1], &x);
+			JS_ValueToInt32(cx, argv[2], &y);
+			glUniform2i(location, x, y);
+		}
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -1526,6 +1544,9 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform2iv)
 	if (argc == 2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
+		if (location < 0) {
+			return JS_TRUE;
+		}
 		if (argv[1].isObject()) {
 			JSObject* arr = JSVAL_TO_OBJECT(argv[1]);
 			if (JS_IsInt32Array(arr, cx)) {
@@ -1555,15 +1576,16 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3f)
 {
 	if (argc == 4) {
 		jsval* argv = JS_ARGV(cx, vp);
-		GLint location;
-		double x;
-		double y;
-		double z;
-		location = JSVAL_TO_INT(argv[0]);
-		JS_ValueToNumber(cx, argv[1], &x);
-		JS_ValueToNumber(cx, argv[2], &y);
-		JS_ValueToNumber(cx, argv[3], &z);
-		glUniform3f(location, x, y, z);
+		GLint location = JSVAL_TO_INT(argv[0]);
+		if (location >= 0) {
+			double x;
+			double y;
+			double z;
+			JS_ValueToNumber(cx, argv[1], &x);
+			JS_ValueToNumber(cx, argv[2], &y);
+			JS_ValueToNumber(cx, argv[3], &z);
+			glUniform3f(location, x, y, z);
+		}
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -1574,6 +1596,9 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3fv)
 	if (argc == 2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
+		if (location < 0) {
+			return JS_TRUE;
+		}
 		if (argv[1].isObject()) {
 			JSObject* arr = JSVAL_TO_OBJECT(argv[1]);
 			if (JS_IsFloat32Array(arr, cx)) {
@@ -1582,7 +1607,6 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3fv)
 				glUniform3fv(location, count, data);
 				return JS_TRUE;
 			} else if (JS_IsArrayObject(cx, arr)) {
-				// implement thing here getting the elements from the array
 				unsigned length;
 				JS_GetArrayLength(cx, arr, &length);
 				GLfloat data[length];
@@ -1591,7 +1615,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3fv)
 					double tmp;
 					JS_GetElement(cx, arr, i, &elt);
 					JS_ValueToNumber(cx, elt, &tmp);
-					data[i] = tmp;
+					data[i] = (GLfloat)tmp;
 				}
 				glUniform3fv(location, length, data);
 				return JS_TRUE;
@@ -1606,13 +1630,15 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3i)
 	if (argc == 4) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
-		GLint x;
-		GLint y;
-		GLint z;
-		JS_ValueToInt32(cx, argv[1], &x);
-		JS_ValueToInt32(cx, argv[2], &y);
-		JS_ValueToInt32(cx, argv[3], &z);
-		glUniform3i(location, x, y, z);
+		if (location >= 0) {
+			GLint x;
+			GLint y;
+			GLint z;
+			JS_ValueToInt32(cx, argv[1], &x);
+			JS_ValueToInt32(cx, argv[2], &y);
+			JS_ValueToInt32(cx, argv[3], &z);
+			glUniform3i(location, x, y, z);
+		}
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -1623,6 +1649,9 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3iv)
 	if (argc == 2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
+		if (location < 0) {
+			return JS_TRUE;
+		}
 		if (argv[1].isObject()) {
 			JSObject* arr = JSVAL_TO_OBJECT(argv[1]);
 			if (JS_IsInt32Array(arr, cx)) {
@@ -1652,17 +1681,18 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform4f)
 {
 	if (argc == 5) {
 		jsval* argv = JS_ARGV(cx, vp);
-		GLint location;
-		double x;
-		double y;
-		double z;
-		double w;
-		location = JSVAL_TO_INT(argv[0]);
-		JS_ValueToNumber(cx, argv[1], &x);
-		JS_ValueToNumber(cx, argv[2], &y);
-		JS_ValueToNumber(cx, argv[3], &z);
-		JS_ValueToNumber(cx, argv[4], &w);
-		glUniform4f(location, x, y, z, w);
+		GLint location = JSVAL_TO_INT(argv[0]);
+		if (location >= 0) {
+			double x;
+			double y;
+			double z;
+			double w;
+			JS_ValueToNumber(cx, argv[1], &x);
+			JS_ValueToNumber(cx, argv[2], &y);
+			JS_ValueToNumber(cx, argv[3], &z);
+			JS_ValueToNumber(cx, argv[4], &w);
+			glUniform4f(location, x, y, z, w);
+		}
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -1673,6 +1703,9 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform4fv)
 	if (argc == 2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
+		if (location < 0) {
+			return JS_TRUE;
+		}
 		if (argv[1].isObject()) {
 			JSObject* arr = JSVAL_TO_OBJECT(argv[1]);
 			if (JS_IsFloat32Array(arr, cx)) {
@@ -1704,15 +1737,17 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform4i)
 	if (argc == 5) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
-		GLint x;
-		GLint y;
-		GLint z;
-		GLint w;
-		JS_ValueToInt32(cx, argv[1], &x);
-		JS_ValueToInt32(cx, argv[2], &y);
-		JS_ValueToInt32(cx, argv[3], &z);
-		JS_ValueToInt32(cx, argv[4], &w);
-		glUniform4i(location, x, y, z, w);
+		if (location >= 0) {
+			GLint x;
+			GLint y;
+			GLint z;
+			GLint w;
+			JS_ValueToInt32(cx, argv[1], &x);
+			JS_ValueToInt32(cx, argv[2], &y);
+			JS_ValueToInt32(cx, argv[3], &z);
+			JS_ValueToInt32(cx, argv[4], &w);
+			glUniform4i(location, x, y, z, w);
+		}
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -1723,6 +1758,9 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform4iv)
 	if (argc == 2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint location = JSVAL_TO_INT(argv[0]);
+		if (location < 0) {
+			return JS_TRUE;
+		}
 		if (argv[1].isObject()) {
 			JSObject* arr = JSVAL_TO_OBJECT(argv[1]);
 			if (JS_IsInt32Array(arr, cx)) {
