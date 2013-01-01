@@ -151,6 +151,41 @@ JS_BINDED_PROP_SET_IMPL(FakeXMLHTTPRequest, onreadystatechange)
 	return JS_TRUE;
 }
 
+JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, responseType)
+{
+	JSString* str = JS_NewStringCopyN(cx, "", 0);
+	vp.set(STRING_TO_JSVAL(str));
+	return JS_TRUE;
+}
+
+JS_BINDED_PROP_SET_IMPL(FakeXMLHTTPRequest, responseType)
+{
+	jsval type = vp.get();
+	if (type.isString()) {
+		JSString* str = type.toString();
+		JSBool equal;
+		JS_StringEqualsAscii(cx, str, "text", &equal);
+		if (equal) {
+			responseType = kRequestResponseTypeString;
+			return JS_TRUE;
+		}
+		JS_StringEqualsAscii(cx, str, "arraybuffer", &equal);
+		if (equal) {
+			responseType = kRequestResponseTypeArrayBuffer;
+			return JS_TRUE;
+		}
+		JS_StringEqualsAscii(cx, str, "json", &equal);
+		if (equal) {
+			responseType = kRequestResponseTypeJSON;
+			return JS_TRUE;
+		}
+		// ignore the rest of the response types for now
+		return JS_TRUE;
+	}
+	JS_ReportError(cx, "Invalid response type");
+	return JS_FALSE;
+}
+
 JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, readyState)
 {
 	vp.set(INT_TO_JSVAL(readyState));
@@ -166,20 +201,33 @@ JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, status)
 JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, responseText)
 {
 	JSString* str = JS_NewStringCopyN(cx, (const char*)data, dataSize);
-	vp.set(STRING_TO_JSVAL(str));
-	return JS_TRUE;
+	if (str) {
+		vp.set(STRING_TO_JSVAL(str));
+		return JS_TRUE;
+	} else {
+		JS_ReportError(cx, "Error trying to create JSString from data");
+		return JS_FALSE;
+	}
 }
 
 JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, response)
 {
-	if (url.length() > 5 && url.compare(url.length() - 5, 5, ".json") == 0) {
+	if (responseType == kRequestResponseTypeJSON) {
 		jsval outVal;
 		JSString* str = JS_NewStringCopyN(cx, (const char*)data, dataSize);
 		if (JS_ParseJSON(cx, JS_GetStringCharsZ(cx, str), dataSize, &outVal)) {
 			vp.set(outVal);
 			return JS_TRUE;
 		}
+	} else if (responseType == kRequestResponseTypeArrayBuffer) {
+		JSObject* tmp = JS_NewArrayBuffer(cx, dataSize);
+		uint8_t* tmpData = JS_GetArrayBufferData(tmp, cx);
+		memcpy(tmpData, data, dataSize);
+		jsval outVal = OBJECT_TO_JSVAL(tmp);
+		vp.set(outVal);
+		return JS_TRUE;
 	}
+	// by default, return text
 	return _js_get_responseText(cx, id, vp);
 }
 
@@ -204,6 +252,9 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, open)
 		readyState = 1;
 		isAsync = async;
 
+		if (url.length() > 5 && url.compare(url.length() - 5, 5, ".json") == 0) {
+			responseType = kRequestResponseTypeJSON;
+		}
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -213,23 +264,17 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, open)
 JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, send)
 {
 	std::string path = getFullPathFromRelativePath(url.c_str());
+	readyState = 4;
 	if (path.empty()) {
 		// file not found
-		readyState = 4;
 		status = 404;
 	} else {
 		dataSize = readFileInMemory(path.c_str(), &data);
 		if (dataSize > 0) {
-			if (onreadystateCallback) {
-				readyState = 4;
-				status = 200;
-			}
+			status = 200;
 		} else {
 			printf("Error trying to read '%s'\n", path.c_str());
-			if (onreadystateCallback) {
-				readyState = 4;
-				status = 404; // just issue any error
-			}
+			status = 404; // just issue any error
 		}
 	}
 	if (onreadystateCallback) {
@@ -251,6 +296,7 @@ void FakeXMLHTTPRequest::_js_register(JSContext *cx, JSObject *global)
 	};
 	static JSPropertySpec props[] = {
 		JS_BINDED_PROP_DEF_ACCESSOR(FakeXMLHTTPRequest, onreadystatechange),
+		JS_BINDED_PROP_DEF_ACCESSOR(FakeXMLHTTPRequest, responseType),
 		JS_BINDED_PROP_DEF_GETTER(FakeXMLHTTPRequest, readyState),
 		JS_BINDED_PROP_DEF_GETTER(FakeXMLHTTPRequest, status),
 		JS_BINDED_PROP_DEF_GETTER(FakeXMLHTTPRequest, responseText),
@@ -386,7 +432,7 @@ JS_BINDED_PROP_GET_IMPL(PNGImage, onerror)
 JS_BINDED_PROP_SET_IMPL(PNGImage, onerror)
 {
 	jsval callback = vp.get();
-	if (callback != JSVAL_NULL) {
+	if (callback != JSVAL_NULL && callback.isObject()) {
 		onerrorCallback = JSVAL_TO_OBJECT(callback);
 	}
 	return JS_TRUE;

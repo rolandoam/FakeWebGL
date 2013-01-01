@@ -58,6 +58,14 @@ public:
 	JS_BINDED_FUNC(ChesterCanvas, getContext);
 };
 
+enum FakeXMLHTTPRequestResponseType {
+	kRequestResponseTypeString,
+	kRequestResponseTypeArrayBuffer,
+	kRequestResponseTypeBlob,
+	kRequestResponseTypeDocument,
+	kRequestResponseTypeJSON
+};
+
 class FakeXMLHTTPRequest
 {
 	std::string url;
@@ -67,6 +75,7 @@ class FakeXMLHTTPRequest
 	JSObject* onreadystateCallback;
 	int readyState;
 	int status;
+	int responseType;
 	bool isAsync;
 public:
 	FakeXMLHTTPRequest() {}
@@ -74,6 +83,7 @@ public:
 	JS_BINDED_CLASS_GLUE(FakeXMLHTTPRequest);
 	JS_BINDED_CONSTRUCTOR(FakeXMLHTTPRequest);
 	JS_BINDED_PROP_ACCESSOR(FakeXMLHTTPRequest, onreadystatechange);
+	JS_BINDED_PROP_ACCESSOR(FakeXMLHTTPRequest, responseType);
 	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, readyState);
 	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, status);
 	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, responseText);

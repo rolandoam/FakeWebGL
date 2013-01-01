@@ -90,18 +90,18 @@ bool evalString(const char *string, jsval *outVal, const char *filename)
 }
 
 size_t readFileInMemory(const char *path, unsigned char **buff) {
-    struct stat buf;
-    int file = open(path, O_RDONLY);
-    long readBytes = -1;
-    if (file) {
-        if (fstat(file, &buf) == 0) {
-            *buff = (unsigned char *)calloc(buf.st_size + 1, 1);
-            if (*buff) {
-                readBytes = read(file, *buff, buf.st_size);
-            }
-        }
-    }
-    close(file);
+	struct stat buf;
+	int file = open(path, O_RDONLY);
+	long readBytes = -1;
+	if (file) {
+		if (fstat(file, &buf) == 0) {
+			*buff = (unsigned char *)calloc(buf.st_size, 1);
+			if (*buff) {
+				readBytes = read(file, *buff, buf.st_size);
+			}
+		}
+		close(file);
+	}
     return readBytes;
 }
 
