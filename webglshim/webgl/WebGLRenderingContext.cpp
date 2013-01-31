@@ -1612,10 +1612,8 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3fv)
 				GLfloat data[length];
 				for (int i=0; i < length; i++) {
 					jsval elt;
-					double tmp;
 					JS_GetElement(cx, arr, i, &elt);
-					JS_ValueToNumber(cx, elt, &tmp);
-					data[i] = (GLfloat)tmp;
+					data[i] = (GLfloat)elt.toNumber();
 				}
 				glUniform3fv(location, length, data);
 				return JS_TRUE;
