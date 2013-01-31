@@ -37,6 +37,7 @@
 		A98B1B0E164436FA00E68C95 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A98B1B0D164436FA00E68C95 /* AudioToolbox.framework */; };
 		A995BB21162DE4BF00C327D1 /* glue.math.ios.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A995BB1F162DE4BF00C327D1 /* glue.math.ios.cpp */; };
 		A9EB655E162F39B200EFEF45 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = A9EB655D162F39B200EFEF45 /* fonts */; };
+		A9FF1F8B1692579E00D2623E /* obj in Resources */ = {isa = PBXBuildFile; fileRef = A9FF1F8A1692579E00D2623E /* obj */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -80,6 +81,7 @@
 		A995BB1F162DE4BF00C327D1 /* glue.math.ios.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glue.math.ios.cpp; sourceTree = "<group>"; };
 		A995BB20162DE4BF00C327D1 /* glue.math.ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glue.math.ios.h; sourceTree = "<group>"; };
 		A9EB655D162F39B200EFEF45 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = webglshim/Resources/fonts; sourceTree = "<group>"; };
+		A9FF1F8A1692579E00D2623E /* obj */ = {isa = PBXFileReference; lastKnownFileType = folder; name = obj; path = webglshim/Resources/obj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -190,6 +192,7 @@
 				A917DEFE16445A6200026B4A /* audio */,
 				A9EB655D162F39B200EFEF45 /* fonts */,
 				A95C3CDD16235B6A00386017 /* images */,
+				A9FF1F8A1692579E00D2623E /* obj */,
 				A95C3CDE16235B6A00386017 /* js */,
 				A95C3CDF16235B6A00386017 /* shaders */,
 			);
@@ -258,6 +261,7 @@
 				A95C3CE216235B6A00386017 /* shaders in Resources */,
 				A9EB655E162F39B200EFEF45 /* fonts in Resources */,
 				A917DEFF16445A6200026B4A /* audio in Resources */,
+				A9FF1F8B1692579E00D2623E /* obj in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
