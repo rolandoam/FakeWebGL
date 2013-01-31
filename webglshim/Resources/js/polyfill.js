@@ -124,8 +124,12 @@ if (fakeHTML) {
 			} else if (event === "touchend") {
 				_touchEndedListeners.push(callback);
 			} else {
-				throw "invalid event: " + event;
+				console.log("ignoring invalid event: " + event);
 			}
+		},
+		// dummy createElement
+		createElement: function () {
+			return {style: {}};
 		}
 	};
 }
