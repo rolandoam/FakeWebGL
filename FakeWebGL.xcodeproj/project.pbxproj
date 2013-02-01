@@ -41,17 +41,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A917DEFE16445A6200026B4A /* audio */ = {isa = PBXFileReference; lastKnownFileType = folder; name = audio; path = webglshim/Resources/audio; sourceTree = "<group>"; };
-		A92CD367161FD93A002E6A62 /* webglshim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = webglshim.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A917DEFE16445A6200026B4A /* audio */ = {isa = PBXFileReference; lastKnownFileType = folder; name = audio; path = FakeWebGL/Resources/audio; sourceTree = "<group>"; };
+		A92CD367161FD93A002E6A62 /* FakeWebGL.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FakeWebGL.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A92CD36B161FD93A002E6A62 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		A92CD36D161FD93A002E6A62 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		A92CD36F161FD93A002E6A62 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		A92CD371161FD93A002E6A62 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		A92CD373161FD93A002E6A62 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
-		A92CD377161FD93A002E6A62 /* webglshim-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "webglshim-Info.plist"; sourceTree = "<group>"; };
+		A92CD377161FD93A002E6A62 /* FakeWebGL-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FakeWebGL-Info.plist"; sourceTree = "<group>"; };
 		A92CD379161FD93A002E6A62 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A92CD37B161FD93A002E6A62 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		A92CD37D161FD93A002E6A62 /* webglshim-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "webglshim-Prefix.pch"; sourceTree = "<group>"; };
+		A92CD37D161FD93A002E6A62 /* FakeWebGL-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FakeWebGL-Prefix.pch"; sourceTree = "<group>"; };
 		A92CD37E161FD93A002E6A62 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		A92CD37F161FD93A002E6A62 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		A92CD381161FD93A002E6A62 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
@@ -70,9 +70,9 @@
 		A92CD3B716229C7A002E6A62 /* lodepng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lodepng.h; sourceTree = "<group>"; };
 		A93ABBF416249B3C00EAE91B /* glue.debugger.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = glue.debugger.mm; sourceTree = "<group>"; };
 		A95C3CD6162339C700386017 /* glue.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = glue.ios.mm; sourceTree = "<group>"; };
-		A95C3CDD16235B6A00386017 /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; name = images; path = webglshim/Resources/images; sourceTree = "<group>"; };
-		A95C3CDE16235B6A00386017 /* js */ = {isa = PBXFileReference; lastKnownFileType = folder; name = js; path = webglshim/Resources/js; sourceTree = "<group>"; };
-		A95C3CDF16235B6A00386017 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = webglshim/Resources/shaders; sourceTree = "<group>"; };
+		A95C3CDD16235B6A00386017 /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; name = images; path = FakeWebGL/Resources/images; sourceTree = "<group>"; };
+		A95C3CDE16235B6A00386017 /* js */ = {isa = PBXFileReference; lastKnownFileType = folder; name = js; path = FakeWebGL/Resources/js; sourceTree = "<group>"; };
+		A95C3CDF16235B6A00386017 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = FakeWebGL/Resources/shaders; sourceTree = "<group>"; };
 		A98B1B01164424FD00E68C95 /* FakeAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FakeAudio.cpp; sourceTree = "<group>"; };
 		A98B1B02164424FD00E68C95 /* FakeAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FakeAudio.h; sourceTree = "<group>"; };
 		A98B1B041644256E00E68C95 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
@@ -80,8 +80,8 @@
 		A98B1B0D164436FA00E68C95 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A995BB1F162DE4BF00C327D1 /* glue.math.ios.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glue.math.ios.cpp; sourceTree = "<group>"; };
 		A995BB20162DE4BF00C327D1 /* glue.math.ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glue.math.ios.h; sourceTree = "<group>"; };
-		A9EB655D162F39B200EFEF45 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = webglshim/Resources/fonts; sourceTree = "<group>"; };
-		A9FF1F8A1692579E00D2623E /* obj */ = {isa = PBXFileReference; lastKnownFileType = folder; name = obj; path = webglshim/Resources/obj; sourceTree = "<group>"; };
+		A9EB655D162F39B200EFEF45 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = FakeWebGL/Resources/fonts; sourceTree = "<group>"; };
+		A9FF1F8A1692579E00D2623E /* obj */ = {isa = PBXFileReference; lastKnownFileType = folder; name = obj; path = FakeWebGL/Resources/obj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,8 +106,8 @@
 		A92CD35C161FD93A002E6A62 = {
 			isa = PBXGroup;
 			children = (
-				A92CD39B161FD9C4002E6A62 /* webgl */,
-				A92CD375161FD93A002E6A62 /* webglshim */,
+				A92CD39B161FD9C4002E6A62 /* FakeWebGL */,
+				A92CD375161FD93A002E6A62 /* iOS Source */,
 				A95C3CDC16235B5100386017 /* Resources */,
 				A92CD36A161FD93A002E6A62 /* Frameworks */,
 				A92CD3B01620C56E002E6A62 /* libz.dylib */,
@@ -118,7 +118,7 @@
 		A92CD368161FD93A002E6A62 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A92CD367161FD93A002E6A62 /* webglshim.app */,
+				A92CD367161FD93A002E6A62 /* FakeWebGL.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -137,7 +137,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		A92CD375161FD93A002E6A62 /* webglshim */ = {
+		A92CD375161FD93A002E6A62 /* iOS Source */ = {
 			isa = PBXGroup;
 			children = (
 				A92CD37E161FD93A002E6A62 /* AppDelegate.h */,
@@ -148,16 +148,17 @@
 				A92CD391161FD93A002E6A62 /* ViewController_iPad.xib */,
 				A92CD376161FD93A002E6A62 /* Supporting Files */,
 			);
-			path = webglshim;
+			name = "iOS Source";
+			path = FakeWebGL;
 			sourceTree = "<group>";
 		};
 		A92CD376161FD93A002E6A62 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				A92CD377161FD93A002E6A62 /* webglshim-Info.plist */,
+				A92CD377161FD93A002E6A62 /* FakeWebGL-Info.plist */,
 				A92CD378161FD93A002E6A62 /* InfoPlist.strings */,
 				A92CD37B161FD93A002E6A62 /* main.m */,
-				A92CD37D161FD93A002E6A62 /* webglshim-Prefix.pch */,
+				A92CD37D161FD93A002E6A62 /* FakeWebGL-Prefix.pch */,
 				A92CD381161FD93A002E6A62 /* Default.png */,
 				A92CD383161FD93A002E6A62 /* Default@2x.png */,
 				A92CD385161FD93A002E6A62 /* Default-568h@2x.png */,
@@ -165,7 +166,7 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		A92CD39B161FD9C4002E6A62 /* webgl */ = {
+		A92CD39B161FD9C4002E6A62 /* FakeWebGL */ = {
 			isa = PBXGroup;
 			children = (
 				A995BB1F162DE4BF00C327D1 /* glue.math.ios.cpp */,
@@ -182,8 +183,8 @@
 				A98B1B02164424FD00E68C95 /* FakeAudio.h */,
 				A98B1B0B164436AE00E68C95 /* FakeAudio.ios.mm */,
 			);
-			name = webgl;
-			path = webglshim/webgl;
+			name = FakeWebGL;
+			path = FakeWebGL/webgl;
 			sourceTree = "<group>";
 		};
 		A95C3CDC16235B5100386017 /* Resources */ = {
@@ -202,9 +203,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A92CD366161FD93A002E6A62 /* webglshim */ = {
+		A92CD366161FD93A002E6A62 /* FakeWebGL */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A92CD396161FD93A002E6A62 /* Build configuration list for PBXNativeTarget "webglshim" */;
+			buildConfigurationList = A92CD396161FD93A002E6A62 /* Build configuration list for PBXNativeTarget "FakeWebGL" */;
 			buildPhases = (
 				A92CD363161FD93A002E6A62 /* Sources */,
 				A92CD364161FD93A002E6A62 /* Frameworks */,
@@ -214,9 +215,9 @@
 			);
 			dependencies = (
 			);
-			name = webglshim;
-			productName = webglshim;
-			productReference = A92CD367161FD93A002E6A62 /* webglshim.app */;
+			name = FakeWebGL;
+			productName = FakeWebGL;
+			productReference = A92CD367161FD93A002E6A62 /* FakeWebGL.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -228,7 +229,7 @@
 				LastUpgradeCheck = 0450;
 				ORGANIZATIONNAME = "Rolando Abarca";
 			};
-			buildConfigurationList = A92CD361161FD93A002E6A62 /* Build configuration list for PBXProject "webglshim" */;
+			buildConfigurationList = A92CD361161FD93A002E6A62 /* Build configuration list for PBXProject "FakeWebGL" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -240,7 +241,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A92CD366161FD93A002E6A62 /* webglshim */,
+				A92CD366161FD93A002E6A62 /* FakeWebGL */,
 			);
 		};
 /* End PBXProject section */
@@ -392,17 +393,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "webglshim/webglshim-Prefix.pch";
-				INFOPLIST_FILE = "webglshim/webglshim-Info.plist";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/webglshim/lame\"",
-				);
+				GCC_PREFIX_HEADER = "FakeWebGL/FakeWebGL-Prefix.pch";
+				INFOPLIST_FILE = "FakeWebGL/FakeWebGL-Info.plist";
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ljs_static",
 					"-v",
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = FakeWebGL;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -411,17 +409,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "webglshim/webglshim-Prefix.pch";
-				INFOPLIST_FILE = "webglshim/webglshim-Info.plist";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/webglshim/lame\"",
-				);
+				GCC_PREFIX_HEADER = "FakeWebGL/FakeWebGL-Prefix.pch";
+				INFOPLIST_FILE = "FakeWebGL/FakeWebGL-Info.plist";
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ljs_static",
 					"-v",
 				);
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = FakeWebGL;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -429,7 +424,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A92CD361161FD93A002E6A62 /* Build configuration list for PBXProject "webglshim" */ = {
+		A92CD361161FD93A002E6A62 /* Build configuration list for PBXProject "FakeWebGL" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A92CD394161FD93A002E6A62 /* Debug */,
@@ -438,7 +433,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A92CD396161FD93A002E6A62 /* Build configuration list for PBXNativeTarget "webglshim" */ = {
+		A92CD396161FD93A002E6A62 /* Build configuration list for PBXNativeTarget "FakeWebGL" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A92CD397161FD93A002E6A62 /* Debug */,
