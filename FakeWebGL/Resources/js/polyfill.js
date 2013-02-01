@@ -65,6 +65,8 @@ window = this;
 window.navigator = undefined;
 window.document = undefined;
 
+self = this;
+
 if (fakeHTML) {
 	window.navigator = {
 		platform: "iPhoneOS - FakeWebGL"
@@ -132,6 +134,8 @@ if (fakeHTML) {
 			return {style: {}};
 		}
 	};
+
+	window.addEventListener = document.addEventListener;
 }
 
 console = {
