@@ -179,8 +179,7 @@ public:
 	void depthRange(GLclampf zNear, GLclampf zFar);
 	void detachShader(WebGLProgram program, WebGLShader shader);
 	JS_BINDED_FUNC(WebGLRenderingContext, disable);
-	void disable(GLenum cap);
-	void disableVertexAttribArray(GLuint index);
+	JS_BINDED_FUNC(WebGLRenderingContext, disableVertexAttribArray);
 	JS_BINDED_FUNC(WebGLRenderingContext, drawArrays);
 	JS_BINDED_FUNC(WebGLRenderingContext, drawElements);
 
@@ -262,6 +261,7 @@ public:
 	JS_BINDED_FUNC(WebGLRenderingContext, vertexAttribPointer);
 
 	JS_BINDED_FUNC(WebGLRenderingContext, viewport);
+	JS_BINDED_FUNC(WebGLRenderingContext, getShaderPrecisionFormat);
 };
 
 #endif

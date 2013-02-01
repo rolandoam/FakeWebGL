@@ -32,6 +32,35 @@
 #include "jsfriendapi.h"
 #include "lodepng.h"
 
+
+// WebGL specific defines
+#define GL_UNPACK_FLIP_Y_WEBGL 0x9240
+#define GL_UNPACK_PREMULTIPLY_ALPHA_WEBGL 0x9241
+#define GL_CONTEXT_LOST_WEBGL 0x9242
+#define GL_UNPACK_COLORSPACE_CONVERSION_WEBGL 0x9243
+#define GL_BROWSER_DEFAULT_WEBGL 0x9244
+
+
+#if DEBUG
+#define BREAK_ON_GL_ERROR 1
+
+#if BREAK_ON_GL_ERROR && TARGET_IPHONE_SIMULATOR
+#define BREAK() { __asm__("int $3\n" : : ); }
+#else
+#define BREAK()
+#endif
+
+#define CHECK_GL_ERROR() ({												\
+	GLenum __error = glGetError();										\
+	if (__error) {														\
+		printf("OpenGL error 0x%04X in %s\n", __error, __FUNCTION__);	\
+		BREAK();														\
+	}																	\
+})
+#else
+#define CHECK_GL_ERROR()
+#endif
+
 using namespace std;
 
 #pragma mark - ChesterCanvas
@@ -480,7 +509,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, activeTexture)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLenum texture;
 		JS_ValueToECMAUint32(cx, argv[0], &texture);
-		glActiveTexture(texture);
+		glActiveTexture(texture); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -495,7 +524,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, attachShader)
 		GLuint shader;
 		JS_GET_UINT_WRAPPED(argv[0], "program", program);
 		JS_ValueToECMAUint32(cx, argv[1], &shader);
-		glAttachShader(program, shader);
+		glAttachShader(program, shader); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -512,7 +541,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bindAttribLocation)
 		JSStringWrapper name(str);
 		JS_GET_UINT_WRAPPED(argv[0], "program", program);
 		JS_ValueToECMAUint32(cx, argv[1], &index);
-		glBindAttribLocation(program, index, name);
+		glBindAttribLocation(program, index, name); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -527,7 +556,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bindBuffer)
 		GLuint buffer;
 		JS_ValueToECMAUint32(cx, argv[0], &target);
 		JS_GET_UINT_WRAPPED(argv[1], "buffer", buffer);
-		glBindBuffer(target, buffer);
+		glBindBuffer(target, buffer); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -542,7 +571,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bindFramebuffer)
 		GLuint framebuffer;
 		JS_ValueToECMAUint32(cx, argv[0], &target);
 		JS_GET_UINT_WRAPPED(argv[1], "buffer", framebuffer);
-		glBindFramebuffer(target, framebuffer);
+		glBindFramebuffer(target, framebuffer); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -557,7 +586,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bindRenderbuffer)
 		GLuint renderbuffer;
 		JS_ValueToECMAUint32(cx, argv[0], &target);
 		JS_GET_UINT_WRAPPED(argv[1], "buffer", renderbuffer);
-		glBindFramebuffer(target, renderbuffer);
+		glBindFramebuffer(target, renderbuffer); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -572,7 +601,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bindTexture)
 		uint32_t texture;
 		JS_ValueToECMAUint32(cx, argv[0], &target);
 		JS_GET_UINT_WRAPPED(argv[1], "texture", texture);
-		glBindTexture(target, texture);
+		glBindTexture(target, texture); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -581,7 +610,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bindTexture)
 
 void WebGLRenderingContext::blendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha)
 {
-	glBlendColor(red, green, blue, alpha);
+	glBlendColor(red, green, blue, alpha); CHECK_GL_ERROR();
 }
 
 JS_BINDED_FUNC_IMPL(WebGLRenderingContext, blendEquation)
@@ -590,7 +619,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, blendEquation)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLenum mode;
 		JS_ValueToECMAUint32(cx, argv[0], &mode);
-		glBlendEquation(mode);
+		glBlendEquation(mode); CHECK_GL_ERROR();
 	}
 	return JS_TRUE;
 }
@@ -603,7 +632,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, blendEquationSeparate)
 		GLenum modeAlpha;
 		JS_ValueToECMAUint32(cx, argv[0], &modeRGB);
 		JS_ValueToECMAUint32(cx, argv[1], &modeAlpha);
-		glBlendEquationSeparate(modeRGB, modeAlpha);
+		glBlendEquationSeparate(modeRGB, modeAlpha); CHECK_GL_ERROR();
 	}
 	return JS_TRUE;
 }
@@ -616,7 +645,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, blendFunc)
 		GLenum dfactor;
 		JS_ValueToECMAUint32(cx, argv[0], &sfactor);
 		JS_ValueToECMAUint32(cx, argv[1], &dfactor);
-		glBlendFunc(sfactor, dfactor);
+		glBlendFunc(sfactor, dfactor); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -634,7 +663,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, blendFuncSeparate)
 		JS_ValueToECMAUint32(cx, argv[1], &dstRGB);
 		JS_ValueToECMAUint32(cx, argv[2], &srcAlpha);
 		JS_ValueToECMAUint32(cx, argv[3], &dstAlpha);
-		glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
+		glBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -653,7 +682,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bufferData)
 		if (JS_IsArrayBufferViewObject(data, cx)) {
 			void* d = JS_GetArrayBufferViewData(data, cx);
 			GLsizeiptr size = JS_GetArrayBufferViewByteLength(data, cx);
-			glBufferData(target, size, d, usage);
+			glBufferData(target, size, d, usage); CHECK_GL_ERROR();
 			return JS_TRUE;
 		}
 	}
@@ -674,7 +703,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bufferSubData)
 		if (JS_IsArrayBufferViewObject(data, cx)) {
 			void* d = JS_GetArrayBufferViewData(data, cx);
 			GLsizeiptr size = JS_GetArrayBufferViewByteLength(data, cx);
-			glBufferSubData(target, offset, size, d);
+			glBufferSubData(target, offset, size, d); CHECK_GL_ERROR();
 			return JS_TRUE;
 		}
 	}
@@ -684,7 +713,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bufferSubData)
 
 GLenum WebGLRenderingContext::checkFramebufferStatus(GLenum target)
 {
-	return glCheckFramebufferStatus(target);
+	return glCheckFramebufferStatus(target); CHECK_GL_ERROR();
 }
 
 JS_BINDED_FUNC_IMPL(WebGLRenderingContext, clear)
@@ -693,7 +722,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, clear)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLbitfield mask;
 		JS_ValueToECMAUint32(cx, argv[0], &mask);
-		glClear(mask);
+		glClear(mask); CHECK_GL_ERROR();
 	}
 	return JS_TRUE;
 }
@@ -708,7 +737,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, clearColor)
 			JS_ValueToNumber(cx, argv[i], &d);
 			color[i] = d;
 		}
-		glClearColor(color[0], color[1], color[2], color[3]);
+		glClearColor(color[0], color[1], color[2], color[3]); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	return JS_TRUE;
@@ -720,7 +749,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, clearDepth)
 		jsval* argv = JS_ARGV(cx, vp);
 		double depth;
 		JS_ValueToNumber(cx, argv[0], &depth);
-		glClearDepthf(depth);
+		glClearDepthf(depth); CHECK_GL_ERROR();
 	}
 	return JS_TRUE;
 }
@@ -730,14 +759,14 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, clearStencil)
 	if (argc == 1) {
 		jsval* argv = JS_ARGV(cx, vp);
 		GLint s = JSVAL_TO_INT(argv[0]);
-		glClearStencil(s);
+		glClearStencil(s); CHECK_GL_ERROR();
 	}
 	return JS_TRUE;
 }
 
 void WebGLRenderingContext::colorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha)
 {
-	glColorMask(red, green, blue, alpha);
+	glColorMask(red, green, blue, alpha); CHECK_GL_ERROR();
 }
 
 JS_BINDED_FUNC_IMPL(WebGLRenderingContext, compileShader)
@@ -746,7 +775,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, compileShader)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLuint shader;
 		JS_ValueToECMAUint32(cx, argv[0], &shader);
-		glCompileShader(shader);
+		glCompileShader(shader); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -757,7 +786,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createBuffer)
 {
 	if (argc == 0) {
 		GLuint buffer;
-		glGenBuffers(1, &buffer);
+		glGenBuffers(1, &buffer); CHECK_GL_ERROR();
 		jsval out;
 		JS_CREATE_UINT_WRAPPED(out, "buffer", buffer);
 		JS_SET_RVAL(cx, vp, out);
@@ -771,7 +800,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createFramebuffer)
 {
 	if (argc == 0) {
 		GLuint framebuffer;
-		glGenFramebuffers(1, &framebuffer);
+		glGenFramebuffers(1, &framebuffer); CHECK_GL_ERROR();
 		jsval out;
 		JS_CREATE_UINT_WRAPPED(out, "buffer", framebuffer);
 		JS_SET_RVAL(cx, vp, out);
@@ -784,7 +813,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createFramebuffer)
 JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createProgram)
 {
 	if (argc == 0) {
-		GLuint program = glCreateProgram();
+		GLuint program = glCreateProgram(); CHECK_GL_ERROR();
 		jsval out;
 		JS_CREATE_UINT_WRAPPED(out, "program", program);
 		JS_SET_RVAL(cx, vp, out);
@@ -798,7 +827,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createRenderbuffer)
 {
 	if (argc == 0) {
 		GLuint renderbuffer;
-		glGenRenderbuffers(1, &renderbuffer);
+		glGenRenderbuffers(1, &renderbuffer); CHECK_GL_ERROR();
 		jsval out;
 		JS_CREATE_UINT_WRAPPED(out, "buffer", renderbuffer);
 		JS_SET_RVAL(cx, vp, out);
@@ -814,7 +843,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createShader)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLenum type;
 		JS_ValueToECMAUint32(cx, argv[0], &type);
-		GLuint shader = glCreateShader(type);
+		GLuint shader = glCreateShader(type); CHECK_GL_ERROR();
 		jsval out = UINT_TO_JSVAL(shader);
 		JS_SET_RVAL(cx, vp, out);
 		return JS_TRUE;
@@ -827,7 +856,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createTexture)
 {
 	if (argc == 0) {
 		GLuint texture;
-		glGenTextures(1, &texture);
+		glGenTextures(1, &texture); CHECK_GL_ERROR();
 		jsval out;
 		JS_CREATE_UINT_WRAPPED(out, "texture", texture);
 		JS_SET_RVAL(cx, vp, out);
@@ -843,29 +872,29 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, cullFace)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLenum mode;
 		JS_ValueToECMAUint32(cx, argv[0], &mode);
-		glCullFace(mode);
+		glCullFace(mode); CHECK_GL_ERROR();
 	}
 	return JS_TRUE;
 }
 
 void WebGLRenderingContext::deleteBuffer(WebGLBuffer buffer)
 {
-	glDeleteBuffers(1, &buffer);
+	glDeleteBuffers(1, &buffer); CHECK_GL_ERROR();
 }
 
 void WebGLRenderingContext::deleteFramebuffer(WebGLFramebuffer framebuffer)
 {
-	glDeleteFramebuffers(1, &framebuffer);
+	glDeleteFramebuffers(1, &framebuffer); CHECK_GL_ERROR();
 }
 
 void WebGLRenderingContext::deleteProgram(WebGLProgram program)
 {
-	glDeleteProgram(program);
+	glDeleteProgram(program); CHECK_GL_ERROR();
 }
 
 void WebGLRenderingContext::deleteRenderbuffer(WebGLRenderbuffer renderbuffer)
 {
-	glDeleteRenderbuffers(1, &renderbuffer);
+	glDeleteRenderbuffers(1, &renderbuffer); CHECK_GL_ERROR();
 }
 
 JS_BINDED_FUNC_IMPL(WebGLRenderingContext, deleteShader)
@@ -874,7 +903,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, deleteShader)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLuint shader;
 		JS_ValueToECMAUint32(cx, argv[0], &shader);
-		glDeleteShader(shader);
+		glDeleteShader(shader); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -882,7 +911,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, deleteShader)
 
 void WebGLRenderingContext::deleteTexture(WebGLTexture texture)
 {
-	glDeleteTextures(1, &texture);
+	glDeleteTextures(1, &texture); CHECK_GL_ERROR();
 }
 
 JS_BINDED_FUNC_IMPL(WebGLRenderingContext, depthFunc)
@@ -891,7 +920,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, depthFunc)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLenum func;
 		JS_ValueToECMAUint32(cx, argv[0], &func);
-		glDepthFunc(func);
+		glDepthFunc(func); CHECK_GL_ERROR();
 	}
 	return JS_TRUE;
 }
@@ -902,7 +931,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, depthMask)
 		jsval* argv = JS_ARGV(cx, vp);
 		JSBool flag;
 		JS_ValueToBoolean(cx, argv[0], &flag);
-		glDepthMask(flag);
+		glDepthMask(flag); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -910,12 +939,12 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, depthMask)
 
 void WebGLRenderingContext::depthRange(GLclampf zNear, GLclampf zFar)
 {
-	glDepthRangef(zNear, zFar);
+	glDepthRangef(zNear, zFar); CHECK_GL_ERROR();
 }
 
 void WebGLRenderingContext::detachShader(WebGLProgram program, WebGLShader shader)
 {
-	glDetachShader(program, shader);
+	glDetachShader(program, shader); CHECK_GL_ERROR();
 }
 
 JS_BINDED_FUNC_IMPL(WebGLRenderingContext, disable)
@@ -924,15 +953,23 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, disable)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLenum cap;
 		JS_ValueToECMAUint32(cx, argv[0], &cap);
-		glDisable(cap);
+		glDisable(cap); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	return JS_FALSE;
 }
 
-void WebGLRenderingContext::disableVertexAttribArray(GLuint index)
+JS_BINDED_FUNC_IMPL(WebGLRenderingContext, disableVertexAttribArray)
 {
-	glDisableVertexAttribArray(index);
+	if (argc == 1) {
+		jsval* argv = JS_ARGV(cx, vp);
+		GLuint index;
+		JS_ValueToECMAUint32(cx, argv[0], &index);
+		glDisableVertexAttribArray(index); CHECK_GL_ERROR();
+		return JS_TRUE;
+	}
+	JS_ReportError(cx, "invalid native call");
+	return JS_FALSE;
 }
 
 JS_BINDED_FUNC_IMPL(WebGLRenderingContext, drawArrays)
@@ -945,7 +982,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, drawArrays)
 		JS_ValueToECMAUint32(cx, argv[0], &mode);
 		first = JSVAL_TO_INT(argv[1]);
 		count = JSVAL_TO_INT(argv[2]);
-		glDrawArrays(mode, first, count);
+		glDrawArrays(mode, first, count); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -964,7 +1001,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, drawElements)
 		count = JSVAL_TO_INT(argv[1]);
 		JS_ValueToECMAUint32(cx, argv[2], &type);
 		offset = JSVAL_TO_INT(argv[3]);
-		glDrawElements(mode, count, type, reinterpret_cast<GLvoid*>(offset));
+		glDrawElements(mode, count, type, ((char *)NULL + offset));
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -977,7 +1014,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, enable)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLenum cap;
 		JS_ValueToECMAUint32(cx, argv[0], &cap);
-		glEnable(cap);
+		glEnable(cap); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -990,7 +1027,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, enableVertexAttribArray)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLuint index;
 		JS_ValueToECMAUint32(cx, argv[0], &index);
-		glEnableVertexAttribArray(index);
+		glEnableVertexAttribArray(index); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -999,25 +1036,25 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, enableVertexAttribArray)
 
 void WebGLRenderingContext::finish()
 {
-	glFinish();
+	glFinish(); CHECK_GL_ERROR();
 }
 
 void WebGLRenderingContext::flush()
 {
-	glFlush();
+	glFlush(); CHECK_GL_ERROR();
 }
 
 void WebGLRenderingContext::framebufferRenderbuffer(GLenum target, GLenum attachment,
 							 GLenum renderbuffertarget,
 							 WebGLRenderbuffer renderbuffer)
 {
-	glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer);
+	glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer); CHECK_GL_ERROR();
 }
 
 void WebGLRenderingContext::framebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget,
 						  WebGLTexture texture, GLint level)
 {
-	glFramebufferTexture2D(target, attachment, textarget, texture, level);
+	glFramebufferTexture2D(target, attachment, textarget, texture, level); CHECK_GL_ERROR();
 }
 
 JS_BINDED_FUNC_IMPL(WebGLRenderingContext, frontFace)
@@ -1026,7 +1063,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, frontFace)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLenum mode;
 		JS_ValueToECMAUint32(cx, argv[0], &mode);
-		glFrontFace(mode);
+		glFrontFace(mode); CHECK_GL_ERROR();
 	}
 	return JS_TRUE;
 }
@@ -1038,7 +1075,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, generateMipmap)
 		GLenum target;
 		if (argv[0].isNumber()) {
 			JS_ValueToECMAUint32(cx, argv[0], &target);
-			glGenerateMipmap(target);
+			glGenerateMipmap(target); CHECK_GL_ERROR();
 			return JS_TRUE;
 		}
 	}
@@ -1054,7 +1091,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getAttribLocation)
 		JS_GET_UINT_WRAPPED(argv[0], "program", program);
 		JSString* jsname = JS_ValueToString(cx, argv[1]);
 		JSStringWrapper name(jsname);
-		int location = glGetAttribLocation(program, name);
+		int location = glGetAttribLocation(program, name); CHECK_GL_ERROR();
 		JS_SET_RVAL(cx, vp, INT_TO_JSVAL(location));
 		return JS_TRUE;
 	}
@@ -1070,7 +1107,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getParameter)
 		GLenum pname;
 		GLint ret;
 		JS_ValueToECMAUint32(cx, argv[0], &pname);
-		glGetIntegerv(pname, &ret);
+		glGetIntegerv(pname, &ret); CHECK_GL_ERROR();
 		JS_SET_RVAL(cx, vp, INT_TO_JSVAL(ret));
 	}
 	return JS_TRUE;
@@ -1079,7 +1116,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getParameter)
 GLint WebGLRenderingContext::getBufferParameter(GLenum target, GLenum pname)
 {
 	GLint res;
-	glGetBufferParameteriv(target, pname, &res);
+	glGetBufferParameteriv(target, pname, &res); CHECK_GL_ERROR();
 	return res;
 }
 
@@ -1105,9 +1142,9 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getShaderInfoLog)
 		GLuint program;
 		JS_GET_UINT_WRAPPED(argv[0], "program", program);
 		GLint len, outLen;
-		glGetShaderiv(program, GL_INFO_LOG_LENGTH, &len);
+		glGetShaderiv(program, GL_INFO_LOG_LENGTH, &len); CHECK_GL_ERROR();
 		char buff[len+1];
-		glGetShaderInfoLog(program, len, &outLen, buff);
+		glGetShaderInfoLog(program, len, &outLen, buff); CHECK_GL_ERROR();
 		if (outLen > 0) {
 			JSString* str = JS_NewStringCopyN(cx, buff, outLen);
 			JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(str));
@@ -1126,7 +1163,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getUniformLocation)
 		JS_GET_UINT_WRAPPED(argv[0], "program", program);
 		JSString* str = JS_ValueToString(cx, argv[1]);
 		JSStringWrapper name(str);
-		int location = glGetUniformLocation(program, name);
+		int location = glGetUniformLocation(program, name); CHECK_GL_ERROR();
 		JS_SET_RVAL(cx, vp, INT_TO_JSVAL(location));
 		return JS_TRUE;
 	}
@@ -1150,7 +1187,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, lineWidth)
 		jsval* argv = JS_ARGV(cx, vp);
 		double width;
 		JS_ValueToNumber(cx, argv[0], &width);
-		glLineWidth(width);
+		glLineWidth(width); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	return JS_FALSE;
@@ -1162,7 +1199,16 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, linkProgram)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLuint program;
 		JS_GET_UINT_WRAPPED(argv[0], "program", program);
-		glLinkProgram(program);
+		glLinkProgram(program); CHECK_GL_ERROR();
+		GLint res;
+		glGetProgramiv(program, GL_LINK_STATUS, &res);
+		if (res != GL_TRUE) {
+			char buf[512];
+			GLsizei length;
+			glGetProgramInfoLog(program, 512, &length, buf);
+			buf[length] = '\0';
+			fprintf(stderr, "OpenGL - %s", buf);
+		}
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -1177,14 +1223,18 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, pixelStorei)
 		int32_t param;
 		JS_ValueToECMAUint32(cx, argv[0], &pname);
 		JS_ValueToInt32(cx, argv[1], &param);
-		if (pname) {
-			glPixelStorei(pname, param);
-			return JS_TRUE;
+		switch (pname) {
+		case GL_UNPACK_FLIP_Y_WEBGL:
+		case GL_UNPACK_PREMULTIPLY_ALPHA_WEBGL:
+		case GL_UNPACK_COLORSPACE_CONVERSION_WEBGL:
+			fprintf(stderr, "WARNING: flag 0x%04X not available (pixelStorei)\n", pname);
+			break;
+				
+		default:
+			glPixelStorei(pname, param); CHECK_GL_ERROR();
+			break;
 		}
-//		else {
-//			JS_ReportError(cx, "Invalid enum for pixelStorei: %u", pname);
-//			return JS_FALSE;
-//		}
+		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
 	return JS_FALSE;
@@ -1192,7 +1242,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, pixelStorei)
 
 void WebGLRenderingContext::polygonOffset(GLfloat factor, GLfloat units)
 {
-	glPolygonOffset(factor, units);
+	glPolygonOffset(factor, units); CHECK_GL_ERROR();
 }
 
 void WebGLRenderingContext::readPixels(GLint x, GLint y, GLsizei width, GLsizei height,
@@ -1210,7 +1260,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, shaderSource)
 		JSStringWrapper wrapper(jsstr);
 		const char* source = wrapper;
 		GLint length = strlen(source);
-		glShaderSource(shader, 1, &source, &length);
+		glShaderSource(shader, 1, &source, &length); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -1229,12 +1279,12 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getShaderParameter)
 		switch (pname) {
 			case GL_SHADER_TYPE:
 				GLint shaderType;
-				glGetShaderiv(shader, GL_SHADER_TYPE, &shaderType);
+				glGetShaderiv(shader, GL_SHADER_TYPE, &shaderType); CHECK_GL_ERROR();
 				out = INT_TO_JSVAL(shaderType);
 				break;
 			case GL_COMPILE_STATUS:
 				GLint status;
-				glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+				glGetShaderiv(shader, GL_COMPILE_STATUS, &status); CHECK_GL_ERROR();
 				out = BOOLEAN_TO_JSVAL(status == GL_TRUE);
 				break;
 			default:
@@ -1259,27 +1309,27 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getProgramParameter)
 		GLint params;
 		switch (pname) {
 			case GL_DELETE_STATUS:
-				glGetProgramiv(program, GL_DELETE_STATUS, &params);
+				glGetProgramiv(program, GL_DELETE_STATUS, &params); CHECK_GL_ERROR();
 				out = BOOLEAN_TO_JSVAL(params == GL_TRUE);
 				break;
 			case GL_LINK_STATUS:
-				glGetProgramiv(program, GL_LINK_STATUS, &params);
+				glGetProgramiv(program, GL_LINK_STATUS, &params); CHECK_GL_ERROR();
 				out = BOOLEAN_TO_JSVAL(params == GL_TRUE);
 				break;
 			case GL_VALIDATE_STATUS:
-				glGetProgramiv(program, GL_VALIDATE_STATUS, &params);
+				glGetProgramiv(program, GL_VALIDATE_STATUS, &params); CHECK_GL_ERROR();
 				out = BOOLEAN_TO_JSVAL(params == GL_TRUE);
 				break;
 			case GL_ATTACHED_SHADERS:
-				glGetProgramiv(program, GL_ATTACHED_SHADERS, &params);
+				glGetProgramiv(program, GL_ATTACHED_SHADERS, &params); CHECK_GL_ERROR();
 				out = INT_TO_JSVAL(params);
 				break;
 			case GL_ACTIVE_ATTRIBUTES:
-				glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &params);
+				glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &params); CHECK_GL_ERROR();
 				out = INT_TO_JSVAL(params);
 				break;
 			case GL_ACTIVE_UNIFORMS:
-				glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &params);
+				glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &params); CHECK_GL_ERROR();
 				out = INT_TO_JSVAL(params);
 				break;
 			default:
@@ -1330,7 +1380,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, texImage2D)
 				PNGImage* image = (PNGImage*)JS_GetPrivate(jsimage);
 				data = image->getBytes();
 			}
-			glTexImage2D(target, level, internalformat, width, height, border, format, type, data);
+			glTexImage2D(target, level, internalformat, width, height, border, format, type, data); CHECK_GL_ERROR();
 			return JS_TRUE;
 		}
 	}
@@ -1348,7 +1398,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, texParameterf)
 		JS_ValueToECMAUint32(cx, argv[0], &target);
 		JS_ValueToECMAUint32(cx, argv[1], &pname);
 		param = JSVAL_TO_DOUBLE(argv[2]);
-		glTexParameterf(target, pname, param);
+		glTexParameterf(target, pname, param); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -1365,7 +1415,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, texParameteri)
 		JS_ValueToECMAUint32(cx, argv[0], &target);
 		JS_ValueToECMAUint32(cx, argv[1], &pname);
 		param = JSVAL_TO_INT(argv[2]);
-		glTexParameteri(target, pname, param);
+		glTexParameteri(target, pname, param); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -1380,7 +1430,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform1f)
 		if (location >= 0) {
 			double x;
 			JS_ValueToNumber(cx, argv[1], &x);
-			glUniform1f(location, x);
+			glUniform1f(location, x); CHECK_GL_ERROR();
 		}
 		return JS_TRUE;
 	}
@@ -1400,7 +1450,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform1fv)
 			if (JS_IsFloat32Array(arr, cx)) {
 				GLfloat* data = JS_GetFloat32ArrayData(arr, cx);
 				GLsizei count = JS_GetTypedArrayLength(arr, cx);
-				glUniform1fv(location, count, data);
+				glUniform1fv(location, count, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			} else if (JS_IsArrayObject(cx, arr)) {
 				// implement thing here getting the elements from the array
@@ -1414,7 +1464,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform1fv)
 					JS_ValueToNumber(cx, elt, &tmp);
 					data[i] = tmp;
 				}
-				glUniform1fv(location, length, data);
+				glUniform1fv(location, length, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			}
 		}
@@ -1430,7 +1480,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform1i)
 		GLint x;
 		if (location >= 0) {
 			JS_ValueToInt32(cx, argv[1], &x);
-			glUniform1i(location, x);
+			glUniform1i(location, x); CHECK_GL_ERROR();
 		}
 		return JS_TRUE;
 	}
@@ -1450,7 +1500,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform1iv)
 			if (JS_IsInt32Array(arr, cx)) {
 				GLint* data = JS_GetInt32ArrayData(arr, cx);
 				GLsizei count = JS_GetTypedArrayLength(arr, cx);
-				glUniform1iv(location, count, data);
+				glUniform1iv(location, count, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			} else if (JS_IsArrayObject(cx, arr)) {
 				// implement thing here getting the elements from the array
@@ -1462,7 +1512,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform1iv)
 					JS_GetElement(cx, arr, i, &elt);
 					data[i] = JSVAL_TO_INT(elt);
 				}
-				glUniform1iv(location, length, data);
+				glUniform1iv(location, length, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			}
 		}
@@ -1480,7 +1530,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform2f)
 			double y;
 			JS_ValueToNumber(cx, argv[1], &x);
 			JS_ValueToNumber(cx, argv[2], &y);
-			glUniform2f(location, x, y);
+			glUniform2f(location, x, y); CHECK_GL_ERROR();
 		}
 		return JS_TRUE;
 	}
@@ -1500,7 +1550,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform2fv)
 			if (JS_IsFloat32Array(arr, cx)) {
 				GLfloat* data = JS_GetFloat32ArrayData(arr, cx);
 				GLsizei count = JS_GetTypedArrayLength(arr, cx);
-				glUniform2fv(location, count, data);
+				glUniform2fv(location, count/2, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			} else if (JS_IsArrayObject(cx, arr)) {
 				// implement thing here getting the elements from the array
@@ -1514,7 +1564,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform2fv)
 					JS_ValueToNumber(cx, elt, &tmp);
 					data[i] = tmp;
 				}
-				glUniform2fv(location, length, data);
+				glUniform2fv(location, length/2, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			}
 		}
@@ -1532,7 +1582,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform2i)
 			GLint y;
 			JS_ValueToInt32(cx, argv[1], &x);
 			JS_ValueToInt32(cx, argv[2], &y);
-			glUniform2i(location, x, y);
+			glUniform2i(location, x, y); CHECK_GL_ERROR();
 		}
 		return JS_TRUE;
 	}
@@ -1552,7 +1602,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform2iv)
 			if (JS_IsInt32Array(arr, cx)) {
 				GLint* data = JS_GetInt32ArrayData(arr, cx);
 				GLsizei count = JS_GetTypedArrayLength(arr, cx);
-				glUniform2iv(location, count, data);
+				glUniform2iv(location, count/2, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			} else if (JS_IsArrayObject(cx, arr)) {
 				// implement thing here getting the elements from the array
@@ -1564,7 +1614,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform2iv)
 					JS_GetElement(cx, arr, i, &elt);
 					data[i] = JSVAL_TO_INT(elt);
 				}
-				glUniform2iv(location, length, data);
+				glUniform2iv(location, length/2, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			}
 		}
@@ -1584,7 +1634,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3f)
 			JS_ValueToNumber(cx, argv[1], &x);
 			JS_ValueToNumber(cx, argv[2], &y);
 			JS_ValueToNumber(cx, argv[3], &z);
-			glUniform3f(location, x, y, z);
+			glUniform3f(location, x, y, z); CHECK_GL_ERROR();
 		}
 		return JS_TRUE;
 	}
@@ -1604,7 +1654,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3fv)
 			if (JS_IsFloat32Array(arr, cx)) {
 				GLfloat* data = JS_GetFloat32ArrayData(arr, cx);
 				GLsizei count = JS_GetTypedArrayLength(arr, cx);
-				glUniform3fv(location, count, data);
+				glUniform3fv(location, count/3, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			} else if (JS_IsArrayObject(cx, arr)) {
 				unsigned length;
@@ -1615,7 +1665,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3fv)
 					JS_GetElement(cx, arr, i, &elt);
 					data[i] = (GLfloat)elt.toNumber();
 				}
-				glUniform3fv(location, length, data);
+				glUniform3fv(location, length/3, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			}
 		}
@@ -1635,7 +1685,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3i)
 			JS_ValueToInt32(cx, argv[1], &x);
 			JS_ValueToInt32(cx, argv[2], &y);
 			JS_ValueToInt32(cx, argv[3], &z);
-			glUniform3i(location, x, y, z);
+			glUniform3i(location, x, y, z); CHECK_GL_ERROR();
 		}
 		return JS_TRUE;
 	}
@@ -1655,7 +1705,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3iv)
 			if (JS_IsInt32Array(arr, cx)) {
 				GLint* data = JS_GetInt32ArrayData(arr, cx);
 				GLsizei count = JS_GetTypedArrayLength(arr, cx);
-				glUniform3iv(location, count, data);
+				glUniform3iv(location, count/3, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			} else if (JS_IsArrayObject(cx, arr)) {
 				// implement thing here getting the elements from the array
@@ -1667,7 +1717,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform3iv)
 					JS_GetElement(cx, arr, i, &elt);
 					data[i] = JSVAL_TO_INT(elt);
 				}
-				glUniform3iv(location, length, data);
+				glUniform3iv(location, length/3, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			}
 		}
@@ -1689,7 +1739,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform4f)
 			JS_ValueToNumber(cx, argv[2], &y);
 			JS_ValueToNumber(cx, argv[3], &z);
 			JS_ValueToNumber(cx, argv[4], &w);
-			glUniform4f(location, x, y, z, w);
+			glUniform4f(location, x, y, z, w); CHECK_GL_ERROR();
 		}
 		return JS_TRUE;
 	}
@@ -1709,7 +1759,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform4fv)
 			if (JS_IsFloat32Array(arr, cx)) {
 				GLfloat* data = JS_GetFloat32ArrayData(arr, cx);
 				GLsizei count = JS_GetTypedArrayLength(arr, cx);
-				glUniform4fv(location, count, data);
+				glUniform4fv(location, count/4, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			} else if (JS_IsArrayObject(cx, arr)) {
 				unsigned length;
@@ -1722,7 +1772,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform4fv)
 					JS_ValueToNumber(cx, elt, &tmp);
 					data[i] = tmp;
 				}
-				glUniform4fv(location, length, data);
+				glUniform4fv(location, length/4, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			}
 		}
@@ -1744,7 +1794,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform4i)
 			JS_ValueToInt32(cx, argv[2], &y);
 			JS_ValueToInt32(cx, argv[3], &z);
 			JS_ValueToInt32(cx, argv[4], &w);
-			glUniform4i(location, x, y, z, w);
+			glUniform4i(location, x, y, z, w); CHECK_GL_ERROR();
 		}
 		return JS_TRUE;
 	}
@@ -1764,7 +1814,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform4iv)
 			if (JS_IsInt32Array(arr, cx)) {
 				GLint* data = JS_GetInt32ArrayData(arr, cx);
 				GLsizei count = JS_GetTypedArrayLength(arr, cx);
-				glUniform4iv(location, count, data);
+				glUniform4iv(location, count/4, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			} else if (JS_IsArrayObject(cx, arr)) {
 				// implement thing here getting the elements from the array
@@ -1776,7 +1826,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniform4iv)
 					JS_GetElement(cx, arr, i, &elt);
 					data[i] = JSVAL_TO_INT(elt);
 				}
-				glUniform4iv(location, length, data);
+				glUniform4iv(location, length/4, data); CHECK_GL_ERROR();
 				return JS_TRUE;
 			}
 		}
@@ -1796,7 +1846,8 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniformMatrix2fv)
 		arr = JSVAL_TO_OBJECT(argv[2]);
 		if (JS_IsFloat32Array(arr, cx)) {
 			GLfloat* data = JS_GetFloat32ArrayData(arr, cx);
-			glUniformMatrix2fv(location, 1, transpose, data);
+			GLsizei count = JS_GetTypedArrayLength(arr, cx);
+			glUniformMatrix2fv(location, count/4, transpose, data); CHECK_GL_ERROR();
 			return JS_TRUE;
 		} else if (JS_IsArrayObject(cx, arr)) {
 			unsigned length;
@@ -1809,7 +1860,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniformMatrix2fv)
 				JS_ValueToNumber(cx, elt, &tmp);
 				data[i] = tmp;
 			}
-			glUniformMatrix2fv(location, 1, transpose, data);
+			glUniformMatrix2fv(location, length/4, transpose, data); CHECK_GL_ERROR();
 			return JS_TRUE;
 		}
 	}
@@ -1828,7 +1879,8 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniformMatrix3fv)
 		arr = JSVAL_TO_OBJECT(argv[2]);
 		if (JS_IsFloat32Array(arr, cx)) {
 			GLfloat* data = JS_GetFloat32ArrayData(arr, cx);
-			glUniformMatrix3fv(location, 1, transpose, data);
+			GLsizei count = JS_GetTypedArrayLength(arr, cx);
+			glUniformMatrix3fv(location, count/9, transpose, data); CHECK_GL_ERROR();
 			return JS_TRUE;
 		} else if (JS_IsArrayObject(cx, arr)) {
 			unsigned length;
@@ -1841,7 +1893,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniformMatrix3fv)
 				JS_ValueToNumber(cx, elt, &tmp);
 				data[i] = tmp;
 			}
-			glUniformMatrix3fv(location, 1, transpose, data);
+			glUniformMatrix3fv(location, length/9, transpose, data); CHECK_GL_ERROR();
 			return JS_TRUE;
 		}
 	}
@@ -1860,7 +1912,8 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniformMatrix4fv)
 		arr = JSVAL_TO_OBJECT(argv[2]);
 		if (JS_IsFloat32Array(arr, cx)) {
 			GLfloat* data = JS_GetFloat32ArrayData(arr, cx);
-			glUniformMatrix4fv(location, 1, transpose, data);
+			GLsizei count = JS_GetTypedArrayLength(arr, cx);
+			glUniformMatrix4fv(location, count/16, transpose, data); CHECK_GL_ERROR();
 			return JS_TRUE;
 		} else if (JS_IsArrayObject(cx, arr)) {
 			unsigned length;
@@ -1873,7 +1926,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, uniformMatrix4fv)
 				JS_ValueToNumber(cx, elt, &tmp);
 				data[i] = tmp;
 			}
-			glUniformMatrix4fv(location, 1, transpose, data);
+			glUniformMatrix4fv(location, length/16, transpose, data); CHECK_GL_ERROR();
 			return JS_TRUE;
 		}
 	}
@@ -1886,7 +1939,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, useProgram)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLuint program;
 		JS_GET_UINT_WRAPPED(argv[0], "program", program);
-		glUseProgram(program);
+		glUseProgram(program); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -1899,7 +1952,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, validateProgram)
 		jsval* argv = JS_ARGV(cx, vp);
 		GLuint program;
 		JS_GET_UINT_WRAPPED(argv[0], "program", program);
-		glValidateProgram(program);
+		glValidateProgram(program); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -1908,7 +1961,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, validateProgram)
 
 void WebGLRenderingContext::vertexAttrib1f(GLuint indx, GLfloat x)
 {
-	glVertexAttrib1f(indx, x);
+	glVertexAttrib1f(indx, x); CHECK_GL_ERROR();
 }
 
 void WebGLRenderingContext::vertexAttrib1fv(GLuint indx, JSObject* values)
@@ -1918,14 +1971,14 @@ void WebGLRenderingContext::vertexAttrib1fv(GLuint indx, JSObject* values)
 		GLfloat* data = JS_GetFloat32ArrayData(values, cx);
 		int count = JS_GetTypedArrayLength(values, cx);
 		if (count >= 1) {
-			glVertexAttrib1fv(indx, data);
+			glVertexAttrib1fv(indx, data); CHECK_GL_ERROR();
 		}
 	}
 }
 
 void WebGLRenderingContext::vertexAttrib2f(GLuint indx, GLfloat x, GLfloat y)
 {
-	glVertexAttrib2f(indx, x, y);
+	glVertexAttrib2f(indx, x, y); CHECK_GL_ERROR();
 }
 
 void WebGLRenderingContext::vertexAttrib2fv(GLuint indx, JSObject* values)
@@ -1935,14 +1988,14 @@ void WebGLRenderingContext::vertexAttrib2fv(GLuint indx, JSObject* values)
 		GLfloat* data = JS_GetFloat32ArrayData(values, cx);
 		int count = JS_GetTypedArrayLength(values, cx);
 		if (count >= 2) {
-			glVertexAttrib2fv(indx, data);
+			glVertexAttrib2fv(indx, data); CHECK_GL_ERROR();
 		}
 	}
 }
 
 void WebGLRenderingContext::vertexAttrib3f(GLuint indx, GLfloat x, GLfloat y, GLfloat z)
 {
-	glVertexAttrib3f(indx, x, y, z);
+	glVertexAttrib3f(indx, x, y, z); CHECK_GL_ERROR();
 }
 
 void WebGLRenderingContext::vertexAttrib3fv(GLuint indx, JSObject* values)
@@ -1952,14 +2005,14 @@ void WebGLRenderingContext::vertexAttrib3fv(GLuint indx, JSObject* values)
 		GLfloat* data = JS_GetFloat32ArrayData(values, cx);
 		int count = JS_GetTypedArrayLength(values, cx);
 		if (count >= 3) {
-			glVertexAttrib3fv(indx, data);
+			glVertexAttrib3fv(indx, data); CHECK_GL_ERROR();
 		}
 	}
 }
 
 void WebGLRenderingContext::vertexAttrib4f(GLuint indx, GLfloat x, GLfloat y, GLfloat z, GLfloat w)
 {
-	glVertexAttrib4f(indx, x, y, z, w);
+	glVertexAttrib4f(indx, x, y, z, w); CHECK_GL_ERROR();
 }
 
 void WebGLRenderingContext::vertexAttrib4fv(GLuint indx, JSObject* values)
@@ -1969,7 +2022,7 @@ void WebGLRenderingContext::vertexAttrib4fv(GLuint indx, JSObject* values)
 		GLfloat* data = JS_GetFloat32ArrayData(values, cx);
 		int count = JS_GetTypedArrayLength(values, cx);
 		if (count >= 4) {
-			glVertexAttrib4fv(indx, data);
+			glVertexAttrib4fv(indx, data); CHECK_GL_ERROR();
 		}
 	}
 }
@@ -2007,7 +2060,35 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, viewport)
 		y = JSVAL_TO_INT(argv[1]);
 		width = JSVAL_TO_INT(argv[2]);
 		height = JSVAL_TO_INT(argv[3]);
-		glViewport(x, y, width, height);
+		glViewport(x, y, width, height); CHECK_GL_ERROR();
+		return JS_TRUE;
+	}
+	JS_ReportError(cx, "invalid call");
+	return JS_FALSE;
+}
+
+JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getShaderPrecisionFormat)
+{
+	if (argc == 2) {
+		jsval* argv = JS_ARGV(cx, vp);
+		GLuint shaderType, precisiontype;
+		JS_ValueToECMAUint32(cx, argv[0], &shaderType);
+		JS_ValueToECMAUint32(cx, argv[1], &precisiontype);
+
+		switch (shaderType) {
+		case GL_FRAGMENT_SHADER:
+		case GL_VERTEX_SHADER:
+			break;
+		default:
+			JS_ReportError(cx, "invalid shader type: 0x%04X", shaderType);
+			return JS_FALSE;
+			break;
+		}
+
+		JSObject* obj = JS_NewObject(cx, NULL, NULL, NULL);
+		jsval precision = UINT_TO_JSVAL(precisiontype);
+		JS_SetProperty(cx, obj, "precision", &precision);
+		JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call");
@@ -2056,6 +2137,7 @@ void WebGLRenderingContext::_js_register(JSContext* cx, JSObject *global)
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, depthFunc),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, depthMask),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, disable),
+		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, disableVertexAttribArray),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, drawArrays),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, drawElements),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, enable),
@@ -2100,6 +2182,7 @@ void WebGLRenderingContext::_js_register(JSContext* cx, JSObject *global)
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, validateProgram),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, vertexAttribPointer),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, viewport),
+		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, getShaderPrecisionFormat),
 		JS_FS_END
 	};
 	WebGLRenderingContext::js_parent = NULL;
