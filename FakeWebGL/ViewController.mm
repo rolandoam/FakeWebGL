@@ -35,11 +35,14 @@
     if (!self.context) {
         NSLog(@"Failed to create ES context");
     }
-    
+
 	debug = false;
     GLKView *view = (GLKView *)self.view;
     view.context = self.context;
-    view.drawableDepthFormat = GLKViewDrawableDepthFormat24;
+	// setting webgl default drawing buffer
+	view.drawableColorFormat = GLKViewDrawableColorFormatRGBA8888;
+    view.drawableDepthFormat = GLKViewDrawableDepthFormat16;
+	view.drawableStencilFormat = GLKViewDrawableStencilFormatNone;
 	// the default is 30 - for games we want it to be as fast as possible
 	self.preferredFramesPerSecond = 60;
     
