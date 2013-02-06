@@ -11,17 +11,12 @@
 		A92CD36C161FD93A002E6A62 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD36B161FD93A002E6A62 /* UIKit.framework */; };
 		A92CD36E161FD93A002E6A62 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD36D161FD93A002E6A62 /* Foundation.framework */; };
 		A92CD370161FD93A002E6A62 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD36F161FD93A002E6A62 /* CoreGraphics.framework */; };
-		A92CD372161FD93A002E6A62 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD371161FD93A002E6A62 /* GLKit.framework */; };
 		A92CD374161FD93A002E6A62 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD373161FD93A002E6A62 /* OpenGLES.framework */; };
 		A92CD37A161FD93A002E6A62 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A92CD378161FD93A002E6A62 /* InfoPlist.strings */; };
 		A92CD37C161FD93A002E6A62 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A92CD37B161FD93A002E6A62 /* main.m */; };
-		A92CD380161FD93A002E6A62 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A92CD37F161FD93A002E6A62 /* AppDelegate.m */; };
 		A92CD382161FD93A002E6A62 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = A92CD381161FD93A002E6A62 /* Default.png */; };
 		A92CD384161FD93A002E6A62 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A92CD383161FD93A002E6A62 /* Default@2x.png */; };
 		A92CD386161FD93A002E6A62 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A92CD385161FD93A002E6A62 /* Default-568h@2x.png */; };
-		A92CD38D161FD93A002E6A62 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = A92CD38C161FD93A002E6A62 /* ViewController.mm */; };
-		A92CD390161FD93A002E6A62 /* ViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = A92CD38E161FD93A002E6A62 /* ViewController_iPhone.xib */; };
-		A92CD393161FD93A002E6A62 /* ViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = A92CD391161FD93A002E6A62 /* ViewController_iPad.xib */; };
 		A92CD3A5161FD9C4002E6A62 /* glue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A92CD39D161FD9C4002E6A62 /* glue.cpp */; };
 		A92CD3A8161FD9C4002E6A62 /* WebGLRenderingContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A92CD3A2161FD9C4002E6A62 /* WebGLRenderingContext.cpp */; };
 		A92CD3B11620C56E002E6A62 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD3B01620C56E002E6A62 /* libz.dylib */; };
@@ -36,6 +31,14 @@
 		A98B1B0C164436AE00E68C95 /* FakeAudio.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A98B1B0B164436AE00E68C95 /* FakeAudio.ios.mm */; };
 		A98B1B0E164436FA00E68C95 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A98B1B0D164436FA00E68C95 /* AudioToolbox.framework */; };
 		A995BB21162DE4BF00C327D1 /* glue.math.ios.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A995BB1F162DE4BF00C327D1 /* glue.math.ios.cpp */; };
+		A998255116C17A1C006888B6 /* FakeCanvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A998254B16C17A1C006888B6 /* FakeCanvas.cpp */; };
+		A998255216C17A1C006888B6 /* FakeImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A998254D16C17A1C006888B6 /* FakeImage.cpp */; };
+		A998255316C17A1C006888B6 /* XMLHTTPRequest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A998254F16C17A1C006888B6 /* XMLHTTPRequest.cpp */; };
+		A998255716C19651006888B6 /* EAGLView.mm in Sources */ = {isa = PBXBuildFile; fileRef = A998255616C19651006888B6 /* EAGLView.mm */; };
+		A998255916C199BD006888B6 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A998255816C199BD006888B6 /* QuartzCore.framework */; };
+		A998255B16C19FD1006888B6 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = A998255A16C19FD1006888B6 /* MainWindow.xib */; };
+		A998255D16C1A1C0006888B6 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = A998255C16C1A1C0006888B6 /* AppDelegate.mm */; };
+		A998256016C1B335006888B6 /* ES2Renderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = A998255F16C1B335006888B6 /* ES2Renderer.mm */; };
 		A9EB655E162F39B200EFEF45 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = A9EB655D162F39B200EFEF45 /* fonts */; };
 		A9FF1F8B1692579E00D2623E /* obj in Resources */ = {isa = PBXBuildFile; fileRef = A9FF1F8A1692579E00D2623E /* obj */; };
 /* End PBXBuildFile section */
@@ -46,21 +49,15 @@
 		A92CD36B161FD93A002E6A62 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		A92CD36D161FD93A002E6A62 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		A92CD36F161FD93A002E6A62 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		A92CD371161FD93A002E6A62 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		A92CD373161FD93A002E6A62 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		A92CD377161FD93A002E6A62 /* FakeWebGL-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "FakeWebGL-Info.plist"; sourceTree = "<group>"; };
 		A92CD379161FD93A002E6A62 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A92CD37B161FD93A002E6A62 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		A92CD37D161FD93A002E6A62 /* FakeWebGL-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FakeWebGL-Prefix.pch"; sourceTree = "<group>"; };
 		A92CD37E161FD93A002E6A62 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		A92CD37F161FD93A002E6A62 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		A92CD381161FD93A002E6A62 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		A92CD383161FD93A002E6A62 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		A92CD385161FD93A002E6A62 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		A92CD38B161FD93A002E6A62 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		A92CD38C161FD93A002E6A62 /* ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
-		A92CD38F161FD93A002E6A62 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController_iPhone.xib; sourceTree = "<group>"; };
-		A92CD392161FD93A002E6A62 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ViewController_iPad.xib; sourceTree = "<group>"; };
 		A92CD39D161FD9C4002E6A62 /* glue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glue.cpp; sourceTree = "<group>"; };
 		A92CD39E161FD9C4002E6A62 /* glue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glue.h; sourceTree = "<group>"; };
 		A92CD3A2161FD9C4002E6A62 /* WebGLRenderingContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WebGLRenderingContext.cpp; sourceTree = "<group>"; };
@@ -76,10 +73,23 @@
 		A98B1B01164424FD00E68C95 /* FakeAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FakeAudio.cpp; sourceTree = "<group>"; };
 		A98B1B02164424FD00E68C95 /* FakeAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FakeAudio.h; sourceTree = "<group>"; };
 		A98B1B041644256E00E68C95 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
-		A98B1B0B164436AE00E68C95 /* FakeAudio.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FakeAudio.ios.mm; sourceTree = "<group>"; };
+		A98B1B0B164436AE00E68C95 /* FakeAudio.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = FakeAudio.ios.mm; path = webgl/FakeAudio.ios.mm; sourceTree = "<group>"; };
 		A98B1B0D164436FA00E68C95 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A995BB1F162DE4BF00C327D1 /* glue.math.ios.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = glue.math.ios.cpp; sourceTree = "<group>"; };
 		A995BB20162DE4BF00C327D1 /* glue.math.ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = glue.math.ios.h; sourceTree = "<group>"; };
+		A998254B16C17A1C006888B6 /* FakeCanvas.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FakeCanvas.cpp; path = FakeWebGL/WebGL/FakeCanvas.cpp; sourceTree = SOURCE_ROOT; };
+		A998254C16C17A1C006888B6 /* FakeCanvas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FakeCanvas.h; path = FakeWebGL/WebGL/FakeCanvas.h; sourceTree = SOURCE_ROOT; };
+		A998254D16C17A1C006888B6 /* FakeImage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FakeImage.cpp; path = FakeWebGL/WebGL/FakeImage.cpp; sourceTree = SOURCE_ROOT; };
+		A998254E16C17A1C006888B6 /* FakeImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FakeImage.h; path = FakeWebGL/WebGL/FakeImage.h; sourceTree = SOURCE_ROOT; };
+		A998254F16C17A1C006888B6 /* XMLHTTPRequest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XMLHTTPRequest.cpp; path = FakeWebGL/WebGL/XMLHTTPRequest.cpp; sourceTree = SOURCE_ROOT; };
+		A998255016C17A1C006888B6 /* XMLHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XMLHTTPRequest.h; path = FakeWebGL/WebGL/XMLHTTPRequest.h; sourceTree = SOURCE_ROOT; };
+		A998255516C19651006888B6 /* EAGLView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EAGLView.h; path = FakeWebGL/WebGL/EAGLView.h; sourceTree = SOURCE_ROOT; };
+		A998255616C19651006888B6 /* EAGLView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = EAGLView.mm; path = FakeWebGL/WebGL/EAGLView.mm; sourceTree = SOURCE_ROOT; };
+		A998255816C199BD006888B6 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		A998255A16C19FD1006888B6 /* MainWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainWindow.xib; sourceTree = "<group>"; };
+		A998255C16C1A1C0006888B6 /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AppDelegate.mm; sourceTree = "<group>"; };
+		A998255E16C1B2BC006888B6 /* ES2Renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ES2Renderer.h; path = WebGL/ES2Renderer.h; sourceTree = "<group>"; };
+		A998255F16C1B335006888B6 /* ES2Renderer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ES2Renderer.mm; path = WebGL/ES2Renderer.mm; sourceTree = "<group>"; };
 		A9EB655D162F39B200EFEF45 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = FakeWebGL/Resources/fonts; sourceTree = "<group>"; };
 		A9FF1F8A1692579E00D2623E /* obj */ = {isa = PBXFileReference; lastKnownFileType = folder; name = obj; path = FakeWebGL/Resources/obj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -89,10 +99,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A998255916C199BD006888B6 /* QuartzCore.framework in Frameworks */,
 				A92CD36C161FD93A002E6A62 /* UIKit.framework in Frameworks */,
 				A92CD36E161FD93A002E6A62 /* Foundation.framework in Frameworks */,
 				A92CD370161FD93A002E6A62 /* CoreGraphics.framework in Frameworks */,
-				A92CD372161FD93A002E6A62 /* GLKit.framework in Frameworks */,
 				A92CD374161FD93A002E6A62 /* OpenGLES.framework in Frameworks */,
 				A98B1B051644256E00E68C95 /* OpenAL.framework in Frameworks */,
 				A98B1B0E164436FA00E68C95 /* AudioToolbox.framework in Frameworks */,
@@ -110,7 +120,6 @@
 				A92CD375161FD93A002E6A62 /* iOS Source */,
 				A95C3CDC16235B5100386017 /* Resources */,
 				A92CD36A161FD93A002E6A62 /* Frameworks */,
-				A92CD3B01620C56E002E6A62 /* libz.dylib */,
 				A92CD368161FD93A002E6A62 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -126,12 +135,13 @@
 		A92CD36A161FD93A002E6A62 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A92CD3B01620C56E002E6A62 /* libz.dylib */,
 				A92CD36B161FD93A002E6A62 /* UIKit.framework */,
 				A92CD36D161FD93A002E6A62 /* Foundation.framework */,
 				A92CD36F161FD93A002E6A62 /* CoreGraphics.framework */,
-				A92CD371161FD93A002E6A62 /* GLKit.framework */,
 				A92CD373161FD93A002E6A62 /* OpenGLES.framework */,
 				A98B1B041644256E00E68C95 /* OpenAL.framework */,
+				A998255816C199BD006888B6 /* QuartzCore.framework */,
 				A98B1B0D164436FA00E68C95 /* AudioToolbox.framework */,
 			);
 			name = Frameworks;
@@ -140,12 +150,14 @@
 		A92CD375161FD93A002E6A62 /* iOS Source */ = {
 			isa = PBXGroup;
 			children = (
+				A998255E16C1B2BC006888B6 /* ES2Renderer.h */,
+				A998255F16C1B335006888B6 /* ES2Renderer.mm */,
+				A998255516C19651006888B6 /* EAGLView.h */,
+				A998255616C19651006888B6 /* EAGLView.mm */,
 				A92CD37E161FD93A002E6A62 /* AppDelegate.h */,
-				A92CD37F161FD93A002E6A62 /* AppDelegate.m */,
-				A92CD38B161FD93A002E6A62 /* ViewController.h */,
-				A92CD38C161FD93A002E6A62 /* ViewController.mm */,
-				A92CD38E161FD93A002E6A62 /* ViewController_iPhone.xib */,
-				A92CD391161FD93A002E6A62 /* ViewController_iPad.xib */,
+				A998255C16C1A1C0006888B6 /* AppDelegate.mm */,
+				A98B1B0B164436AE00E68C95 /* FakeAudio.ios.mm */,
+				A998255A16C19FD1006888B6 /* MainWindow.xib */,
 				A92CD376161FD93A002E6A62 /* Supporting Files */,
 			);
 			name = "iOS Source";
@@ -169,6 +181,12 @@
 		A92CD39B161FD9C4002E6A62 /* FakeWebGL */ = {
 			isa = PBXGroup;
 			children = (
+				A998254B16C17A1C006888B6 /* FakeCanvas.cpp */,
+				A998254C16C17A1C006888B6 /* FakeCanvas.h */,
+				A998254D16C17A1C006888B6 /* FakeImage.cpp */,
+				A998254E16C17A1C006888B6 /* FakeImage.h */,
+				A998254F16C17A1C006888B6 /* XMLHTTPRequest.cpp */,
+				A998255016C17A1C006888B6 /* XMLHTTPRequest.h */,
 				A995BB1F162DE4BF00C327D1 /* glue.math.ios.cpp */,
 				A995BB20162DE4BF00C327D1 /* glue.math.ios.h */,
 				A93ABBF416249B3C00EAE91B /* glue.debugger.mm */,
@@ -181,7 +199,6 @@
 				A92CD3A3161FD9C4002E6A62 /* WebGLRenderingContext.h */,
 				A98B1B01164424FD00E68C95 /* FakeAudio.cpp */,
 				A98B1B02164424FD00E68C95 /* FakeAudio.h */,
-				A98B1B0B164436AE00E68C95 /* FakeAudio.ios.mm */,
 			);
 			name = FakeWebGL;
 			path = FakeWebGL/webgl;
@@ -255,14 +272,13 @@
 				A92CD382161FD93A002E6A62 /* Default.png in Resources */,
 				A92CD384161FD93A002E6A62 /* Default@2x.png in Resources */,
 				A92CD386161FD93A002E6A62 /* Default-568h@2x.png in Resources */,
-				A92CD390161FD93A002E6A62 /* ViewController_iPhone.xib in Resources */,
-				A92CD393161FD93A002E6A62 /* ViewController_iPad.xib in Resources */,
 				A95C3CE016235B6A00386017 /* images in Resources */,
 				A95C3CE116235B6A00386017 /* js in Resources */,
 				A95C3CE216235B6A00386017 /* shaders in Resources */,
 				A9EB655E162F39B200EFEF45 /* fonts in Resources */,
 				A917DEFF16445A6200026B4A /* audio in Resources */,
 				A9FF1F8B1692579E00D2623E /* obj in Resources */,
+				A998255B16C19FD1006888B6 /* MainWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,13 +293,17 @@
 				A92CD37C161FD93A002E6A62 /* main.m in Sources */,
 				A92CD3A5161FD9C4002E6A62 /* glue.cpp in Sources */,
 				A92CD3A8161FD9C4002E6A62 /* WebGLRenderingContext.cpp in Sources */,
-				A92CD380161FD93A002E6A62 /* AppDelegate.m in Sources */,
-				A92CD38D161FD93A002E6A62 /* ViewController.mm in Sources */,
 				A95C3CD7162339C700386017 /* glue.ios.mm in Sources */,
 				A93ABBF516249B3C00EAE91B /* glue.debugger.mm in Sources */,
 				A995BB21162DE4BF00C327D1 /* glue.math.ios.cpp in Sources */,
 				A98B1B03164424FD00E68C95 /* FakeAudio.cpp in Sources */,
 				A98B1B0C164436AE00E68C95 /* FakeAudio.ios.mm in Sources */,
+				A998255116C17A1C006888B6 /* FakeCanvas.cpp in Sources */,
+				A998255216C17A1C006888B6 /* FakeImage.cpp in Sources */,
+				A998255316C17A1C006888B6 /* XMLHTTPRequest.cpp in Sources */,
+				A998255716C19651006888B6 /* EAGLView.mm in Sources */,
+				A998255D16C1A1C0006888B6 /* AppDelegate.mm in Sources */,
+				A998256016C1B335006888B6 /* ES2Renderer.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,22 +316,6 @@
 				A92CD379161FD93A002E6A62 /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		A92CD38E161FD93A002E6A62 /* ViewController_iPhone.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A92CD38F161FD93A002E6A62 /* en */,
-			);
-			name = ViewController_iPhone.xib;
-			sourceTree = "<group>";
-		};
-		A92CD391161FD93A002E6A62 /* ViewController_iPad.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A92CD392161FD93A002E6A62 /* en */,
-			);
-			name = ViewController_iPad.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

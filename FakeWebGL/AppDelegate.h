@@ -8,12 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
-@class ViewController;
+@class EAGLView;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
-@property (strong, nonatomic) UIWindow *window;
-
-@property (strong, nonatomic) ViewController *viewController;
+@property (strong, nonatomic) IBOutlet UIWindow* window;
+@property (strong, nonatomic) IBOutlet EAGLView* glView;
 
 @end
