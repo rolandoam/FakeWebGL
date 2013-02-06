@@ -48,15 +48,6 @@ float getDevicePixelRatio();
 void getDeviceWinSize(int* width, int* height);
 void setInnerWidthAndHeight(JSContext* cx, JSObject* glob, int width, int height);
 
-// debug functions
-JSScript* getScript(std::string name);
-JSBool jsGetScript(JSContext* cx, unsigned argc, jsval* vp);
-// this is a server socket
-JSBool jsSocketOpen(JSContext* cx, unsigned argc, jsval* vp);
-JSBool jsSocketRead(JSContext* cx, unsigned argc, jsval* vp);
-JSBool jsSocketWrite(JSContext* cx, unsigned argc, jsval* vp);
-JSBool jsSocketClose(JSContext* cx, unsigned argc, jsval* vp);
-
 // native matrix ops
 
 // multiply 2 4x4 matrices. Store result in res
