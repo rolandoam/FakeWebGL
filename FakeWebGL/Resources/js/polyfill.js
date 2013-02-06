@@ -58,7 +58,7 @@ _touchesEnded = function (event) {
 	}
 };
 
-var fakeHTML = false;
+var fakeHTML = true;
 
 // defining window is not enough for passing the isBrowser test in requirejs, which is a good thing
 window = this;
@@ -86,20 +86,11 @@ if (fakeHTML) {
 	window.HTMLElement = function( tagName ){
 		this.tagName = tagName;
 		this.children = [];
+		this.style = {};
 	};
 
 	window.HTMLElement.prototype.appendChild = function( element ) {
 		this.children.push( element );
-
-		// If the child is a script element, begin to load it
-		if( element.tagName == 'script' ) {
-			ej.setTimeout( function(){
-				ej.require( element.src );
-				if( element.onload ) {
-					element.onload();
-				}
-			}, 1);
-		}
 	};
 
 	document = {
@@ -130,8 +121,12 @@ if (fakeHTML) {
 			}
 		},
 		// dummy createElement
-		createElement: function () {
-			return {style: {}};
+		createElement: function (tag) {
+			if (tag == "canvas") {
+				return new FakeCanvas(innerWidth, innerHeight);
+			} else {
+				return new window.HTMLElement(tag);
+			}
 		}
 	};
 
@@ -191,18 +186,18 @@ Stats = function () {
 	};
 };
 
-HTMLCanvasElement = ChesterCanvas;
+HTMLCanvasElement = FakeCanvas;
 
-ChesterCanvas.prototype.__offset = {
+FakeCanvas.prototype.__offset = {
 	top: 0,
 	left: 0
 };
 
-ChesterCanvas.prototype.style = {
+FakeCanvas.prototype.style = {
 };
 
-Image = PNGImage;
-Image.prototype.addEventListener = function PNGImage_addEventListener(event, callback) {
+Image = FakeImage;
+Image.prototype.addEventListener = function FakeImage_addEventListener(event, callback) {
 	if (event == "load") {
 		this.onload = callback;
 	} else if (event == "error") {

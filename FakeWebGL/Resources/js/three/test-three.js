@@ -11,12 +11,9 @@ var VIEW_ANGLE = 45,
   NEAR = 0.1,
   FAR = 10000;
 
-// get the Canvas
-var canvas = new ChesterCanvas(innerWidth, innerHeight);
-
 // create a WebGL renderer, camera
 // and a scene
-var renderer = new THREE.WebGLRenderer({canvas: canvas});
+var renderer = new THREE.WebGLRenderer({canvas: document.createElement("canvas")});
 var camera =
   new THREE.PerspectiveCamera(
     VIEW_ANGLE,

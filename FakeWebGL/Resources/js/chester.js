@@ -525,7 +525,7 @@ p("chesterGL.viewportSize", function() {
   return new ga(K.za, K.ka)
 });
 p("chesterGL.setup", function(a) {
-  a = Ea ? new ChesterCanvas(innerWidth, innerHeight) : document.getElementById(a);
+  a = Ea ? new FakeCanvas(innerWidth, innerHeight) : document.getElementById(a);
   Ga = Fa.projection;
   J = Fa.webglMode;
   Ha = Fa.basePath;

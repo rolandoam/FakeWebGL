@@ -35,12 +35,12 @@ function setupGame() {
 	// add some action
 	var dz = 10,
 		oneDeg = Math.PI / 180.0;
-//	label.setUpdate(function () {
-//		this.setRotation(this.rotation + oneDeg);
-//		this.setPosition([this.position[0], this.position[1], this.position[2] + dz]);
-//		if (this.position[2] >=  200) { dz = -dz; }
-//		if (this.position[2] <= -200) { dz = -dz; }
-//	});
+	label.setUpdate(function () {
+		this.setRotation(this.rotation + oneDeg);
+		this.setPosition([this.position[0], this.position[1], this.position[2] + dz]);
+		if (this.position[2] >=  200) { dz = -dz; }
+		if (this.position[2] <= -200) { dz = -dz; }
+	});
 
 	sceneBlock.addChild(group, label);
 	// sceneBlock.addChild(someBlock);
