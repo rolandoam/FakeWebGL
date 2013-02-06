@@ -13,8 +13,50 @@
 #import "EAGLView.h"
 #import "glue.h"
 
-@interface AppDelegate ()
-- (void)initJS;
+@interface SimpleViewController : UIViewController
+@end
+
+@implementation SimpleViewController
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+	return YES;
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	std::vector<webglTouch_t> injectedTouches;
+	for (UITouch *t in touches) {
+		CGPoint pt = [t locationInView:self.view];
+		injectedTouches.push_back({pt.x, pt.y});
+	}
+	injectTouches(webglTouchesBegan, &injectedTouches[0], touches.count);
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+	std::vector<webglTouch_t> injectedTouches;
+	for (UITouch *t in touches) {
+		CGPoint pt = [t locationInView:self.view];
+		injectedTouches.push_back({pt.x, pt.y});
+	}
+	injectTouches(webglTouchesMoved, &injectedTouches[0], touches.count);
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	std::vector<webglTouch_t> injectedTouches;
+	for (UITouch *t in touches) {
+		CGPoint pt = [t locationInView:self.view];
+		injectedTouches.push_back({pt.x, pt.y});
+	}
+	injectTouches(webglTouchesEnded, &injectedTouches[0], touches.count);
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+	std::vector<webglTouch_t> injectedTouches;
+	for (UITouch *t in touches) {
+		CGPoint pt = [t locationInView:self.view];
+		injectedTouches.push_back({pt.x, pt.y});
+	}
+	injectTouches(webglTouchesCanceled, &injectedTouches[0], touches.count);
+}
 @end
 
 @implementation AppDelegate
@@ -22,8 +64,9 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
 	[_window setFrame:[UIScreen mainScreen].bounds];
+	_window.rootViewController = [[SimpleViewController alloc] init];
+	_window.rootViewController.view = _glView;
 	createJSEnvironment();
-	[self initJS];
     return YES;
 }
 

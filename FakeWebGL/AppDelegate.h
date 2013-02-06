@@ -15,4 +15,6 @@
 @property (strong, nonatomic) IBOutlet UIWindow* window;
 @property (strong, nonatomic) IBOutlet EAGLView* glView;
 
+- (void)initJS;
+
 @end
