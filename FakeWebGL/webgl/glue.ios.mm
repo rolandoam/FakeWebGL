@@ -26,7 +26,6 @@
 #include "glue.h"
 #import <Foundation/Foundation.h>
 #import "AppDelegate.h"
-#import "ViewController.h"
 #include "glue.math.ios.h"
 
 #define RETINA_PREFIX @"@2x"

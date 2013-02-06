@@ -36,6 +36,9 @@
 #include "lodepng.h"
 
 #include "WebGLRenderingContext.h"
+#include "XMLHTTPRequest.h"
+#include "FakeCanvas.h"
+#include "FakeImage.h"
 #include "FakeAudio.h"
 
 JSContext *_cx, *dbgCtx;
@@ -59,7 +62,7 @@ static JSClass global_class = {
 };
 
 void basic_object_finalize(JSFreeOp *freeOp, JSObject *obj) {
-	void* native = JS_GetPrivate(obj);
+	JSBindedObject* native = dynamic_cast<JSBindedObject*>((JSBindedObject*)JS_GetPrivate(obj));
 	if (native) {
 		delete native;
 	}
@@ -356,21 +359,29 @@ JSObject* NewGlobalObject(JSContext* cx)
 	// get the size of the screen
 	int width, height;
 	getDeviceWinSize(&width, &height);
+	setInnerWidthAndHeight(cx, glob, width, height);
+
+	// add custom classes
+	FakeCanvas::_js_register(_cx, glob);
+	WebGLRenderingContext::_js_register(_cx, glob);
+	FakeImage::_js_register(_cx, glob);
+	FakeXMLHTTPRequest::_js_register(_cx, glob);
+	FakeAudio::_js_register(_cx, glob);
+
+	return glob;
+}
+
+void setInnerWidthAndHeight(JSContext* cx, JSObject* glob, int width, int height)
+{
+	if (glob == NULL) {
+		glob = globalObject;
+	}
 	jsval valWidth = INT_TO_JSVAL(width);
 	jsval valHeight = INT_TO_JSVAL(height);
 	jsval pixelRatio = DOUBLE_TO_JSVAL(getDevicePixelRatio());
 	JS_SetProperty(cx, glob, "innerWidth", &valWidth);
 	JS_SetProperty(cx, glob, "innerHeight", &valHeight);
 	JS_SetProperty(cx, glob, "devicePixelRatio", &pixelRatio);
-
-	// add custom classes
-	ChesterCanvas::_js_register(_cx, glob);
-	WebGLRenderingContext::_js_register(_cx, glob);
-	PNGImage::_js_register(_cx, glob);
-	FakeXMLHTTPRequest::_js_register(_cx, glob);
-	FakeAudio::_js_register(_cx, glob);
-
-	return glob;
 }
 
 JSBool jsNewGlobal(JSContext* cx, unsigned argc, jsval* vp)
@@ -443,8 +454,8 @@ void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count)
 void createJSEnvironment() {
 	// create world
 	JS_SetCStringsAreUTF8();
-	runtime = JS_NewRuntime(10 * 1024 * 1024);
-	_cx = JS_NewContext(runtime, 10240);
+	runtime = JS_NewRuntime(15 * 1024 * 1024);
+	_cx = JS_NewContext(runtime, 15360);
 
 	JS_SetVersion(_cx, JSVERSION_LATEST);
 	JS_SetOptions(_cx, JSOPTION_TYPE_INFERENCE);

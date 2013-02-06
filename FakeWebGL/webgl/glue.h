@@ -46,6 +46,7 @@ JSObject* getRequestAnimationFrameCallback();
 void setRequestAnimationFrameCallback(JSObject* obj);
 float getDevicePixelRatio();
 void getDeviceWinSize(int* width, int* height);
+void setInnerWidthAndHeight(JSContext* cx, JSObject* glob, int width, int height);
 
 // debug functions
 JSScript* getScript(std::string name);
@@ -132,6 +133,10 @@ public:
 	operator char*() {
 		return (char*)buffer;
 	}
+};
+
+class JSBindedObject
+{	
 };
 
 #pragma mark - Helpful Macros
@@ -222,7 +227,7 @@ JS_BINDED_PROP_SET(klass, propName);
 do { \
 	JSObject* jsobj = JS_NewObject(cx, NULL, NULL, NULL); \
 	jsval propVal = UINT_TO_JSVAL(val); \
-	JS_SetProperty(cx, jsobj, "_" propName, &propVal); \
+	JS_SetProperty(cx, jsobj, "__" propName, &propVal); \
 	valOut = OBJECT_TO_JSVAL(jsobj); \
 } while(0)
 
@@ -231,7 +236,7 @@ do { \
 	if (inVal.isObject()) {\
 		JSObject* jsobj = JSVAL_TO_OBJECT(inVal); \
 		jsval outVal; \
-		JS_GetProperty(cx, jsobj, "_" propName, &outVal); \
+		JS_GetProperty(cx, jsobj, "__" propName, &outVal); \
 		JS_ValueToECMAUint32(cx, outVal, &out); \
 	} else { \
 		int32_t tmp; \
@@ -239,5 +244,25 @@ do { \
 		out = (uint32_t)tmp; \
 	} \
 } while (0)
+
+#if DEBUG
+#define BREAK_ON_GL_ERROR 0
+
+#if BREAK_ON_GL_ERROR && TARGET_IPHONE_SIMULATOR
+#define BREAK() { __asm__("int $3\n" : : ); }
+#else
+#define BREAK()
+#endif
+
+#define CHECK_GL_ERROR() ({												\
+	GLenum __error = glGetError();										\
+	if (__error) {														\
+		printf("OpenGL error 0x%04X in %s\n", __error, __FUNCTION__);	\
+		BREAK()															\
+	}																	\
+})
+#else
+#define CHECK_GL_ERROR()
+#endif
 
 #endif

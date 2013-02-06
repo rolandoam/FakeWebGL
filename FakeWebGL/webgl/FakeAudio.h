@@ -28,7 +28,7 @@ public:
 	void* getData();
 };
 
-class FakeAudio
+class FakeAudio : public JSBindedObject
 {
 	int readyState;
 	std::string src;

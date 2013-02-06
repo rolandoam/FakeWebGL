@@ -1,6 +1,6 @@
 //
 //  WebGLRenderingContext.h
-//  webglshim
+//  FakeWebGL
 //
 //  Created by Rolando Abarca on 10/5/12.
 //  Copyright (c) 2012 Rolando Abarca. All rights reserved.
@@ -42,93 +42,17 @@ class JSObject;
 #define WebGLTexture GLuint
 #define WebGLUniformLocation GLint
 
-class WebGLRenderingContext;
+class FakeCanvas;
 
-class ChesterCanvas
-{
-public:
-	int width;
-	int height;
-
-	ChesterCanvas(int w, int h) : width(w), height(h) {};
-	JS_BINDED_CLASS_GLUE(ChesterCanvas);
-	JS_BINDED_CONSTRUCTOR(ChesterCanvas);
-	JS_BINDED_PROP_GET(ChesterCanvas, width);
-	JS_BINDED_PROP_GET(ChesterCanvas, height);
-	JS_BINDED_FUNC(ChesterCanvas, getContext);
-};
-
-enum FakeXMLHTTPRequestResponseType {
-	kRequestResponseTypeString,
-	kRequestResponseTypeArrayBuffer,
-	kRequestResponseTypeBlob,
-	kRequestResponseTypeDocument,
-	kRequestResponseTypeJSON
-};
-
-class FakeXMLHTTPRequest
-{
-	std::string url;
-	std::string type;
-	unsigned char* data;
-	size_t dataSize;
-	JSObject* onreadystateCallback;
-	int readyState;
-	int status;
-	int responseType;
-	bool isAsync;
-public:
-	FakeXMLHTTPRequest() {}
-	~FakeXMLHTTPRequest();
-	JS_BINDED_CLASS_GLUE(FakeXMLHTTPRequest);
-	JS_BINDED_CONSTRUCTOR(FakeXMLHTTPRequest);
-	JS_BINDED_PROP_ACCESSOR(FakeXMLHTTPRequest, onreadystatechange);
-	JS_BINDED_PROP_ACCESSOR(FakeXMLHTTPRequest, responseType);
-	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, readyState);
-	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, status);
-	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, responseText);
-	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, response);
-	JS_BINDED_FUNC(FakeXMLHTTPRequest, open);
-	JS_BINDED_FUNC(FakeXMLHTTPRequest, send);
-};
-
-class PNGImage
-{
-	std::vector<unsigned char> bytes;
-	std::string src;
-	js::RootedObject onloadCallback;
-	js::RootedObject onerrorCallback;
-
-	void loadPNG();
-
-public:
-	unsigned int width;
-	unsigned int height;
-
-	PNGImage();
-	unsigned char* getBytes();
-	JS_BINDED_CLASS_GLUE(PNGImage);
-	JS_BINDED_CONSTRUCTOR(PNGImage);
-	JS_BINDED_PROP_GET(PNGImage, width);
-	JS_BINDED_PROP_GET(PNGImage, height);
-	JS_BINDED_PROP_ACCESSOR(PNGImage, src);
-	JS_BINDED_PROP_ACCESSOR(PNGImage, onload);
-	JS_BINDED_PROP_ACCESSOR(PNGImage, onerror);
-};
-
-class WebGLRenderingContext
+class WebGLRenderingContext : public JSBindedObject
 {
 public:
 	GLsizei drawingBufferWidth;
 	GLsizei drawingBufferHeight;
-	ChesterCanvas* canvas;
+	FakeCanvas* canvas;
+	bool unpackFlipY;
 
-	WebGLRenderingContext(ChesterCanvas* canvas)
-	{
-		this->canvas = canvas;
-		this->drawingBufferWidth = canvas->width;
-		this->drawingBufferHeight = canvas->height;
-	};
+	WebGLRenderingContext(FakeCanvas* canvas);
 
 	JS_BINDED_CLASS_GLUE(WebGLRenderingContext);
 	JS_BINDED_CONSTRUCTOR(WebGLRenderingContext);
@@ -190,8 +114,7 @@ public:
 	void framebufferRenderbuffer(GLenum target, GLenum attachment,
 								 GLenum renderbuffertarget,
 								 WebGLRenderbuffer renderbuffer);
-	void framebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget,
-							  WebGLTexture texture, GLint level);
+	JS_BINDED_FUNC(WebGLRenderingContext, framebufferTexture2D);
 	JS_BINDED_FUNC(WebGLRenderingContext, frontFace);
 
 	JS_BINDED_FUNC(WebGLRenderingContext, generateMipmap);

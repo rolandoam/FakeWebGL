@@ -1,6 +1,6 @@
 //
 //  WebGLRenderingContext.cpp
-//  webglshim
+//  FakeWebGL
 //
 //  Created by Rolando Abarca on 10/5/12.
 //  Copyright (c) 2012 Rolando Abarca. All rights reserved.
@@ -27,10 +27,12 @@
 #include <iostream>
 #include <iterator>
 #include <assert.h>
+#include <TargetConditionals.h>
 #include "WebGLRenderingContext.h"
+#include "FakeImage.h"
+#include "FakeCanvas.h"
 #include "jsapi.h"
 #include "jsfriendapi.h"
-#include "lodepng.h"
 
 
 // WebGL specific defines
@@ -40,466 +42,24 @@
 #define GL_UNPACK_COLORSPACE_CONVERSION_WEBGL 0x9243
 #define GL_BROWSER_DEFAULT_WEBGL 0x9244
 
-
-#if DEBUG
-#define BREAK_ON_GL_ERROR 1
-
-#if BREAK_ON_GL_ERROR && TARGET_IPHONE_SIMULATOR
-#define BREAK() { __asm__("int $3\n" : : ); }
-#else
-#define BREAK()
-#endif
-
-#define CHECK_GL_ERROR() ({												\
-	GLenum __error = glGetError();										\
-	if (__error) {														\
-		printf("OpenGL error 0x%04X in %s\n", __error, __FUNCTION__);	\
-		BREAK();														\
-	}																	\
-})
-#else
-#define CHECK_GL_ERROR()
-#endif
-
 using namespace std;
 
-#pragma mark - ChesterCanvas
-
-JS_BINDED_CLASS_GLUE_IMPL(ChesterCanvas);
-
-JS_BINDED_CONSTRUCTOR_IMPL(ChesterCanvas)
-{
-	if (argc == 2) {
-		jsval* argv = JS_ARGV(cx, vp);
-		int w = JSVAL_TO_INT(argv[0]);
-		int h = JSVAL_TO_INT(argv[1]);
-		ChesterCanvas* cobj = new ChesterCanvas(w, h);
-		jsval out;
-		JS_WRAP_OBJECT_IN_VAL(ChesterCanvas, cobj, out);
-		JS_SET_RVAL(cx, vp, out);
-		return JS_TRUE;
-	}
-	JS_ReportError(cx, "invalid call");
-	return JS_FALSE;
-}
-
-JS_BINDED_PROP_GET_IMPL(ChesterCanvas, width)
-{
-	vp.set(INT_TO_JSVAL(width));
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_GET_IMPL(ChesterCanvas, height)
-{
-	vp.set(INT_TO_JSVAL(height));
-	return JS_TRUE;
-}
-
-JS_BINDED_FUNC_IMPL(ChesterCanvas, getContext)
-{
-	if (argc >= 1) {
-		jsval* argv = JS_ARGV(cx, vp);
-		JSString* str = JS_ValueToString(cx, argv[0]);
-		JSStringWrapper wrapper(str);
-		JSBool ok = JS_FALSE;
-		if (strncmp(wrapper, "experimental-webgl", 18) == 0) {
-			WebGLRenderingContext* cobj = new WebGLRenderingContext(this);
-			jsval out;
-			JS_WRAP_OBJECT_IN_VAL(WebGLRenderingContext, cobj, out);
-			JS_SET_RVAL(cx, vp, out);
-			ok = JS_TRUE;
-		}
-		return ok;
-	}
-	JS_ReportError(cx, "invalid call");
-	return JS_FALSE;
-}
-
-void ChesterCanvas::_js_register(JSContext* cx, JSObject* global)
-{
-	// create the class
-	ChesterCanvas::js_class = {
-		"ChesterCanvas", JSCLASS_HAS_PRIVATE,
-		JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
-		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, basic_object_finalize,
-		JSCLASS_NO_OPTIONAL_MEMBERS
-	};
-	static JSPropertySpec props[] = {
-		JS_BINDED_PROP_DEF_GETTER(ChesterCanvas, width),
-		JS_BINDED_PROP_DEF_GETTER(ChesterCanvas, height),
-		{0, 0, 0, 0, 0}
-	};
-	static JSFunctionSpec funcs[] = {
-		JS_BINDED_FUNC_FOR_DEF(ChesterCanvas, getContext),
-		JS_FS_END
-	};
-	ChesterCanvas::js_parent = NULL;
-	ChesterCanvas::js_proto = JS_InitClass(cx, global, NULL, &ChesterCanvas::js_class, ChesterCanvas::_js_constructor, 1, props, funcs, NULL, NULL);
-}
-
-#pragma mark - FakeXMLHTTPRequest
-
-FakeXMLHTTPRequest::~FakeXMLHTTPRequest()
-{
-	if (onreadystateCallback) {
-		JS_RemoveObjectRoot(getGlobalContext(), &onreadystateCallback);
-	}
-	if (data) {
-		free(data);
-	}
-}
-
-JS_BINDED_CLASS_GLUE_IMPL(FakeXMLHTTPRequest);
-
-JS_BINDED_CONSTRUCTOR_IMPL(FakeXMLHTTPRequest)
-{
-	FakeXMLHTTPRequest* req = new FakeXMLHTTPRequest();
-	jsval out;
-	JS_WRAP_OBJECT_IN_VAL(FakeXMLHTTPRequest, req, out);
-	JS_SET_RVAL(cx, vp, out);
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, onreadystatechange)
-{
-	if (onreadystateCallback) {
-		jsval out = OBJECT_TO_JSVAL(onreadystateCallback);
-		vp.set(out);
-	} else {
-		vp.set(JSVAL_NULL);
-	}
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_SET_IMPL(FakeXMLHTTPRequest, onreadystatechange)
-{
-	jsval callback = vp.get();
-	if (callback != JSVAL_NULL) {
-		onreadystateCallback = JSVAL_TO_OBJECT(callback);
-		JS_AddNamedObjectRoot(cx, &onreadystateCallback, "FakeXMLHttpRequest_callback");
-	}
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, responseType)
-{
-	JSString* str = JS_NewStringCopyN(cx, "", 0);
-	vp.set(STRING_TO_JSVAL(str));
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_SET_IMPL(FakeXMLHTTPRequest, responseType)
-{
-	jsval type = vp.get();
-	if (type.isString()) {
-		JSString* str = type.toString();
-		JSBool equal;
-		JS_StringEqualsAscii(cx, str, "text", &equal);
-		if (equal) {
-			responseType = kRequestResponseTypeString;
-			return JS_TRUE;
-		}
-		JS_StringEqualsAscii(cx, str, "arraybuffer", &equal);
-		if (equal) {
-			responseType = kRequestResponseTypeArrayBuffer;
-			return JS_TRUE;
-		}
-		JS_StringEqualsAscii(cx, str, "json", &equal);
-		if (equal) {
-			responseType = kRequestResponseTypeJSON;
-			return JS_TRUE;
-		}
-		// ignore the rest of the response types for now
-		return JS_TRUE;
-	}
-	JS_ReportError(cx, "Invalid response type");
-	return JS_FALSE;
-}
-
-JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, readyState)
-{
-	vp.set(INT_TO_JSVAL(readyState));
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, status)
-{
-	vp.set(INT_TO_JSVAL(status));
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, responseText)
-{
-	JSString* str = JS_NewStringCopyN(cx, (const char*)data, dataSize);
-	if (str) {
-		vp.set(STRING_TO_JSVAL(str));
-		return JS_TRUE;
-	} else {
-		JS_ReportError(cx, "Error trying to create JSString from data");
-		return JS_FALSE;
-	}
-}
-
-JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, response)
-{
-	if (responseType == kRequestResponseTypeJSON) {
-		jsval outVal;
-		JSString* str = JS_NewStringCopyN(cx, (const char*)data, dataSize);
-		if (JS_ParseJSON(cx, JS_GetStringCharsZ(cx, str), dataSize, &outVal)) {
-			vp.set(outVal);
-			return JS_TRUE;
-		}
-	} else if (responseType == kRequestResponseTypeArrayBuffer) {
-		JSObject* tmp = JS_NewArrayBuffer(cx, dataSize);
-		uint8_t* tmpData = JS_GetArrayBufferData(tmp, cx);
-		memcpy(tmpData, data, dataSize);
-		jsval outVal = OBJECT_TO_JSVAL(tmp);
-		vp.set(outVal);
-		return JS_TRUE;
-	}
-	// by default, return text
-	return _js_get_responseText(cx, id, vp);
-}
-
-JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, open)
-{
-	if (argc >= 2) {
-		jsval* argv = JS_ARGV(cx, vp);
-		const char* method;
-		const char* urlstr;
-		JSBool async = true;
-		JSString* jsMethod = JS_ValueToString(cx, argv[0]);
-		JSString* jsURL = JS_ValueToString(cx, argv[1]);
-		if (argc > 2) {
-			JS_ValueToBoolean(cx, argv[2], &async);
-		}
-		JSStringWrapper w1(jsMethod);
-		JSStringWrapper w2(jsURL);
-		method = w1;
-		urlstr = w2;
-
-		url = urlstr;
-		readyState = 1;
-		isAsync = async;
-
-		if (url.length() > 5 && url.compare(url.length() - 5, 5, ".json") == 0) {
-			responseType = kRequestResponseTypeJSON;
-		}
-		return JS_TRUE;
-	}
-	JS_ReportError(cx, "invalid call");
-	return JS_FALSE;
-}
-
-JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, send)
-{
-	std::string path = getFullPathFromRelativePath(url.c_str());
-	readyState = 4;
-	if (path.empty()) {
-		// file not found
-		status = 404;
-	} else {
-		dataSize = readFileInMemory(path.c_str(), &data);
-		if (dataSize > 0) {
-			status = 200;
-		} else {
-			printf("Error trying to read '%s'\n", path.c_str());
-			status = 404; // just issue any error
-		}
-	}
-	if (onreadystateCallback) {
-		jsval fval = OBJECT_TO_JSVAL(onreadystateCallback);
-		jsval out;
-		JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &out);
-	}
-	return JS_TRUE;
-}
-
-void FakeXMLHTTPRequest::_js_register(JSContext *cx, JSObject *global)
-{
-	// create the class
-	FakeXMLHTTPRequest::js_class = {
-		"XMLHttpRequest", JSCLASS_HAS_PRIVATE,
-		JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
-		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, basic_object_finalize,
-		JSCLASS_NO_OPTIONAL_MEMBERS
-	};
-	static JSPropertySpec props[] = {
-		JS_BINDED_PROP_DEF_ACCESSOR(FakeXMLHTTPRequest, onreadystatechange),
-		JS_BINDED_PROP_DEF_ACCESSOR(FakeXMLHTTPRequest, responseType),
-		JS_BINDED_PROP_DEF_GETTER(FakeXMLHTTPRequest, readyState),
-		JS_BINDED_PROP_DEF_GETTER(FakeXMLHTTPRequest, status),
-		JS_BINDED_PROP_DEF_GETTER(FakeXMLHTTPRequest, responseText),
-		JS_BINDED_PROP_DEF_GETTER(FakeXMLHTTPRequest, response),
-		{0, 0, 0, 0, 0}
-	};
-	static JSFunctionSpec funcs[] = {
-		JS_BINDED_FUNC_FOR_DEF(FakeXMLHTTPRequest, open),
-		JS_BINDED_FUNC_FOR_DEF(FakeXMLHTTPRequest, send),
-		JS_FS_END
-	};
-	FakeXMLHTTPRequest::js_parent = NULL;
-	FakeXMLHTTPRequest::js_proto = JS_InitClass(cx, global, NULL, &FakeXMLHTTPRequest::js_class, FakeXMLHTTPRequest::_js_constructor, 1, props, funcs, NULL, NULL);
-}
-
-#pragma mark - PNGImage
-
-PNGImage::PNGImage() :
-	onloadCallback(getGlobalContext()),
-	onerrorCallback(getGlobalContext())
-{
-	src = "invalid";
-}
-
-void PNGImage::loadPNG()
-{
-	std::string fullPath = getFullPathFromRelativePath(src.c_str());
-	if (fullPath.empty()) {
-		printf("PNG: File not found: %s\n", src.c_str());
-		if (onerrorCallback) {
-			jsval funcval = OBJECT_TO_JSVAL(onerrorCallback);
-			jsval out;
-			JSContext* cx = getGlobalContext();
-			// create error: object with a single property
-			JSObject* err = JS_NewObject(cx, NULL, NULL, NULL);
-			JSString* str = JS_NewStringCopyZ(cx, "error");
-			jsval strVal = STRING_TO_JSVAL(str);
-			JS_SetProperty(cx, err, "type", &strVal);
-			jsval errVal = OBJECT_TO_JSVAL(err);
-			// just execute the callback
-			JS_CallFunctionValue(cx, NULL, funcval, 1, &errVal, &out);
-		}
-	} else {
-		unsigned error = lodepng::decode(bytes, width, height, fullPath);
-		if (error) {
-			printf("PNG: error %u decoding png: %s\n", error, lodepng_error_text(error));
-			return;
-		}
-		if (onloadCallback) {
-			jsval funcval = OBJECT_TO_JSVAL(onloadCallback);
-			jsval out;
-			JS_CallFunctionValue(getGlobalContext(), NULL, funcval, 0, NULL, &out);
-		}
-	}
-}
-
-unsigned char* PNGImage::getBytes()
-{
-	return &bytes[0];
-}
-
-JS_BINDED_CLASS_GLUE_IMPL(PNGImage)
-
-JS_BINDED_CONSTRUCTOR_IMPL(PNGImage)
-{
-	PNGImage* image = new PNGImage();
-	jsval out;
-	JS_WRAP_OBJECT_IN_VAL(PNGImage, image, out);
-	JS_SET_RVAL(cx, vp, out);
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_GET_IMPL(PNGImage, width)
-{
-	vp.set(INT_TO_JSVAL(width));
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_GET_IMPL(PNGImage, height)
-{
-	vp.set(INT_TO_JSVAL(height));
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_GET_IMPL(PNGImage, src)
-{
-	JSString* str = JS_NewStringCopyZ(cx, src.c_str());
-	vp.set(STRING_TO_JSVAL(str));
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_SET_IMPL(PNGImage, src)
-{
-	JSString* jsstr = JS_ValueToString(cx, vp.get());
-	JSStringWrapper wrapper(jsstr);
-	// copy the source
-	if (strlen(wrapper) > 0) {
-		src = (char *)wrapper;
-		loadPNG();
-	}
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_GET_IMPL(PNGImage, onload)
-{
-	if (onloadCallback) {
-		vp.set(OBJECT_TO_JSVAL(onloadCallback));
-	} else {
-		vp.set(JSVAL_NULL);
-	}
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_SET_IMPL(PNGImage, onload)
-{
-	jsval callback = vp.get();
-	if (callback != JSVAL_NULL) {
-		onloadCallback = JSVAL_TO_OBJECT(callback);
-	}
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_GET_IMPL(PNGImage, onerror)
-{
-	if (onerrorCallback) {
-		vp.set(OBJECT_TO_JSVAL(onerrorCallback));
-	} else {
-		vp.set(JSVAL_NULL);
-	}
-	return JS_TRUE;
-}
-
-JS_BINDED_PROP_SET_IMPL(PNGImage, onerror)
-{
-	jsval callback = vp.get();
-	if (callback != JSVAL_NULL && callback.isObject()) {
-		onerrorCallback = JSVAL_TO_OBJECT(callback);
-	}
-	return JS_TRUE;
-}
-
-void PNGImage::_js_register(JSContext* cx, JSObject* global)
-{
-	// create the class
-	PNGImage::js_class = {
-		"PNGImage", JSCLASS_HAS_PRIVATE,
-		JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
-		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, basic_object_finalize,
-		JSCLASS_NO_OPTIONAL_MEMBERS
-	};
-	static JSPropertySpec props[] = {
-		JS_BINDED_PROP_DEF_GETTER(PNGImage, width),
-		JS_BINDED_PROP_DEF_GETTER(PNGImage, height),
-		JS_BINDED_PROP_DEF_ACCESSOR(PNGImage, src),
-		JS_BINDED_PROP_DEF_ACCESSOR(PNGImage, onload),
-		JS_BINDED_PROP_DEF_ACCESSOR(PNGImage, onerror),
-		{0, 0, 0, 0, 0}
-	};
-	static JSFunctionSpec funcs[] = {
-		JS_FS_END
-	};
-	PNGImage::js_parent = NULL;
-	PNGImage::js_proto = JS_InitClass(cx, global, NULL, &PNGImage::js_class, PNGImage::_js_constructor, 1, props, funcs, NULL, NULL);
-}
-
 #pragma mark - WebGLRenderingContext
+
+WebGLRenderingContext::WebGLRenderingContext(FakeCanvas* canvas)
+{
+	this->canvas = canvas;
+	this->drawingBufferWidth = canvas->width;
+	this->drawingBufferHeight = canvas->height;
+	this->unpackFlipY = false;
+};
 
 JS_BINDED_CLASS_GLUE_IMPL(WebGLRenderingContext);
 
 JS_BINDED_CONSTRUCTOR_IMPL(WebGLRenderingContext)
 {
 	// this constructor should never be called from js
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -512,7 +72,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, activeTexture)
 		glActiveTexture(texture); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -527,7 +87,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, attachShader)
 		glAttachShader(program, shader); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -544,7 +104,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bindAttribLocation)
 		glBindAttribLocation(program, index, name); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -559,7 +119,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bindBuffer)
 		glBindBuffer(target, buffer); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -574,7 +134,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bindFramebuffer)
 		glBindFramebuffer(target, framebuffer); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -586,10 +146,12 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bindRenderbuffer)
 		GLuint renderbuffer;
 		JS_ValueToECMAUint32(cx, argv[0], &target);
 		JS_GET_UINT_WRAPPED(argv[1], "buffer", renderbuffer);
-		glBindFramebuffer(target, renderbuffer); CHECK_GL_ERROR();
-		return JS_TRUE;
+		if (target == GL_RENDERBUFFER) {
+			glBindFramebuffer(target, renderbuffer); CHECK_GL_ERROR();
+			return JS_TRUE;
+		}
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -604,7 +166,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bindTexture)
 		glBindTexture(target, texture); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -686,7 +248,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bufferData)
 			return JS_TRUE;
 		}
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -707,7 +269,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, bufferSubData)
 			return JS_TRUE;
 		}
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -778,7 +340,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, compileShader)
 		glCompileShader(shader); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -792,7 +354,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createBuffer)
 		JS_SET_RVAL(cx, vp, out);
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -806,7 +368,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createFramebuffer)
 		JS_SET_RVAL(cx, vp, out);
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -819,7 +381,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createProgram)
 		JS_SET_RVAL(cx, vp, out);
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -833,7 +395,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createRenderbuffer)
 		JS_SET_RVAL(cx, vp, out);
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -848,7 +410,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createShader)
 		JS_SET_RVAL(cx, vp, out);
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -862,7 +424,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, createTexture)
 		JS_SET_RVAL(cx, vp, out);
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -985,7 +547,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, drawArrays)
 		glDrawArrays(mode, first, count); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1004,7 +566,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, drawElements)
 		glDrawElements(mode, count, type, ((char *)NULL + offset));
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1017,7 +579,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, enable)
 		glEnable(cap); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1030,7 +592,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, enableVertexAttribArray)
 		glEnableVertexAttribArray(index); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1051,10 +613,25 @@ void WebGLRenderingContext::framebufferRenderbuffer(GLenum target, GLenum attach
 	glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer); CHECK_GL_ERROR();
 }
 
-void WebGLRenderingContext::framebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget,
-						  WebGLTexture texture, GLint level)
+JS_BINDED_FUNC_IMPL(WebGLRenderingContext, framebufferTexture2D)
 {
-	glFramebufferTexture2D(target, attachment, textarget, texture, level); CHECK_GL_ERROR();
+	if (argc == 5) {
+		jsval* argv = JS_ARGV(cx, vp);
+		GLenum target;
+		GLenum attachment;
+		GLenum textarget;
+		WebGLTexture texture;
+		GLint level;
+		JS_ValueToECMAUint32(cx, argv[0], &target);
+		JS_ValueToECMAUint32(cx, argv[1], &attachment);
+		JS_ValueToECMAUint32(cx, argv[2], &textarget);
+		JS_ValueToECMAUint32(cx, argv[3], &texture);
+		JS_ValueToECMAInt32(cx, argv[4], &level);
+		glFramebufferTexture2D(target, attachment, textarget, texture, level); CHECK_GL_ERROR();
+		return JS_TRUE;
+	}
+	JS_ReportError(cx, "Invalid native call");
+	return JS_FALSE;
 }
 
 JS_BINDED_FUNC_IMPL(WebGLRenderingContext, frontFace)
@@ -1095,7 +672,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getAttribLocation)
 		JS_SET_RVAL(cx, vp, INT_TO_JSVAL(location));
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1167,7 +744,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getUniformLocation)
 		JS_SET_RVAL(cx, vp, INT_TO_JSVAL(location));
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1211,7 +788,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, linkProgram)
 		}
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1225,6 +802,11 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, pixelStorei)
 		JS_ValueToInt32(cx, argv[1], &param);
 		switch (pname) {
 		case GL_UNPACK_FLIP_Y_WEBGL:
+			this->unpackFlipY = (param == 1);
+			if (this->unpackFlipY) {
+				fprintf(stderr, "WARNING: avoid setting UNPACK_FLIP_Y_WEBGL (%d)", param);
+			}
+			break;
 		case GL_UNPACK_PREMULTIPLY_ALPHA_WEBGL:
 		case GL_UNPACK_COLORSPACE_CONVERSION_WEBGL:
 			fprintf(stderr, "WARNING: flag 0x%04X not available (pixelStorei)\n", pname);
@@ -1236,7 +818,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, pixelStorei)
 		}
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1263,7 +845,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, shaderSource)
 		glShaderSource(shader, 1, &source, &length); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1293,7 +875,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getShaderParameter)
 		JS_SET_RVAL(cx, vp, out);
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1338,7 +920,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getProgramParameter)
 		JS_SET_RVAL(cx, vp, out);
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1359,11 +941,14 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, texImage2D)
 			JS_ValueToECMAUint32(cx, argv[3], &format);
 			JS_ValueToECMAUint32(cx, argv[4], &type);
 			jsimage = JSVAL_TO_OBJECT(argv[5]);
-			if (JS_InstanceOf(cx, jsimage, &PNGImage::js_class, NULL)) {
-				PNGImage* image = (PNGImage*)JS_GetPrivate(jsimage);
+			if (JS_InstanceOf(cx, jsimage, &FakeImage::js_class, NULL)) {
+				FakeImage* image = (FakeImage*)JS_GetPrivate(jsimage);
 				// NOTE: this is ignoring the format that getBytes() is returning...
 				// we should convert the image to the proper `type` before sending it
 				// to glTexImage2D
+				if (this->unpackFlipY) {
+					image->flipY();
+				}
 				glTexImage2D(target, level, internalformat, image->width, image->height, 0, format, type, image->getBytes());
 				return JS_TRUE;
 			}
@@ -1376,15 +961,18 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, texImage2D)
 			JS_ValueToECMAUint32(cx, argv[7], &type);
 			jsimage = (argv[8].isNullOrUndefined() ? NULL : JSVAL_TO_OBJECT(argv[8]));
 			const GLvoid* data = NULL;
-			if (jsimage && JS_InstanceOf(cx, jsimage, &PNGImage::js_class, NULL)) {
-				PNGImage* image = (PNGImage*)JS_GetPrivate(jsimage);
+			if (jsimage && JS_InstanceOf(cx, jsimage, &FakeImage::js_class, NULL)) {
+				FakeImage* image = (FakeImage*)JS_GetPrivate(jsimage);
+				if (this->unpackFlipY) {
+					image->flipY();
+				}
 				data = image->getBytes();
 			}
 			glTexImage2D(target, level, internalformat, width, height, border, format, type, data); CHECK_GL_ERROR();
 			return JS_TRUE;
 		}
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1401,7 +989,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, texParameterf)
 		glTexParameterf(target, pname, param); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1418,7 +1006,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, texParameteri)
 		glTexParameteri(target, pname, param); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1942,7 +1530,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, useProgram)
 		glUseProgram(program); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -1955,7 +1543,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, validateProgram)
 		glValidateProgram(program); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -2046,7 +1634,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, vertexAttribPointer)
 		glVertexAttribPointer(indx, size, type, normalized, stride, reinterpret_cast<GLvoid*>(offset));
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -2063,7 +1651,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, viewport)
 		glViewport(x, y, width, height); CHECK_GL_ERROR();
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -2091,7 +1679,7 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, getShaderPrecisionFormat)
 		JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
 		return JS_TRUE;
 	}
-	JS_ReportError(cx, "invalid call");
+	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
 }
 
@@ -2142,6 +1730,7 @@ void WebGLRenderingContext::_js_register(JSContext* cx, JSObject *global)
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, drawElements),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, enable),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, enableVertexAttribArray),
+		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, framebufferTexture2D),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, frontFace),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, getError),
 		JS_BINDED_FUNC_FOR_DEF(WebGLRenderingContext, getExtension),
