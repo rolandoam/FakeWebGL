@@ -21,7 +21,6 @@
 		A92CD3A8161FD9C4002E6A62 /* WebGLRenderingContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A92CD3A2161FD9C4002E6A62 /* WebGLRenderingContext.cpp */; };
 		A92CD3B11620C56E002E6A62 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD3B01620C56E002E6A62 /* libz.dylib */; };
 		A92CD3B816229C7A002E6A62 /* lodepng.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A92CD3B616229C7A002E6A62 /* lodepng.cpp */; };
-		A93ABBF516249B3C00EAE91B /* glue.debugger.mm in Sources */ = {isa = PBXBuildFile; fileRef = A93ABBF416249B3C00EAE91B /* glue.debugger.mm */; };
 		A95C3CD7162339C700386017 /* glue.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A95C3CD6162339C700386017 /* glue.ios.mm */; };
 		A95C3CE016235B6A00386017 /* images in Resources */ = {isa = PBXBuildFile; fileRef = A95C3CDD16235B6A00386017 /* images */; };
 		A95C3CE116235B6A00386017 /* js in Resources */ = {isa = PBXBuildFile; fileRef = A95C3CDE16235B6A00386017 /* js */; };
@@ -65,7 +64,6 @@
 		A92CD3B01620C56E002E6A62 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		A92CD3B616229C7A002E6A62 /* lodepng.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lodepng.cpp; sourceTree = "<group>"; };
 		A92CD3B716229C7A002E6A62 /* lodepng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lodepng.h; sourceTree = "<group>"; };
-		A93ABBF416249B3C00EAE91B /* glue.debugger.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = glue.debugger.mm; sourceTree = "<group>"; };
 		A95C3CD6162339C700386017 /* glue.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = glue.ios.mm; sourceTree = "<group>"; };
 		A95C3CDD16235B6A00386017 /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; name = images; path = FakeWebGL/Resources/images; sourceTree = "<group>"; };
 		A95C3CDE16235B6A00386017 /* js */ = {isa = PBXFileReference; lastKnownFileType = folder; name = js; path = FakeWebGL/Resources/js; sourceTree = "<group>"; };
@@ -189,7 +187,6 @@
 				A998255016C17A1C006888B6 /* XMLHTTPRequest.h */,
 				A995BB1F162DE4BF00C327D1 /* glue.math.ios.cpp */,
 				A995BB20162DE4BF00C327D1 /* glue.math.ios.h */,
-				A93ABBF416249B3C00EAE91B /* glue.debugger.mm */,
 				A95C3CD6162339C700386017 /* glue.ios.mm */,
 				A92CD39D161FD9C4002E6A62 /* glue.cpp */,
 				A92CD39E161FD9C4002E6A62 /* glue.h */,
@@ -294,7 +291,6 @@
 				A92CD3A5161FD9C4002E6A62 /* glue.cpp in Sources */,
 				A92CD3A8161FD9C4002E6A62 /* WebGLRenderingContext.cpp in Sources */,
 				A95C3CD7162339C700386017 /* glue.ios.mm in Sources */,
-				A93ABBF516249B3C00EAE91B /* glue.debugger.mm in Sources */,
 				A995BB21162DE4BF00C327D1 /* glue.math.ios.cpp in Sources */,
 				A98B1B03164424FD00E68C95 /* FakeAudio.cpp in Sources */,
 				A98B1B0C164436AE00E68C95 /* FakeAudio.ios.mm in Sources */,
@@ -344,9 +340,9 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/spidermonkey/include\"";
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/spidermonkey/ios/include\"";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/spidermonkey/lib\"";
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/spidermonkey/ios/lib\"";
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-Wno-return-type-c-linkage",
@@ -376,9 +372,9 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/spidermonkey/include\"";
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/spidermonkey/ios/include\"";
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/spidermonkey/lib\"";
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/spidermonkey/ios/lib\"";
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
@@ -399,10 +395,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "FakeWebGL/FakeWebGL-Prefix.pch";
 				INFOPLIST_FILE = "FakeWebGL/FakeWebGL-Info.plist";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = (
-					"-ljs_static",
-					"-v",
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/spidermonkey/ios/lib\"",
 				);
 				PRODUCT_NAME = FakeWebGL;
 				WRAPPER_EXTENSION = app;
@@ -415,10 +410,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "FakeWebGL/FakeWebGL-Prefix.pch";
 				INFOPLIST_FILE = "FakeWebGL/FakeWebGL-Info.plist";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = (
-					"-ljs_static",
-					"-v",
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/spidermonkey/ios/lib\"",
 				);
 				PRODUCT_NAME = FakeWebGL;
 				WRAPPER_EXTENSION = app;
