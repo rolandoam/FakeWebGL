@@ -780,11 +780,11 @@ JS_BINDED_FUNC_IMPL(WebGLRenderingContext, linkProgram)
 		GLint res;
 		glGetProgramiv(program, GL_LINK_STATUS, &res);
 		if (res != GL_TRUE) {
-			char buf[512];
+			char buf[1024];
 			GLsizei length;
-			glGetProgramInfoLog(program, 512, &length, buf);
+			glGetProgramInfoLog(program, 1024, &length, buf);
 			buf[length] = '\0';
-			fprintf(stderr, "OpenGL - %s", buf);
+			fprintf(stderr, "OpenGL [Shader Linker Error] %s\n", buf);
 		}
 		return JS_TRUE;
 	}

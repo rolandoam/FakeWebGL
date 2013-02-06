@@ -50,8 +50,14 @@
 
 #import "EAGLView.h"
 #import "ES2Renderer.h"
+#import "AppDelegate.h"
 #include "glue.h"
 
+@interface EAGLView () {
+	bool initialized;
+}
+
+@end
 
 @implementation EAGLView
 
@@ -78,8 +84,9 @@
 		
 		renderer = [[ES2Renderer alloc] init];
 
-		animating = FALSE;
-		displayLinkSupported = FALSE;
+		animating = false;
+		displayLinkSupported = false;
+		initialized = false;
 		animationFrameInterval = 1;
 		displayLink = nil;
 		animationTimer = nil;
@@ -101,6 +108,10 @@
 
 - (void)run:(id)sender
 {
+	if (!initialized) {
+		initialized = true;
+		[((AppDelegate *)[UIApplication sharedApplication].delegate) initJS];
+	}
     [renderer render];
 }
 

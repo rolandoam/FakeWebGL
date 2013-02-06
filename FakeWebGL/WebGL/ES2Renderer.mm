@@ -47,8 +47,8 @@
  
  */
 
-#import "ES2Renderer.h"
 #include "glue.h"
+#import "ES2Renderer.h"
 
 @implementation ES2Renderer
 
@@ -119,9 +119,9 @@
         NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
         return false;
     }
-	
+
 	setInnerWidthAndHeight(getGlobalContext(), NULL, backingWidth, backingHeight);
-    return true;
+	return true;
 }
 
 - (CGSize)size
