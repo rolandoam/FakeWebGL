@@ -120,7 +120,7 @@
 	 * 4) materials skin
 	 *    http://mrdoob.github.com/three.js/examples/webgl_materials_bumpmap_skin.html
 	 */
-#define TEST_THREE 0
+#define TEST_THREE 2
 	
 	// three.js
 #if TEST_THREE
