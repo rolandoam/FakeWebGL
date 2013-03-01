@@ -25,16 +25,19 @@ Right now this works:
 
 * up to [lesson 5](http://learningwebgl.com/blog/?p=507) of the
   [WebGL lessons](http://learningwebgl.com/blog/?page_id=1217)
-* touch input
+* some Three.js samples (check the
+  [AppDelegate.mm](https://github.com/funkaster/FakeWebGL/blob/master/FakeWebGL/AppDelegate.mm#L123))
+* touch input (only when touch is supported on the js side, we're not emulating
+  mouse input)
 * PNG support (non-compressed PNGs)
-* XMLHttpRequest, sort of... just working for local requests, and it's non-async
-  :)
+* XMLHttpRequest, sort of... just working for local requests, and it's
+  non-async. Support for network requests and async mode is coming soon.
+* audio (similar API to HTML5 Audio tag)
 
 Not working:
 
-* sound (HTML5 Sound API-like in the works)
 * js debugger (in the works)
-* proper retina support
+* proper highDPI support (somewhat working)
 
 ## Will this work in the iOS store?
 
@@ -55,7 +58,6 @@ really straight-forward.
 ## How can I add my own classes to javascript?
 
 That also should be easy. Just look at the implementation of the
-TestClass. There are several macros there that will help you go through it. At
-some point I'll write documentation :) - Although I keep saying that all the
-time...
-
+XMLHttpRequest. There are several macros there that will help you go through
+it. At some point I'll write documentation :) - Although I keep saying that all
+the time...
