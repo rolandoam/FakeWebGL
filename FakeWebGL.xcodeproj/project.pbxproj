@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		A917DEFF16445A6200026B4A /* audio in Resources */ = {isa = PBXBuildFile; fileRef = A917DEFE16445A6200026B4A /* audio */; };
+		A91C75C416DFF9CD0069913F /* Icon-ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = A91C75C016DFF9CD0069913F /* Icon-ipad.png */; };
+		A91C75C516DFF9CD0069913F /* Icon-ipad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A91C75C116DFF9CD0069913F /* Icon-ipad@2x.png */; };
+		A91C75C616DFF9CD0069913F /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = A91C75C216DFF9CD0069913F /* Icon.png */; };
+		A91C75C716DFF9CD0069913F /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A91C75C316DFF9CD0069913F /* Icon@2x.png */; };
 		A92CD36C161FD93A002E6A62 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD36B161FD93A002E6A62 /* UIKit.framework */; };
 		A92CD36E161FD93A002E6A62 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD36D161FD93A002E6A62 /* Foundation.framework */; };
 		A92CD370161FD93A002E6A62 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A92CD36F161FD93A002E6A62 /* CoreGraphics.framework */; };
@@ -44,6 +48,10 @@
 
 /* Begin PBXFileReference section */
 		A917DEFE16445A6200026B4A /* audio */ = {isa = PBXFileReference; lastKnownFileType = folder; name = audio; path = FakeWebGL/Resources/audio; sourceTree = "<group>"; };
+		A91C75C016DFF9CD0069913F /* Icon-ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-ipad.png"; sourceTree = "<group>"; };
+		A91C75C116DFF9CD0069913F /* Icon-ipad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-ipad@2x.png"; sourceTree = "<group>"; };
+		A91C75C216DFF9CD0069913F /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		A91C75C316DFF9CD0069913F /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@2x.png"; sourceTree = "<group>"; };
 		A92CD367161FD93A002E6A62 /* FakeWebGL.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FakeWebGL.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A92CD36B161FD93A002E6A62 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		A92CD36D161FD93A002E6A62 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -172,6 +180,10 @@
 				A92CD381161FD93A002E6A62 /* Default.png */,
 				A92CD383161FD93A002E6A62 /* Default@2x.png */,
 				A92CD385161FD93A002E6A62 /* Default-568h@2x.png */,
+				A91C75C016DFF9CD0069913F /* Icon-ipad.png */,
+				A91C75C116DFF9CD0069913F /* Icon-ipad@2x.png */,
+				A91C75C216DFF9CD0069913F /* Icon.png */,
+				A91C75C316DFF9CD0069913F /* Icon@2x.png */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -276,6 +288,10 @@
 				A917DEFF16445A6200026B4A /* audio in Resources */,
 				A9FF1F8B1692579E00D2623E /* obj in Resources */,
 				A998255B16C19FD1006888B6 /* MainWindow.xib in Resources */,
+				A91C75C416DFF9CD0069913F /* Icon-ipad.png in Resources */,
+				A91C75C516DFF9CD0069913F /* Icon-ipad@2x.png in Resources */,
+				A91C75C616DFF9CD0069913F /* Icon.png in Resources */,
+				A91C75C716DFF9CD0069913F /* Icon@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

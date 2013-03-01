@@ -50,8 +50,4 @@ function setupGame() {
    });
 } // setupGame()
 
-try {
-	setupGame();
-} catch (e) {
-	console.log(e);
-}
+setupGame();

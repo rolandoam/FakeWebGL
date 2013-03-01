@@ -174,7 +174,7 @@ do { \
 } while(0) \
 
 #define JS_BINDED_FUNC_FOR_DEF(klass, name) \
-JS_FN(#name, klass##_func_##name, 0, JSPROP_PERMANENT | JSPROP_SHARED)
+JS_FN(#name, klass##_func_##name, 0, JSPROP_ENUMERATE | JSPROP_PERMANENT)
 
 #define JS_BINDED_PROP_GET(klass, propName) \
 JSBool _js_get_##propName(JSContext *cx, JSHandleId id, JSMutableHandleValue vp)
@@ -209,10 +209,10 @@ JS_BINDED_PROP_GET(klass, propName); \
 JS_BINDED_PROP_SET(klass, propName);
 
 #define JS_BINDED_PROP_DEF_GETTER(klass, propName) \
-{#propName, 0, JSPROP_ENUMERATE | JSPROP_SHARED, JSOP_WRAPPER(_js_get_##klass##_##propName), NULL}
+{#propName, 0, JSPROP_ENUMERATE | JSPROP_PERMANENT | JSPROP_SHARED, JSOP_WRAPPER(_js_get_##klass##_##propName), NULL}
 
 #define JS_BINDED_PROP_DEF_ACCESSOR(klass, propName) \
-{#propName, 0, JSPROP_ENUMERATE | JSPROP_SHARED, JSOP_WRAPPER(_js_get_##klass##_##propName), JSOP_WRAPPER(_js_set_##klass##_##propName)}
+{#propName, 0, JSPROP_ENUMERATE | JSPROP_PERMANENT | JSPROP_SHARED, JSOP_WRAPPER(_js_get_##klass##_##propName), JSOP_WRAPPER(_js_set_##klass##_##propName)}
 
 #define JS_CREATE_UINT_WRAPPED(valOut, propName, val) \
 do { \

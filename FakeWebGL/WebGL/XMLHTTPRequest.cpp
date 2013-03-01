@@ -31,9 +31,6 @@
 
 FakeXMLHTTPRequest::~FakeXMLHTTPRequest()
 {
-	if (onreadystateCallback) {
-		JS_RemoveObjectRoot(getGlobalContext(), &onreadystateCallback);
-	}
 	if (data) {
 		free(data);
 	}
@@ -66,7 +63,6 @@ JS_BINDED_PROP_SET_IMPL(FakeXMLHTTPRequest, onreadystatechange)
 	jsval callback = vp.get();
 	if (callback != JSVAL_NULL) {
 		onreadystateCallback = JSVAL_TO_OBJECT(callback);
-		JS_AddNamedObjectRoot(cx, &onreadystateCallback, "FakeXMLHttpRequest_callback");
 	}
 	return JS_TRUE;
 }
@@ -141,7 +137,7 @@ JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, response)
 		}
 	} else if (responseType == kRequestResponseTypeArrayBuffer) {
 		JSObject* tmp = JS_NewArrayBuffer(cx, dataSize);
-		uint8_t* tmpData = JS_GetArrayBufferData(tmp, cx);
+		uint8_t* tmpData = JS_GetArrayBufferData(tmp);
 		memcpy(tmpData, data, dataSize);
 		jsval outVal = OBJECT_TO_JSVAL(tmp);
 		vp.set(outVal);
@@ -229,5 +225,5 @@ void FakeXMLHTTPRequest::_js_register(JSContext *cx, JSObject *global)
 		JS_FS_END
 	};
 	FakeXMLHTTPRequest::js_parent = NULL;
-	FakeXMLHTTPRequest::js_proto = JS_InitClass(cx, global, NULL, &FakeXMLHTTPRequest::js_class, FakeXMLHTTPRequest::_js_constructor, 1, props, funcs, NULL, NULL);
+	FakeXMLHTTPRequest::js_proto = JS_InitClass(cx, global, NULL, &FakeXMLHTTPRequest::js_class, FakeXMLHTTPRequest::_js_constructor, 0, props, funcs, NULL, NULL);
 }

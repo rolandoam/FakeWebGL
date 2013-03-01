@@ -99,7 +99,7 @@ if (fakeHTML) {
 		getElementById: function (domId) {
 			if (domId == "webgl") {
 				// create a canvas the full size of the window
-				return new ChesterCanvas(window.innerWidth, window.innerHeight);
+				return new FakeCanvas(window.innerWidth, window.innerHeight);
 			} else {
 				throw "invalid dom id!";
 			}
@@ -123,7 +123,8 @@ if (fakeHTML) {
 		// dummy createElement
 		createElement: function (tag) {
 			if (tag == "canvas") {
-				return new FakeCanvas(innerWidth, innerHeight);
+				var canvas = new FakeCanvas(innerWidth, innerHeight);
+				return canvas;
 			} else {
 				return new window.HTMLElement(tag);
 			}
@@ -174,6 +175,7 @@ Stats = function () {
 					fpsMax = Math.max( fpsMax, fps );
 
 					console.log(fps + ' FPS (' + fpsMin + '-' + fpsMax + ')');
+					console.log(ms + ' MS (' + msMin + '-' + msMax + ')');
 
 					prevTime = time;
 					frames = 0;

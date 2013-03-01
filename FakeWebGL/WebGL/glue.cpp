@@ -135,18 +135,27 @@ bool runScript(const char *path, JSObject* glob, JSContext* cx) {
 	if (cx == NULL) {
 		cx = _cx;
 	}
-	JSScript* script = JS_CompileUTF8File(cx, glob, rpath.c_str());
-	jsval rval;
-	JSBool evaluatedOK = false;
-	if (script) {
-		filename_script[path] = script;
-		JSAutoCompartment ac(cx, glob);
-		evaluatedOK = JS_ExecuteScript(cx, glob, script, &rval);
-		if (JS_FALSE == evaluatedOK) {
-			fprintf(stderr, "(evaluatedOK == JS_FALSE)\n");
+	unsigned char* buff = NULL;
+	size_t fsize = readFileInMemory(rpath.c_str(), &buff);
+	if (fsize > 0) {
+		JSScript* script = JS_CompileScript(cx, glob, (const char*)buff, fsize, rpath.c_str(), 1);
+		jsval rval;
+		JSBool evaluatedOK = false;
+		if (script) {
+			filename_script[path] = script;
+			JSAutoCompartment ac(cx, glob);
+			evaluatedOK = JS_ExecuteScript(cx, glob, script, &rval);
+			if (JS_FALSE == evaluatedOK) {
+				fprintf(stderr, "(evaluatedOK == JS_FALSE)\n");
+			}
 		}
+		// check pending exceptions
+		if (JS_IsExceptionPending(cx) && JS_ReportPendingException(cx)) {
+			fprintf(stderr, "***\n");
+		}
+		return evaluatedOK;
 	}
-	return evaluatedOK;
+	return false;
 }
 
 JSBool jsRunScript(JSContext* cx, unsigned argc, jsval*vp)
@@ -232,10 +241,10 @@ JSBool jsMat4mul(JSContext* cx, unsigned argc, jsval* vp)
 		JSObject* mat0 = JSVAL_TO_OBJECT(argv[0]);
 		JSObject* mat1 = JSVAL_TO_OBJECT(argv[1]);
 		JSObject* matOut = JSVAL_TO_OBJECT(argv[2]);
-		if (JS_IsArrayBufferViewObject(mat0, cx) && JS_IsArrayBufferViewObject(mat1, cx) && JS_IsArrayBufferViewObject(matOut, cx)) {
-			float* fmat0 = (float *)JS_GetArrayBufferViewData(mat0, cx);
-			float* fmat1 = (float *)JS_GetArrayBufferViewData(mat1, cx);
-			float* fmatOut = (float *)JS_GetArrayBufferViewData(matOut, cx);
+		if (JS_IsArrayBufferViewObject(mat0) && JS_IsArrayBufferViewObject(mat1) && JS_IsArrayBufferViewObject(matOut)) {
+			float* fmat0 = (float *)JS_GetArrayBufferViewData(mat0);
+			float* fmat1 = (float *)JS_GetArrayBufferViewData(mat1);
+			float* fmatOut = (float *)JS_GetArrayBufferViewData(matOut);
 			mat4mul(fmat0, fmat1, fmatOut);
 			return JS_TRUE;
 		}
@@ -250,10 +259,10 @@ JSBool jsMat4mulvec3(JSContext* cx, unsigned argc, jsval* vp)
 		JSObject* mat = JSVAL_TO_OBJECT(argv[0]);
 		JSObject* vec = JSVAL_TO_OBJECT(argv[1]);
 		JSObject* vecOut = JSVAL_TO_OBJECT(argv[2]);
-		if (JS_IsArrayBufferViewObject(mat, cx) && JS_IsArrayBufferViewObject(vec, cx) && JS_IsArrayBufferViewObject(vecOut, cx)) {
-			float* fmat = (float *)JS_GetArrayBufferViewData(mat, cx);
-			float* fvec = (float *)JS_GetArrayBufferViewData(vec, cx);
-			float* fvecOut = (float *)JS_GetArrayBufferViewData(vecOut, cx);
+		if (JS_IsArrayBufferViewObject(mat) && JS_IsArrayBufferViewObject(vec) && JS_IsArrayBufferViewObject(vecOut)) {
+			float* fmat = (float *)JS_GetArrayBufferViewData(mat);
+			float* fvec = (float *)JS_GetArrayBufferViewData(vec);
+			float* fvecOut = (float *)JS_GetArrayBufferViewData(vecOut);
 			mat4mulvec3(fmat, fvec, fvecOut);
 			return JS_TRUE;
 		}
@@ -269,8 +278,8 @@ JSBool jsMat4translate(JSContext* cx, unsigned argc, jsval* vp)
 		double x; JS_ValueToNumber(cx, argv[1], &x);
 		double y; JS_ValueToNumber(cx, argv[2], &y);
 		double z; JS_ValueToNumber(cx, argv[3], &z);
-		if (JS_IsArrayBufferViewObject(mat, cx)) {
-			float* fmat = (float *)JS_GetArrayBufferViewData(mat, cx);
+		if (JS_IsArrayBufferViewObject(mat)) {
+			float* fmat = (float *)JS_GetArrayBufferViewData(mat);
 			mat4translate(fmat, x, y, z);
 			return JS_TRUE;
 		}
@@ -287,8 +296,8 @@ JSBool jsMat4rotate(JSContext* cx, unsigned argc, jsval* vp)
 		double x; JS_ValueToNumber(cx, argv[2], &x);
 		double y; JS_ValueToNumber(cx, argv[3], &y);
 		double z; JS_ValueToNumber(cx, argv[4], &z);
-		if (JS_IsArrayBufferViewObject(mat, cx)) {
-			float* fmat = (float *)JS_GetArrayBufferViewData(mat, cx);
+		if (JS_IsArrayBufferViewObject(mat)) {
+			float* fmat = (float *)JS_GetArrayBufferViewData(mat);
 			mat4rotate(fmat, angle, x, y, z);
 			return JS_TRUE;
 		}
@@ -304,8 +313,8 @@ JSBool jsMat4scale(JSContext* cx, unsigned argc, jsval* vp)
 		double x; JS_ValueToNumber(cx, argv[1], &x);
 		double y; JS_ValueToNumber(cx, argv[2], &y);
 		double z; JS_ValueToNumber(cx, argv[3], &z);
-		if (JS_IsArrayBufferViewObject(mat, cx)) {
-			float* fmat = (float *)JS_GetArrayBufferViewData(mat, cx);
+		if (JS_IsArrayBufferViewObject(mat)) {
+			float* fmat = (float *)JS_GetArrayBufferViewData(mat);
 			mat4scale(fmat, x, y, z);
 			return JS_TRUE;
 		}
@@ -446,8 +455,7 @@ void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count)
 
 void createJSEnvironment() {
 	// create world
-	JS_SetCStringsAreUTF8();
-	runtime = JS_NewRuntime(15 * 1024 * 1024);
+	runtime = JS_NewRuntime(15 * 1024 * 1024, JS_NO_HELPER_THREADS);
 	_cx = JS_NewContext(runtime, 15360);
 
 	JS_SetVersion(_cx, JSVERSION_LATEST);

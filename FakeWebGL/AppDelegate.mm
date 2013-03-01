@@ -63,10 +63,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+	createJSEnvironment();
 	[_window setFrame:[UIScreen mainScreen].bounds];
 	_window.rootViewController = [[SimpleViewController alloc] init];
 	_window.rootViewController.view = _glView;
-	createJSEnvironment();
     return YES;
 }
 
@@ -120,8 +120,8 @@
 	 * 4) materials skin
 	 *    http://mrdoob.github.com/three.js/examples/webgl_materials_bumpmap_skin.html
 	 */
-#define TEST_THREE 2
-	
+#define TEST_THREE 0
+
 	// three.js
 #if TEST_THREE
 	// required for all tests
@@ -154,11 +154,10 @@
 	
 #endif
 	
-	// chester examples
 #if !TEST_THREE
+	// chester examples
 	runScript("js/chester.js");
-	runScript("js/chester-test-2.js");
-	evalString("setupGame()", NULL, "--");
+	runScript("js/chester-test-3.js");
 #endif
 }
 

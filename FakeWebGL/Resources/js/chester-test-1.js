@@ -49,3 +49,4 @@ function setupGame() {
 		// chesterGL.drawScene();
 	});
 }
+setupGame();

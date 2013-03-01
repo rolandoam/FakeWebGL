@@ -43,13 +43,13 @@ class FakeXMLHTTPRequest : public JSBindedObject
 	std::string type;
 	unsigned char* data;
 	size_t dataSize;
-	JSObject* onreadystateCallback;
+	js::RootedObject onreadystateCallback;
 	int readyState;
 	int status;
 	int responseType;
 	bool isAsync;
 public:
-	FakeXMLHTTPRequest() {}
+	FakeXMLHTTPRequest() : onreadystateCallback(getGlobalContext(), NULL) {}
 	~FakeXMLHTTPRequest();
 	JS_BINDED_CLASS_GLUE(FakeXMLHTTPRequest);
 	JS_BINDED_CONSTRUCTOR(FakeXMLHTTPRequest);

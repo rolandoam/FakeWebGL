@@ -35,3 +35,5 @@ function setupGame() {
 		// chesterGL.drawScene();
 	});
 } // setupGame()
+
+setupGame();
