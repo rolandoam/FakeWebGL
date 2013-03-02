@@ -78,6 +78,27 @@ JS_BINDED_FUNC_IMPL(FakeCanvas, getContext)
 	return JS_FALSE;
 }
 
+JS_BINDED_FUNC_IMPL(FakeCanvas, getBoundingClientRect) {
+	static js::RootedObject obj(cx, NULL);
+	if (!obj) {
+		obj = JS_NewObject(cx, NULL, NULL, NULL);
+		int width, height;
+		getDeviceWinSize(&width, &height);
+		jsval t = INT_TO_JSVAL(0),
+			l = INT_TO_JSVAL(0),
+			b = INT_TO_JSVAL(0),
+			w = INT_TO_JSVAL(width),
+			h = INT_TO_JSVAL(height);
+		JS_SetProperty(cx, obj, "top", &t);
+		JS_SetProperty(cx, obj, "left", &l);
+		JS_SetProperty(cx, obj, "bottom", &b);
+		JS_SetProperty(cx, obj, "width", &w);
+		JS_SetProperty(cx, obj, "height", &h);
+	}
+	JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
+	return JS_FALSE;
+}
+
 void FakeCanvas::_js_register(JSContext* cx, JSObject* global)
 {
 	// create the class
@@ -94,6 +115,7 @@ void FakeCanvas::_js_register(JSContext* cx, JSObject* global)
 	};
 	static JSFunctionSpec funcs[] = {
 		JS_BINDED_FUNC_FOR_DEF(FakeCanvas, getContext),
+		JS_BINDED_FUNC_FOR_DEF(FakeCanvas, getBoundingClientRect),
 		JS_FS_END
 	};
 	FakeCanvas::js_parent = NULL;

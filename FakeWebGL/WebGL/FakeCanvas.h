@@ -41,6 +41,7 @@ public:
 	JS_BINDED_PROP_GET(FakeCanvas, width);
 	JS_BINDED_PROP_GET(FakeCanvas, height);
 	JS_BINDED_FUNC(FakeCanvas, getContext);
+	JS_BINDED_FUNC(FakeCanvas, getBoundingClientRect);
 };
 
 #endif
