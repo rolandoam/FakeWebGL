@@ -71,9 +71,10 @@ void basic_object_finalize(JSFreeOp *freeOp, JSObject *obj) {
 
 void reportError(JSContext *cx, const char *message, JSErrorReport *report)
 {
-	fprintf(stderr, "%s:%u:%s\n",
+	fprintf(stderr, "%s:%u:%u:%s\n",
 			report->filename ? report->filename : "<no filename=\"filename\">",
 			(unsigned int) report->lineno,
+			(unsigned int) report->column,
 			message);
 };
 
@@ -446,7 +447,7 @@ void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count)
 		default:
 			break;
 	}
-	if (eventHandler != JSVAL_VOID) {
+	if (!eventHandler.isNullOrUndefined()) {
 		jsval valEvent = OBJECT_TO_JSVAL(jsEvent);
 		jsval out;
 		JS_CallFunctionValue(_cx, NULL, eventHandler, 1, &valEvent, &out);
@@ -465,5 +466,5 @@ void createJSEnvironment() {
 	globalObject = NewGlobalObject(_cx);
 
 	// load the polyfill
-	runScript("js/polyfill.js");
+	runScript("scripts/polyfill.js");
 }
