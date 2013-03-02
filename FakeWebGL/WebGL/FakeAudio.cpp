@@ -67,13 +67,13 @@ ALuint OpenALBuffer::getBufferId()
 
 #pragma mark - FakeAudio
 
-FakeAudio::FakeAudio()
+FakeAudio::FakeAudio() : onendedCallback(getGlobalContext())
 {
 	readyState = 0;
 	volume = 1.0f;
 }
 
-FakeAudio::FakeAudio(std::string aPath)
+FakeAudio::FakeAudio(std::string aPath) : onendedCallback(getGlobalContext())
 {
 	readyState = 0;
 	volume = 1.0f;
@@ -344,6 +344,18 @@ JS_BINDED_FUNC_IMPL(FakeAudio, pause)
 	return JS_TRUE;
 }
 
+JS_BINDED_FUNC_IMPL(FakeAudio, addEventListener) {
+	if (argc >=2) {
+		jsval* argv = JS_ARGV(cx, vp);
+		JSStringWrapper jsstr(argv[0]);
+		std::string str = jsstr;
+		if (str.compare("ended") == 0) {
+			onendedCallback = JSVAL_TO_OBJECT(argv[1]);
+		}
+	}
+	return JS_TRUE;
+}
+
 void FakeAudio::_js_register(JSContext* cx, JSObject* global)
 {
 	// create the class
@@ -373,6 +385,7 @@ void FakeAudio::_js_register(JSContext* cx, JSObject* global)
 		JS_BINDED_FUNC_FOR_DEF(FakeAudio, load),
 		JS_BINDED_FUNC_FOR_DEF(FakeAudio, play),
 		JS_BINDED_FUNC_FOR_DEF(FakeAudio, pause),
+		JS_BINDED_FUNC_FOR_DEF(FakeAudio, addEventListener),
 		JS_FS_END
 	};
 	FakeAudio::js_parent = NULL;

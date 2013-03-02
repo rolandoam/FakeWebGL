@@ -41,6 +41,7 @@ class FakeAudio : public JSBindedObject
 	float volume;
 	float duration;
 
+	js::RootedObject onendedCallback;
 	OpenALBuffer* buffer;
 	ALuint sourceId;
 public:
@@ -69,6 +70,7 @@ public:
 	JS_BINDED_FUNC(FakeAudio, load);
 	JS_BINDED_FUNC(FakeAudio, play);
 	JS_BINDED_FUNC(FakeAudio, pause);
+	JS_BINDED_FUNC(FakeAudio, addEventListener);
 };
 
 #endif /* defined(__webglshim__FakeAudio__) */
