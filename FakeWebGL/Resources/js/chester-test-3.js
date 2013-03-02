@@ -42,6 +42,12 @@ function setupGame() {
 		if (this.position[2] <= -200) { dz = -dz; }
 	});
 
+	chesterGL.addMouseHandler(function (pt, eventType) {
+		if (eventType == chesterGL.mouseEvents.DOWN) {
+			console.log("(" + pt[0].toFixed(3) + "," + pt[1].toFixed(3) + ")");
+		}
+	});
+
 	sceneBlock.addChild(group, label);
 	// sceneBlock.addChild(someBlock);
 	chesterGL.run();
