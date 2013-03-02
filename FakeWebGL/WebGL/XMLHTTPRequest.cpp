@@ -194,6 +194,7 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, send)
 		}
 	}
 	if (onreadystateCallback) {
+		JS_IsExceptionPending(cx) && JS_ReportPendingException(cx);
 		jsval fval = OBJECT_TO_JSVAL(onreadystateCallback);
 		jsval out;
 		JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &out);
