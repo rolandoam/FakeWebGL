@@ -60,6 +60,8 @@ public:
 	JS_BINDED_PROP_ACCESSOR(FakeImage, src);
 	JS_BINDED_PROP_ACCESSOR(FakeImage, onload);
 	JS_BINDED_PROP_ACCESSOR(FakeImage, onerror);
+
+	JS_BINDED_FUNC(FakeImage, addEventListener);
 };
 
 #endif

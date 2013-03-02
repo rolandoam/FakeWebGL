@@ -147,6 +147,20 @@ JS_BINDED_PROP_SET_IMPL(FakeImage, onerror)
 	return JS_TRUE;
 }
 
+JS_BINDED_FUNC_IMPL(FakeImage, addEventListener) {
+	if (argc >=2) {
+		jsval* argv = JS_ARGV(cx, vp);
+		JSStringWrapper jsstr(argv[0]);
+		std::string str = jsstr;
+		if (str.compare("load") == 0) {
+			onloadCallback = JSVAL_TO_OBJECT(argv[1]);
+		} else if (str.compare("error") == 0) {
+			onerrorCallback = JSVAL_TO_OBJECT(argv[1]);
+		}
+	}
+	return JS_TRUE;
+}
+
 void FakeImage::_js_register(JSContext* cx, JSObject* global)
 {
 	// create the class
@@ -165,6 +179,7 @@ void FakeImage::_js_register(JSContext* cx, JSObject* global)
 		{0, 0, 0, 0, 0}
 	};
 	static JSFunctionSpec funcs[] = {
+		JS_BINDED_FUNC_FOR_DEF(FakeImage, addEventListener),
 		JS_FS_END
 	};
 	FakeImage::js_parent = NULL;
