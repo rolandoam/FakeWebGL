@@ -144,7 +144,6 @@ bool runScript(const char *path, JSObject* glob, JSContext* cx) {
 		JSBool evaluatedOK = false;
 		if (script) {
 			filename_script[path] = script;
-			JSAutoCompartment ac(cx, glob);
 			evaluatedOK = JS_ExecuteScript(cx, glob, script, &rval);
 			if (JS_FALSE == evaluatedOK) {
 				fprintf(stderr, "(evaluatedOK == JS_FALSE)\n");
@@ -334,7 +333,6 @@ JSObject* NewGlobalObject(JSContext* cx)
 	if (!glob) {
 		return NULL;
 	}
-	JSAutoCompartment ac(cx, glob);
 	if (!JS_InitStandardClasses(cx, glob))
 		return NULL;
 	if (!JS_InitReflect(cx, glob))
@@ -344,7 +342,7 @@ JSObject* NewGlobalObject(JSContext* cx)
 
 	JS_DefineFunction(cx, glob, "log", jslog, 0, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "requestAnimationFrame", jsRequestAnimationFrame, 1, JSPROP_READONLY | JSPROP_PERMANENT);
-	JS_DefineFunction(cx, glob, "require", jsRunScript, 1, JSPROP_READONLY | JSPROP_PERMANENT);
+	JS_DefineFunction(cx, glob, "runScript", jsRunScript, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 
 	// add the native mat functions
 	JS_DefineFunction(cx, glob, "_mat4mul", jsMat4mul, 3, JSPROP_READONLY | JSPROP_PERMANENT);
