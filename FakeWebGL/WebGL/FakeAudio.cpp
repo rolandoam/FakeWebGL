@@ -239,7 +239,7 @@ JS_BINDED_PROP_GET_IMPL(FakeAudio, currentTime)
 	float time;
 	alGetSourcef(sourceId, AL_SEC_OFFSET, &time);
 	vp.set(DOUBLE_TO_JSVAL(time));
-	return JS_FALSE;
+	return JS_TRUE;
 }
 
 JS_BINDED_PROP_SET_IMPL(FakeAudio, currentTime)

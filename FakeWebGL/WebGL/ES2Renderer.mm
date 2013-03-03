@@ -87,7 +87,6 @@
 		JSContext* cx = getGlobalContext();
 		if (0) {
 			JSObject* global = getGlobalObject("debug-global");
-			JSAutoCompartment(cx, global);
 			JS_CallFunctionValue(cx, global, fval, 0, NULL, &outval);
 		} else {
 			JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &outval);

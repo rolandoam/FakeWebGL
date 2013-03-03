@@ -64,15 +64,13 @@ JS_BINDED_FUNC_IMPL(FakeCanvas, getContext)
 		jsval* argv = JS_ARGV(cx, vp);
 		JSString* str = JS_ValueToString(cx, argv[0]);
 		JSStringWrapper wrapper(str);
-		JSBool ok = JS_FALSE;
 		if (strncmp(wrapper, "experimental-webgl", 18) == 0) {
 			WebGLRenderingContext* cobj = new WebGLRenderingContext(this);
 			jsval out;
 			JS_WRAP_OBJECT_IN_VAL(WebGLRenderingContext, cobj, out);
 			JS_SET_RVAL(cx, vp, out);
-			ok = JS_TRUE;
+			return JS_TRUE;
 		}
-		return ok;
 	}
 	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
 	return JS_FALSE;
