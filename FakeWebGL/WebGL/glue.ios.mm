@@ -23,10 +23,10 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-#include "glue.h"
 #import <Foundation/Foundation.h>
-#import "AppDelegate.h"
+#include "glue.h"
 #include "glue.math.ios.h"
+#import "AppDelegate.h"
 
 #define RETINA_PREFIX @"@2x"
 
@@ -51,14 +51,11 @@ float getDevicePixelRatio()
 void getDeviceWinSize(int* width, int* height)
 {
 	CGRect bounds = [UIScreen mainScreen].bounds;
-	//AppDelegate* delegate = [UIApplication sharedApplication].delegate;
-	//ViewController* controller = delegate.viewController;
-	//UIView* view = controller.view;
 
 	// retina not working yet...
-	//float contentScaleFactor = view.contentScaleFactor;
-	*width = bounds.size.width;// * contentScaleFactor;
-	*height = bounds.size.height;// * contentScaleFactor;
+	float pixelRatio = [[UIScreen mainScreen] scale];
+	*width = bounds.size.width * pixelRatio;
+	*height = bounds.size.height * pixelRatio;
 }
 
 // all the mat multiplication code "borrowed" from the closure library
