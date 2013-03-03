@@ -96,7 +96,7 @@ JS_BINDED_FUNC_IMPL(FakeCanvas, getBoundingClientRect) {
 		JS_SetProperty(cx, obj, "height", &h);
 	}
 	JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj));
-	return JS_FALSE;
+	return JS_TRUE;
 }
 
 void FakeCanvas::_js_register(JSContext* cx, JSObject* global)
