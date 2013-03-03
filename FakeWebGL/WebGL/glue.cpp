@@ -237,12 +237,14 @@ JSBool jsMat4mul(JSContext* cx, unsigned argc, jsval* vp)
 		JSObject* mat0 = JSVAL_TO_OBJECT(argv[0]);
 		JSObject* mat1 = JSVAL_TO_OBJECT(argv[1]);
 		JSObject* matOut = JSVAL_TO_OBJECT(argv[2]);
-		if (JS_IsArrayBufferViewObject(mat0) && JS_IsArrayBufferViewObject(mat1) && JS_IsArrayBufferViewObject(matOut)) {
-			float* fmat0 = (float *)JS_GetArrayBufferViewData(mat0);
-			float* fmat1 = (float *)JS_GetArrayBufferViewData(mat1);
-			float* fmatOut = (float *)JS_GetArrayBufferViewData(matOut);
+		if (JS_IsTypedArrayObject(mat0) && JS_IsTypedArrayObject(mat1) && JS_IsTypedArrayObject(matOut)) {
+			float* fmat0 = JS_GetFloat32ArrayData(mat0);
+			float* fmat1 = JS_GetFloat32ArrayData(mat1);
+			float* fmatOut = JS_GetFloat32ArrayData(matOut);
 			mat4mul(fmat0, fmat1, fmatOut);
 			return JS_TRUE;
+		} else {
+			JS_ReportError(cx, "One of the vectors passed is not a typed array");
 		}
 	}
 	return JS_FALSE;
@@ -255,12 +257,14 @@ JSBool jsMat4mulvec3(JSContext* cx, unsigned argc, jsval* vp)
 		JSObject* mat = JSVAL_TO_OBJECT(argv[0]);
 		JSObject* vec = JSVAL_TO_OBJECT(argv[1]);
 		JSObject* vecOut = JSVAL_TO_OBJECT(argv[2]);
-		if (JS_IsArrayBufferViewObject(mat) && JS_IsArrayBufferViewObject(vec) && JS_IsArrayBufferViewObject(vecOut)) {
-			float* fmat = (float *)JS_GetArrayBufferViewData(mat);
-			float* fvec = (float *)JS_GetArrayBufferViewData(vec);
-			float* fvecOut = (float *)JS_GetArrayBufferViewData(vecOut);
+		if (JS_IsTypedArrayObject(mat) && JS_IsTypedArrayObject(vec) && JS_IsTypedArrayObject(vecOut)) {
+			float* fmat = JS_GetFloat32ArrayData(mat);
+			float* fvec = JS_GetFloat32ArrayData(vec);
+			float* fvecOut = JS_GetFloat32ArrayData(vecOut);
 			mat4mulvec3(fmat, fvec, fvecOut);
 			return JS_TRUE;
+		} else {
+			JS_ReportError(cx, "One of the vectors passed is not a typed array");
 		}
 	}
 	return JS_FALSE;
@@ -274,10 +278,12 @@ JSBool jsMat4translate(JSContext* cx, unsigned argc, jsval* vp)
 		double x; JS_ValueToNumber(cx, argv[1], &x);
 		double y; JS_ValueToNumber(cx, argv[2], &y);
 		double z; JS_ValueToNumber(cx, argv[3], &z);
-		if (JS_IsArrayBufferViewObject(mat)) {
-			float* fmat = (float *)JS_GetArrayBufferViewData(mat);
+		if (JS_IsTypedArrayObject(mat)) {
+			float* fmat = JS_GetFloat32ArrayData(mat);
 			mat4translate(fmat, x, y, z);
 			return JS_TRUE;
+		} else {
+			JS_ReportError(cx, "The vector passed is not a typed array");
 		}
 	}
 	return JS_FALSE;
@@ -292,10 +298,12 @@ JSBool jsMat4rotate(JSContext* cx, unsigned argc, jsval* vp)
 		double x; JS_ValueToNumber(cx, argv[2], &x);
 		double y; JS_ValueToNumber(cx, argv[3], &y);
 		double z; JS_ValueToNumber(cx, argv[4], &z);
-		if (JS_IsArrayBufferViewObject(mat)) {
-			float* fmat = (float *)JS_GetArrayBufferViewData(mat);
+		if (JS_IsTypedArrayObject(mat)) {
+			float* fmat = JS_GetFloat32ArrayData(mat);
 			mat4rotate(fmat, angle, x, y, z);
 			return JS_TRUE;
+		} else {
+			JS_ReportError(cx, "The vector passed is not a typed array");
 		}
 	}
 	return JS_FALSE;
@@ -309,10 +317,12 @@ JSBool jsMat4scale(JSContext* cx, unsigned argc, jsval* vp)
 		double x; JS_ValueToNumber(cx, argv[1], &x);
 		double y; JS_ValueToNumber(cx, argv[2], &y);
 		double z; JS_ValueToNumber(cx, argv[3], &z);
-		if (JS_IsArrayBufferViewObject(mat)) {
-			float* fmat = (float *)JS_GetArrayBufferViewData(mat);
+		if (JS_IsTypedArrayObject(mat)) {
+			float* fmat = JS_GetFloat32ArrayData(mat);
 			mat4scale(fmat, x, y, z);
 			return JS_TRUE;
+		} else {
+			JS_ReportError(cx, "The vector passed is not a typed array");
 		}
 	}
 	return JS_FALSE;
@@ -342,7 +352,7 @@ JSObject* NewGlobalObject(JSContext* cx)
 	JS_DefineFunction(cx, glob, "_mat4translate", jsMat4translate, 4, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "_mat4rotate", jsMat4rotate, 5, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "_mat4scale", jsMat4scale, 4, JSPROP_READONLY | JSPROP_PERMANENT);
-	
+
 	// get the size of the screen
 	int width, height;
 	getDeviceWinSize(&width, &height);
@@ -388,6 +398,8 @@ void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count)
 		jsval pageY = INT_TO_JSVAL(touches[i].y);
 		JS_SetProperty(_cx, objTouch, "pageX", &pageX);
 		JS_SetProperty(_cx, objTouch, "pageY", &pageY);
+		JS_SetProperty(_cx, objTouch, "clientX", &pageX);
+		JS_SetProperty(_cx, objTouch, "clientY", &pageY);
 		jsval jsTouch = OBJECT_TO_JSVAL(objTouch);
 		jsTouches.push_back(jsTouch);
 	}
@@ -413,6 +425,7 @@ void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count)
 			break;
 	}
 	if (!eventHandler.isNullOrUndefined()) {
+		JS_IsExceptionPending(_cx) && JS_ReportPendingException(_cx);
 		jsval valEvent = OBJECT_TO_JSVAL(jsEvent);
 		jsval out;
 		JS_CallFunctionValue(_cx, NULL, eventHandler, 1, &valEvent, &out);
