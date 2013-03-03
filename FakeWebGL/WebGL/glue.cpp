@@ -229,11 +229,6 @@ void setRequestAnimationFrameCallback(JSObject* obj) {
 //	JS_AddNamedObjectRoot(cx, &nextCallbackForRequestAnimationFrame, "requestAnimationFrameCallback");
 }
 
-JSScript* getScript(std::string name)
-{
-	return filename_script[name];
-}
-
 // mat native methods
 JSBool jsMat4mul(JSContext* cx, unsigned argc, jsval* vp)
 {
@@ -323,16 +318,6 @@ JSBool jsMat4scale(JSContext* cx, unsigned argc, jsval* vp)
 	return JS_FALSE;
 }
 
-JSBool jsSetGlobalObject(JSContext* cx, unsigned argc, jsval* vp)
-{
-	if (argc == 1) {
-		jsval* argv = JS_ARGV(cx, vp);
-		JSObject* obj = JSVAL_TO_OBJECT(argv[0]);
-		globalObject = obj;
-	}
-	return JS_TRUE;
-}
-
 JSObject* NewGlobalObject(JSContext* cx)
 {
 	JSObject* glob = JS_NewGlobalObject(cx, &global_class, NULL);
@@ -348,9 +333,8 @@ JSObject* NewGlobalObject(JSContext* cx)
 		return NULL;
 
 	JS_DefineFunction(cx, glob, "log", jslog, 0, JSPROP_READONLY | JSPROP_PERMANENT);
-	JS_DefineFunction(cx, glob, "newGlobal", jsNewGlobal, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "requestAnimationFrame", jsRequestAnimationFrame, 1, JSPROP_READONLY | JSPROP_PERMANENT);
-	JS_DefineFunction(cx, glob, "runScript", jsRunScript, 1, JSPROP_READONLY | JSPROP_PERMANENT);
+	JS_DefineFunction(cx, glob, "require", jsRunScript, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 
 	// add the native mat functions
 	JS_DefineFunction(cx, glob, "_mat4mul", jsMat4mul, 3, JSPROP_READONLY | JSPROP_PERMANENT);
@@ -385,25 +369,6 @@ void setInnerWidthAndHeight(JSContext* cx, JSObject* glob, int width, int height
 	JS_SetProperty(cx, glob, "innerWidth", &valWidth);
 	JS_SetProperty(cx, glob, "innerHeight", &valHeight);
 	JS_SetProperty(cx, glob, "devicePixelRatio", &pixelRatio);
-}
-
-JSBool jsNewGlobal(JSContext* cx, unsigned argc, jsval* vp)
-{
-	if (argc == 1) {
-		jsval *argv = JS_ARGV(cx, vp);
-		JSString *jsstr = JS_ValueToString(cx, argv[0]);
-		JSStringWrapper wrapper(jsstr);
-		std::string key = (char *)wrapper;
-		js::RootedObject *global = globals[key];
-		if (!global) {
-			global = new js::RootedObject(cx, NewGlobalObject(getGlobalContext()));
-			JS_WrapObject(cx, global->address());
-			globals[key] = global;
-		}
-		JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(*global));
-		return JS_TRUE;
-	}
-	return JS_FALSE;
 }
 
 JSContext* getGlobalContext()
