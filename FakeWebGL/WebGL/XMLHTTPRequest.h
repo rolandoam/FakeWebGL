@@ -26,6 +26,8 @@
 #ifndef __FAKE_XMLHTTPREQUEST_H__
 #define __FAKE_XMLHTTPREQUEST_H__
 
+#include <sstream>
+#include "curl.h"
 #include "jstypes.h"
 #include "glue.h"
 
@@ -41,15 +43,20 @@ class FakeXMLHTTPRequest : public JSBindedObject
 {
 	std::string url;
 	std::string type;
-	unsigned char* data;
+	std::stringstream data;
 	size_t dataSize;
 	js::RootedObject onreadystateCallback;
 	int readyState;
 	int status;
 	int responseType;
 	bool isAsync;
+	CURL* curlHandle;
+	bool isNetwork;
+
+	void _gotHeader(std::string header);
+	void _gotData(char* ptr, size_t len);
 public:
-	FakeXMLHTTPRequest() : onreadystateCallback(getGlobalContext(), NULL) {}
+	FakeXMLHTTPRequest();
 	~FakeXMLHTTPRequest();
 	JS_BINDED_CLASS_GLUE(FakeXMLHTTPRequest);
 	JS_BINDED_CONSTRUCTOR(FakeXMLHTTPRequest);
@@ -61,6 +68,9 @@ public:
 	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, response);
 	JS_BINDED_FUNC(FakeXMLHTTPRequest, open);
 	JS_BINDED_FUNC(FakeXMLHTTPRequest, send);
+
+	static size_t gotHeader(void *ptr, size_t size, size_t nmemb, void *userdata);
+	static size_t gotData(char *ptr, size_t size, size_t nmemb, void *userdata);
 };
 
 #endif

@@ -24,15 +24,56 @@
 //  THE SOFTWARE.
 
 
+#include <regex>
+#include <algorithm>
 #include "jsfriendapi.h"
 #include "XMLHTTPRequest.h"
 
+using namespace std;
+
 #pragma mark - FakeXMLHTTPRequest
 
-FakeXMLHTTPRequest::~FakeXMLHTTPRequest()
-{
-	if (data) {
-		free(data);
+size_t FakeXMLHTTPRequest::gotHeader(void* ptr, size_t size, size_t nmemb, void *userdata) {
+	FakeXMLHTTPRequest* req = (FakeXMLHTTPRequest*)userdata;
+	string header((const char*)ptr, size * nmemb);
+	req->_gotHeader(header);
+	return size * nmemb;
+}
+
+size_t FakeXMLHTTPRequest::gotData(char* ptr, size_t size, size_t nmemb, void *userdata) {
+	FakeXMLHTTPRequest* req = (FakeXMLHTTPRequest*)userdata;
+	req->_gotData(ptr, size * nmemb);
+	return size * nmemb;
+}
+
+void FakeXMLHTTPRequest::_gotData(char* ptr, size_t len) {
+	data.write(ptr, len);
+}
+
+void FakeXMLHTTPRequest::_gotHeader(string header) {
+	regex re("([\\w-]+):\\s+(.+)\r\n");
+	smatch md;
+	if (regex_match(header, md, re)) {
+		string h = md[1],
+			v = md[2];
+		std::transform(h.begin(), h.end(), h.begin(), ::tolower);
+		if (h == "content-type") {
+			fprintf(stderr, "got content type: %s\n", v.c_str());
+		}
+	}
+}
+
+FakeXMLHTTPRequest::FakeXMLHTTPRequest() : onreadystateCallback(getGlobalContext(), NULL), isNetwork(false) {
+	curlHandle = curl_easy_init();
+	curl_easy_setopt(curlHandle, CURLOPT_WRITEFUNCTION, FakeXMLHTTPRequest::gotData);
+	curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, this);
+	curl_easy_setopt(curlHandle, CURLOPT_HEADERFUNCTION, FakeXMLHTTPRequest::gotHeader);
+	curl_easy_setopt(curlHandle, CURLOPT_WRITEHEADER, this);
+}
+
+FakeXMLHTTPRequest::~FakeXMLHTTPRequest() {
+	if (curlHandle) {
+		curl_easy_cleanup(curlHandle);
 	}
 }
 
@@ -116,7 +157,7 @@ JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, status)
 
 JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, responseText)
 {
-	JSString* str = JS_NewStringCopyN(cx, (const char*)data, dataSize);
+	JSString* str = JS_NewStringCopyN(cx, data.str().c_str(), dataSize);
 	if (str) {
 		vp.set(STRING_TO_JSVAL(str));
 		return JS_TRUE;
@@ -130,7 +171,7 @@ JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, response)
 {
 	if (responseType == kRequestResponseTypeJSON) {
 		jsval outVal;
-		JSString* str = JS_NewStringCopyN(cx, (const char*)data, dataSize);
+		JSString* str = JS_NewStringCopyN(cx, data.str().c_str(), dataSize);
 		if (JS_ParseJSON(cx, JS_GetStringCharsZ(cx, str), dataSize, &outVal)) {
 			vp.set(outVal);
 			return JS_TRUE;
@@ -138,7 +179,7 @@ JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, response)
 	} else if (responseType == kRequestResponseTypeArrayBuffer) {
 		JSObject* tmp = JS_NewArrayBuffer(cx, dataSize);
 		uint8_t* tmpData = JS_GetArrayBufferData(tmp);
-		memcpy(tmpData, data, dataSize);
+		data.read((char*)tmpData, dataSize);
 		jsval outVal = OBJECT_TO_JSVAL(tmp);
 		vp.set(outVal);
 		return JS_TRUE;
@@ -171,6 +212,12 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, open)
 		if (url.length() > 5 && url.compare(url.length() - 5, 5, ".json") == 0) {
 			responseType = kRequestResponseTypeJSON;
 		}
+		if ((url.length() > 7 && url.compare(0, 7, "http://") == 0) ||
+			(url.length() > 8 && url.compare(0, 8, "https://") == 0))
+		{
+			curl_easy_setopt(curlHandle, CURLOPT_URL, url.c_str());
+			isNetwork = true;
+		}
 		return JS_TRUE;
 	}
 	JS_ReportError(cx, "invalid call: %s", __FUNCTION__);
@@ -179,25 +226,32 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, open)
 
 JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, send)
 {
-	std::string path = getFullPathFromRelativePath(url.c_str());
-	readyState = 4;
-	if (path.empty()) {
-		// file not found
-		status = 404;
-	} else {
-		dataSize = readFileInMemory(path.c_str(), &data);
-		if (dataSize > 0) {
-			status = 200;
+	if (!isNetwork) {
+		std::string path = getFullPathFromRelativePath(url.c_str());
+		readyState = 4;
+		if (path.empty()) {
+			// file not found
+			status = 404;
 		} else {
-			printf("Error trying to read '%s'\n", path.c_str());
-			status = 404; // just issue any error
+			unsigned char *tmp;
+			dataSize = readFileInMemory(path.c_str(), &tmp);
+			data.flush();
+			data << tmp;
+			if (dataSize > 0) {
+				status = 200;
+			} else {
+				printf("Error trying to read '%s'\n", path.c_str());
+				status = 404; // just issue any error
+			}
 		}
-	}
-	if (onreadystateCallback) {
-		JS_IsExceptionPending(cx) && JS_ReportPendingException(cx);
-		jsval fval = OBJECT_TO_JSVAL(onreadystateCallback);
-		jsval out;
-		JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &out);
+		if (onreadystateCallback) {
+			JS_IsExceptionPending(cx) && JS_ReportPendingException(cx);
+			jsval fval = OBJECT_TO_JSVAL(onreadystateCallback);
+			jsval out;
+			JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &out);
+		}
+	} else {
+		curl_easy_perform(curlHandle);
 	}
 	return JS_TRUE;
 }
