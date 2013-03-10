@@ -77,7 +77,7 @@ JS_BINDED_FUNC_IMPL(FakeCanvas, getContext)
 }
 
 JS_BINDED_FUNC_IMPL(FakeCanvas, getBoundingClientRect) {
-	static js::RootedObject obj(cx, NULL);
+	JSObject* obj = NULL;
 	if (!obj) {
 		obj = JS_NewObject(cx, NULL, NULL, NULL);
 		int width, height;
