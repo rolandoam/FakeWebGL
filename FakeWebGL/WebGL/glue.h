@@ -42,8 +42,8 @@ bool runScript(const char *path, JSObject* glob = NULL, JSContext* cx = NULL);
 bool evalString(const char *string, jsval *outVal, const char *filename);
 
 size_t readFileInMemory(const char *path, unsigned char **buff);
-JSObject* getRequestAnimationFrameCallback();
-void setRequestAnimationFrameCallback(JSObject* obj);
+jsval getRequestAnimationFrameCallback();
+void setRequestAnimationFrameCallback(jsval cb);
 float getDevicePixelRatio();
 void getDeviceWinSize(int* width, int* height);
 void setInnerWidthAndHeight(JSContext* cx, JSObject* glob, int width, int height);

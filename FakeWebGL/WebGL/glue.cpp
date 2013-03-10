@@ -43,7 +43,7 @@
 
 JSContext *_cx, *dbgCtx;
 JSObject* globalObject;
-JSObject* nextCallbackForRequestAnimationFrame;
+jsval nextCallbackForRequestAnimationFrame = JSVAL_NULL;
 JSRuntime* runtime;
 
 std::map<std::string, JSScript*> filename_script;
@@ -203,7 +203,7 @@ JSBool jsRequestAnimationFrame(JSContext* cx, uint32_t argc, jsval *vp)
 	// remove from root if the argument is NULL
 	if (argc >= 1) {
 		jsval* argv = JS_ARGV(cx, vp);
-		setRequestAnimationFrameCallback(JSVAL_TO_OBJECT(argv[0]));
+		setRequestAnimationFrameCallback(argv[0]);
 	}
 	return JS_TRUE;
 }
@@ -214,18 +214,16 @@ JSBool jsDevicePixelRatio(JSContext* cx, uint32_t argc, jsval *vp)
 	return JS_TRUE;
 }
 
-JSObject* getRequestAnimationFrameCallback() {
-	JSObject* ret = nextCallbackForRequestAnimationFrame;
-	if (ret) {
-//		JS_RemoveObjectRoot(cx, &nextCallbackForRequestAnimationFrame);
-		nextCallbackForRequestAnimationFrame = NULL;
-	}
-	return ret;
+jsval getRequestAnimationFrameCallback() {
+	return nextCallbackForRequestAnimationFrame;
 }
 
-void setRequestAnimationFrameCallback(JSObject* obj) {
-	nextCallbackForRequestAnimationFrame = obj;
-//	JS_AddNamedObjectRoot(cx, &nextCallbackForRequestAnimationFrame, "requestAnimationFrameCallback");
+void setRequestAnimationFrameCallback(jsval cb) {
+	if (nextCallbackForRequestAnimationFrame != JSVAL_NULL) {
+		JS_RemoveValueRoot(_cx, &nextCallbackForRequestAnimationFrame);
+	}
+	nextCallbackForRequestAnimationFrame = cb;
+	JS_AddValueRoot(_cx, &nextCallbackForRequestAnimationFrame);
 }
 
 // mat native methods

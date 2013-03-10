@@ -80,18 +80,13 @@
     
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer); CHECK_GL_ERROR();
     
-	JSObject* obj = getRequestAnimationFrameCallback();
-	if (obj) {
-		jsval fval = OBJECT_TO_JSVAL(obj);
+	jsval fval = getRequestAnimationFrameCallback();
+	if (fval != JSVAL_NULL) {
 		jsval outval;
 		JSContext* cx = getGlobalContext();
-		if (0) {
-			JSObject* global = getGlobalObject("debug-global");
-			JS_CallFunctionValue(cx, global, fval, 0, NULL, &outval);
-		} else {
-			JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &outval);
-		}
+		JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &outval);
 	}
+	executePendingCallbacks();
 #if 0
 	struct timeval now;
 	gettimeofday(&now, NULL);
