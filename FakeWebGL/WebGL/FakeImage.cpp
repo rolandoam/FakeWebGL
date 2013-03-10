@@ -102,7 +102,7 @@ JS_BINDED_PROP_SET_IMPL(FakeImage, src)
 	JSStringWrapper wrapper(jsstr);
 	// copy the source
 	if (strlen(wrapper) > 0) {
-		src = (char *)wrapper;
+		src = (const char *)wrapper;
 		std::string ext = src.substr(src.find_last_of(".") + 1);
 		load(ext);
 	}
@@ -151,7 +151,7 @@ JS_BINDED_FUNC_IMPL(FakeImage, addEventListener) {
 	if (argc >=2) {
 		jsval* argv = JS_ARGV(cx, vp);
 		JSStringWrapper jsstr(argv[0]);
-		std::string str = jsstr;
+		std::string str((const char*)jsstr);
 		if (str.compare("load") == 0) {
 			onloadCallback = JSVAL_TO_OBJECT(argv[1]);
 		} else if (str.compare("error") == 0) {

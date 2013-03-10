@@ -83,46 +83,44 @@ void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count);
 // just a simple utility to avoid mem leaking when using JSString
 class JSStringWrapper
 {
-	JSString*	string;
-	const char*	buffer;
+	JSString* string;
+	std::shared_ptr<char> utf8string;
 public:
-	JSStringWrapper() {
-		buffer = NULL;
+	JSStringWrapper() : utf8string(NULL) {
 	}
-	JSStringWrapper(JSString* str, JSContext* cx = NULL) {
+	JSStringWrapper(JSString* str, JSContext* cx = NULL) : utf8string(NULL) {
 		set(str, cx);
 	}
-	JSStringWrapper(jsval val, JSContext* cx = NULL) {
+	JSStringWrapper(jsval val, JSContext* cx = NULL) : utf8string(NULL) {
 		set(val, cx);
 	}
-	~JSStringWrapper() {
-		if (buffer) {
-			JS_free(getGlobalContext(), (void*)buffer);
-		}
-	}
+
 	void set(jsval val, JSContext* cx) {
 		if (val.isString()) {
 			string = val.toString();
 			if (!cx) {
 				cx = getGlobalContext();
 			}
-			buffer = JS_EncodeString(cx, string);
+			size_t len;
+			const jschar* chars = JS_GetStringCharsZAndLength(cx, string, &len);
+			utf8string = convertToUTF8((char*)chars, len * sizeof(jschar));
 		} else {
-			buffer = NULL;
+			utf8string = NULL;
 		}
 	}
+
 	void set(JSString* str, JSContext* cx) {
 		string = str;
 		if (!cx) {
 			cx = getGlobalContext();
 		}
-		buffer = JS_EncodeString(cx, string);
+		size_t len;
+		const jschar* chars = JS_GetStringCharsZAndLength(cx, string, &len);
+		utf8string = convertToUTF8((char*)chars, len * sizeof(jschar));
 	}
-	operator std::string() {
-		return std::string(buffer);
-	}
-	operator char*() {
-		return (char*)buffer;
+
+	operator const char*() {
+		return (const char *)utf8string.get();
 	}
 };
 

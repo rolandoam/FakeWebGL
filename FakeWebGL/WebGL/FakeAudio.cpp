@@ -125,7 +125,8 @@ JS_BINDED_CONSTRUCTOR_IMPL(FakeAudio)
 	if (argc == 1 && argv[0].isString()) {
 		JSString* str = argv[0].toString();
 		JSStringWrapper wrapper(str);
-		audio = new FakeAudio(wrapper);
+		std::string tmp = (const char *)wrapper;
+		audio = new FakeAudio(tmp);
 	} else {
 		audio = new FakeAudio();
 	}
@@ -181,7 +182,7 @@ JS_BINDED_PROP_SET_IMPL(FakeAudio, preload)
 	if (vp.isString()) {
 		JSString* str = vp.toString();
 		JSStringWrapper wrapper(str);
-		std::string tmp = wrapper;
+		std::string tmp((const char*)wrapper);
 		if (tmp == "none") {
 			preload = false;
 		} else if (tmp == "auto" || tmp == "metadata") {
@@ -224,7 +225,7 @@ JS_BINDED_PROP_SET_IMPL(FakeAudio, src)
 	if (vp.isString()) {
 		JSString* str = vp.toString();
 		JSStringWrapper wrapper(str);
-		src = (char *)wrapper;
+		src = (const char *)wrapper;
 		if (preload) {
 			loadAudio();
 		}
@@ -310,7 +311,7 @@ JS_BINDED_FUNC_IMPL(FakeAudio, canPlayType)
 	if (argc == 1 && argv[0].isString()) {
 		JSString* str = argv[0].toString();
 		JSStringWrapper wrapper(str);
-		std::string tmp = wrapper;
+		std::string tmp((const char*)wrapper);
 		if (tmp == "audio/mpeg" || tmp == "audio/wav") {
 			out = JS_NewStringCopyZ(cx, "maybe");
 		} else {
@@ -347,8 +348,8 @@ JS_BINDED_FUNC_IMPL(FakeAudio, pause)
 JS_BINDED_FUNC_IMPL(FakeAudio, addEventListener) {
 	if (argc >=2) {
 		jsval* argv = JS_ARGV(cx, vp);
-		JSStringWrapper jsstr(argv[0]);
-		std::string str = jsstr;
+		JSStringWrapper wrapper(argv[0]);
+		std::string str((const char*)wrapper);
 		if (str.compare("ended") == 0) {
 			onendedCallback = JSVAL_TO_OBJECT(argv[1]);
 		}
@@ -360,7 +361,7 @@ void FakeAudio::_js_register(JSContext* cx, JSObject* global)
 {
 	// create the class
 	FakeAudio::js_class = {
-		"Audio", JSCLASS_HAS_PRIVATE,
+		"FakeAudio", JSCLASS_HAS_PRIVATE,
 		JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
 		JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, basic_object_finalize,
 		JSCLASS_NO_OPTIONAL_MEMBERS
