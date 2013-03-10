@@ -233,10 +233,9 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, send)
 			// file not found
 			status = 404;
 		} else {
-			unsigned char *tmp;
-			dataSize = readFileInMemory(path.c_str(), &tmp);
+			shared_ptr<char> tmp = readFileInMemory(path.c_str(), dataSize);
 			data.flush();
-			data << tmp;
+			data << tmp.get();
 			if (dataSize > 0) {
 				status = 200;
 			} else {

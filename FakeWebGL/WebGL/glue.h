@@ -38,15 +38,16 @@ typedef JSBool(*js_function)(JSContext* cx, unsigned argc, jsval* vp);
 
 JSContext* getGlobalContext();
 void createJSEnvironment();
+void maybeGC();
 JSObject* getGlobalObject();
 bool runScript(const char *path, JSObject* glob = NULL, JSContext* cx = NULL);
 bool evalString(const char *string, jsval *outVal, const char *filename);
 void addDeferredCallback(JSObject* obj, jsval fval, unsigned argc, jsval* args);
 void executePendingCallbacks();
-std::shared_ptr<char> convertToUTF16(char* utf8string);
+std::shared_ptr<char> convertToUTF16(char* utf8string, size_t& outLen);
 std::shared_ptr<char> convertToUTF8(char* utf16string, size_t length);
 
-size_t readFileInMemory(const char *path, unsigned char **buff);
+std::shared_ptr<char> readFileInMemory(const char *path, size_t& readBytes);
 jsval getRequestAnimationFrameCallback();
 void setRequestAnimationFrameCallback(jsval cb);
 float getDevicePixelRatio();

@@ -96,7 +96,7 @@ void basic_object_finalize(JSFreeOp *freeOp, JSObject *obj) {
 void reportError(JSContext *cx, const char *message, JSErrorReport *report)
 {
 	fprintf(stderr, "%s:%u:%u:%s\n",
-			report->filename ? report->filename : "<no filename=\"filename\">",
+			report->filename ? report->filename : "(no-filename)",
 			(unsigned int) report->lineno,
 			(unsigned int) report->column,
 			message);
@@ -141,20 +141,23 @@ void executePendingCallbacks() {
 	pthread_mutex_unlock(&queue_mutex);
 }
 
-size_t readFileInMemory(const char *path, unsigned char **buff) {
+shared_ptr<char> readFileInMemory(const char *path, size_t& readBytes) {
 	struct stat buf;
+	shared_ptr<char> outptr(NULL);
+	char* buffer = NULL;
 	int file = open(path, O_RDONLY);
-	size_t readBytes = 0;
+	readBytes = 0;
 	if (file) {
 		if (fstat(file, &buf) == 0) {
-			*buff = (unsigned char *)calloc(buf.st_size, 1);
-			if (*buff) {
-				readBytes = read(file, *buff, buf.st_size);
+			buffer = (char *)calloc(buf.st_size, 1);
+			if (buffer) {
+				readBytes = read(file, buffer, buf.st_size);
+				outptr.reset(buffer);
 			}
 		}
 		close(file);
 	}
-    return readBytes;
+    return outptr;
 }
 
 bool runScript(const char *path, JSObject* glob, JSContext* cx) {
@@ -176,10 +179,14 @@ bool runScript(const char *path, JSObject* glob, JSContext* cx) {
 	if (cx == NULL) {
 		cx = _cx;
 	}
-	unsigned char* buff = NULL;
-	size_t fsize = readFileInMemory(rpath.c_str(), &buff);
+	size_t fsize;
+	shared_ptr<char> data = readFileInMemory(rpath.c_str(), fsize);
 	if (fsize > 0) {
-		JSScript* script = JS_CompileScript(cx, glob, (const char*)buff, fsize, rpath.c_str(), 1);
+		js::CompileOptions options(cx);
+		options.setUTF8(true);
+		options.setFileAndLine(rpath.c_str(), 1);
+		js::RootedObject rootedGlob(cx, glob);
+		JSScript* script = js::Compile(cx, rootedGlob, options, (const char*)data.get(), fsize);
 		jsval rval;
 		JSBool evaluatedOK = false;
 		if (script) {
@@ -192,7 +199,6 @@ bool runScript(const char *path, JSObject* glob, JSContext* cx) {
 		if (JS_IsExceptionPending(cx) && JS_ReportPendingException(cx)) {
 			fprintf(stderr, "***\n");
 		}
-		free(buff);
 		return evaluatedOK;
 	}
 	return false;
@@ -474,6 +480,10 @@ void createJSEnvironment() {
 	runScript("scripts/polyfill.js");
 }
 
+void maybeGC() {
+	JS_MaybeGC(_cx);
+}
+
 shared_ptr<char> convertToUTF8(char* utf16string, size_t len) {
 	iconv_t cd = iconv_open("UTF-8", "UTF-16LE");
 	char* utf8;
@@ -510,7 +520,7 @@ shared_ptr<char> convertToUTF8(char* utf16string, size_t len) {
 /**
  * receiver should free the buffer when done
  */
-shared_ptr<char> convertToUTF16(char* utf8string) {
+shared_ptr<char> convertToUTF16(char* utf8string, size_t& outLen) {
 	iconv_t cd = iconv_open("UTF-16LE", "UTF-8");
 	char* utf16;
 	size_t len;
@@ -519,6 +529,7 @@ shared_ptr<char> convertToUTF16(char* utf8string) {
 	len = strlen(utf8string);
 
 	utf16len = 2*len;
+	outLen = utf16len;
 	utf16 = (char *)calloc(utf16len, 1);
 	shared_ptr<char> outptr(utf16);
 
@@ -541,6 +552,7 @@ shared_ptr<char> convertToUTF16(char* utf8string) {
 		}
 		outptr = NULL;
 	}
+	outLen -= utf16len;
 
 	iconv_close(cd);
 	return outptr;
