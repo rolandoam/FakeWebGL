@@ -473,3 +473,75 @@ void createJSEnvironment() {
 	// load the polyfill
 	runScript("scripts/polyfill.js");
 }
+
+shared_ptr<char> convertToUTF8(char* utf16string, size_t len) {
+	iconv_t cd = iconv_open("UTF-8", "UTF-16LE");
+	char* utf8;
+	size_t utf8len;
+
+	utf8len = len;
+	utf8 = (char *)calloc(utf8len, 1);
+	shared_ptr<char> outptr(utf8);
+
+	size_t converted = iconv(cd, &utf16string, &len, &utf8, &utf8len);
+	if (converted == (size_t)-1) {
+		fprintf(stderr, "iconv failed\n");
+		switch (errno) {
+			case EILSEQ:
+				fprintf(stderr, "Invalid multibyte sequence.\n");
+				break;
+			case EINVAL:
+				fprintf(stderr, "Incomplete multibyte sequence.\n");
+				break;
+			case E2BIG:
+				fprintf(stderr, "No more room (iconv).\n");
+				break;
+			default:
+				fprintf(stderr, "Error: %s.\n", strerror(errno));
+				break;
+		}
+		outptr = NULL;
+	}
+	iconv_close(cd);
+	assert(outptr);
+	return outptr;
+}
+
+/**
+ * receiver should free the buffer when done
+ */
+shared_ptr<char> convertToUTF16(char* utf8string) {
+	iconv_t cd = iconv_open("UTF-16LE", "UTF-8");
+	char* utf16;
+	size_t len;
+	size_t utf16len;
+
+	len = strlen(utf8string);
+
+	utf16len = 2*len;
+	utf16 = (char *)calloc(utf16len, 1);
+	shared_ptr<char> outptr(utf16);
+
+	size_t converted = iconv(cd, &utf8string, &len, &utf16, &utf16len);
+	if (converted == (size_t)-1) {
+		fprintf(stderr, "iconv failed\n");
+		switch (errno) {
+			case EILSEQ:
+				fprintf(stderr, "Invalid multibyte sequence.\n");
+				break;
+			case EINVAL:
+				fprintf(stderr, "Incomplete multibyte sequence.\n");
+				break;
+			case E2BIG:
+				fprintf(stderr, "No more room (iconv).\n");
+				break;
+			default:
+				fprintf(stderr, "Error: %s.\n", strerror(errno));
+				break;
+		}
+		outptr = NULL;
+	}
+
+	iconv_close(cd);
+	return outptr;
+}

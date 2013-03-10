@@ -43,6 +43,8 @@ bool runScript(const char *path, JSObject* glob = NULL, JSContext* cx = NULL);
 bool evalString(const char *string, jsval *outVal, const char *filename);
 void addDeferredCallback(JSObject* obj, jsval fval, unsigned argc, jsval* args);
 void executePendingCallbacks();
+std::shared_ptr<char> convertToUTF16(char* utf8string);
+std::shared_ptr<char> convertToUTF8(char* utf16string, size_t length);
 
 size_t readFileInMemory(const char *path, unsigned char **buff);
 jsval getRequestAnimationFrameCallback();
