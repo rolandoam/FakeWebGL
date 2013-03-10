@@ -28,7 +28,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <map>
+#include <queue>
 #include <string>
+#include <pthread.h>
+#include <iconv.h>
+#include <errno.h>
+#include <assert.h>
 #include "jsapi.h"
 #include "jsfriendapi.h"
 #include "jsdbgapi.h"
@@ -46,8 +51,27 @@ JSObject* globalObject;
 jsval nextCallbackForRequestAnimationFrame = JSVAL_NULL;
 JSRuntime* runtime;
 
-std::map<std::string, JSScript*> filename_script;
-std::map<std::string, js::RootedObject*> globals;
+using namespace std;
+
+
+struct DeferredCallback {
+	js::RootedObject obj;
+	js::RootedValue  fval;
+	js::AutoArrayRooter args;
+	unsigned argc;
+
+	DeferredCallback(JSContext* cx) : obj(cx, NULL), fval(cx), args(cx, 0, NULL), argc(0) {}
+	~DeferredCallback() {
+		jsval* arr = args.array;
+		if (arr) {
+			delete arr;
+		}
+	}
+};
+
+// this is the queue of things to evaluate (obj,function)
+queue<DeferredCallback*> callbackQueue;
+pthread_mutex_t queue_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void dummy_finalize(JSFreeOp *freeOp, JSObject *obj)
 {
@@ -83,7 +107,6 @@ bool evalString(const char *string, jsval *outVal, const char *filename)
 	jsval rval;
 	JSScript* script = JS_CompileScript(_cx, globalObject, string, strlen(string), filename, 1);
 	if (script) {
-		filename_script[filename] = script;
 		JSBool evaluatedOK = JS_ExecuteScript(_cx, globalObject, script, &rval);
 		if (JS_FALSE == evaluatedOK) {
 			fprintf(stderr, "(evaluatedOK == JS_FALSE)\n");
@@ -93,10 +116,35 @@ bool evalString(const char *string, jsval *outVal, const char *filename)
 	return false;
 }
 
+void addDeferredCallback(JSObject* obj, jsval fval, unsigned argc, jsval* args) {
+	DeferredCallback* cb = new DeferredCallback(_cx);
+	cb->obj = obj;
+	cb->fval = fval;
+	cb->argc = argc;
+	cb->args.changeArray(args, argc);
+
+	pthread_mutex_lock(&queue_mutex);
+	callbackQueue.push(cb);
+	pthread_mutex_unlock(&queue_mutex);
+}
+
+void executePendingCallbacks() {
+	pthread_mutex_lock(&queue_mutex);
+	while (!callbackQueue.empty()) {
+		DeferredCallback* cb = callbackQueue.front();
+		jsval rval;
+		// we might find a deadlock if something we execute tries to add a deffered callback
+		JS_CallFunctionValue(_cx, cb->obj, cb->fval, cb->argc, cb->args.array, &rval);
+		JS_IsExceptionPending(_cx) && JS_ReportPendingException(_cx);
+		callbackQueue.pop();
+	}
+	pthread_mutex_unlock(&queue_mutex);
+}
+
 size_t readFileInMemory(const char *path, unsigned char **buff) {
 	struct stat buf;
 	int file = open(path, O_RDONLY);
-	long readBytes = -1;
+	size_t readBytes = 0;
 	if (file) {
 		if (fstat(file, &buf) == 0) {
 			*buff = (unsigned char *)calloc(buf.st_size, 1);
@@ -109,19 +157,11 @@ size_t readFileInMemory(const char *path, unsigned char **buff) {
     return readBytes;
 }
 
-JSObject* getGlobalObject(const char* name) {
-	js::RootedObject* obj = globals[name];
-	if (obj) {
-		return obj->get();
-	}
-	return NULL;
-}
-
 bool runScript(const char *path, JSObject* glob, JSContext* cx) {
 	if (!path) {
 		return false;
 	}
-	std::string rpath;
+	string rpath;
 	if (path[0] == '/') {
 		rpath = path;
 	} else {
@@ -143,7 +183,6 @@ bool runScript(const char *path, JSObject* glob, JSContext* cx) {
 		jsval rval;
 		JSBool evaluatedOK = false;
 		if (script) {
-			filename_script[path] = script;
 			evaluatedOK = JS_ExecuteScript(cx, glob, script, &rval);
 			if (JS_FALSE == evaluatedOK) {
 				fprintf(stderr, "(evaluatedOK == JS_FALSE)\n");
@@ -153,6 +192,7 @@ bool runScript(const char *path, JSObject* glob, JSContext* cx) {
 		if (JS_IsExceptionPending(cx) && JS_ReportPendingException(cx)) {
 			fprintf(stderr, "***\n");
 		}
+		free(buff);
 		return evaluatedOK;
 	}
 	return false;
@@ -160,25 +200,12 @@ bool runScript(const char *path, JSObject* glob, JSContext* cx) {
 
 JSBool jsRunScript(JSContext* cx, unsigned argc, jsval*vp)
 {
-	if (argc >= 1) {
+	if (argc == 1) {
 		jsval* argv = JS_ARGV(cx, vp);
 		JSString* str = JS_ValueToString(cx, argv[0]);
 		JSStringWrapper path(str);
-		JSBool res = false;
-		if (argc == 2 && argv[1].isString()) {
-			JSString* globalName = JSVAL_TO_STRING(argv[1]);
-			JSStringWrapper name(globalName);
-			js::RootedObject* rootedGlobal = globals[name];
-			if (rootedGlobal) {
-				res = runScript(path, rootedGlobal->get());
-			} else {
-				JS_ReportError(cx, "Invalid global object: %s", (char *)name);
-				return JS_FALSE;
-			}
-		} else {
-			JSObject* glob = JS_GetGlobalForScopeChain(cx);
-			res = runScript(path, glob);
-		}
+		JSObject* glob = JS_GetGlobalForScopeChain(cx);
+		JSBool res = runScript(path, glob);
 		return res;
 	}
 	return JS_TRUE;
@@ -191,7 +218,7 @@ JSBool jslog(JSContext* cx, uint32_t argc, jsval *vp)
 		JSString *string = JS_ValueToString(cx, argv[0]);
 		if (string) {
 			JSStringWrapper wrapper(string);
-			printf("%s\n", (char*)wrapper);
+			printf("%s\n", (const char*)wrapper);
 		}
 	}
 	return JS_TRUE;
@@ -377,9 +404,12 @@ void setInnerWidthAndHeight(JSContext* cx, JSObject* glob, int width, int height
 	JS_SetProperty(cx, glob, "devicePixelRatio", &pixelRatio);
 }
 
-JSContext* getGlobalContext()
-{
+JSContext* getGlobalContext() {
 	return _cx;
+}
+
+JSObject* getGlobalObject() {
+	return globalObject;
 }
 
 // will inject touches in the proper document event
@@ -387,7 +417,7 @@ void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count)
 {
 	// the js event
 	JSObject* jsEvent = JS_NewObject(_cx, NULL, NULL, NULL);
-	std::vector<jsval> jsTouches;
+	vector<jsval> jsTouches;
 	for (int i=0; i < count; i++) {
 		JSObject* objTouch = JS_NewObject(_cx, NULL, NULL, NULL);
 		jsval pageX = INT_TO_JSVAL(touches[i].x);
@@ -399,7 +429,7 @@ void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count)
 		jsval jsTouch = OBJECT_TO_JSVAL(objTouch);
 		jsTouches.push_back(jsTouch);
 	}
-	JSObject* touchArray = JS_NewArrayObject(_cx, count, &jsTouches[0]);
+	js::RootedObject touchArray(_cx, JS_NewArrayObject(_cx, count, &jsTouches[0]));
 	jsval valArray = OBJECT_TO_JSVAL(touchArray);
 	// set all the touches arrays with the same data
 	JS_SetProperty(_cx, jsEvent, "touches", &valArray);
@@ -417,7 +447,9 @@ void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count)
 		case webglTouchesEnded:
 		case webglTouchesCanceled:
 			JS_GetProperty(_cx, globalObject, "_touchesEnded", &eventHandler);
+			break;
 		default:
+			eventHandler = JSVAL_NULL;
 			break;
 	}
 	if (!eventHandler.isNullOrUndefined()) {
@@ -435,7 +467,6 @@ void createJSEnvironment() {
 
 	JS_SetVersion(_cx, JSVERSION_LATEST);
 	JS_SetOptions(_cx, JSOPTION_TYPE_INFERENCE);
-	JS_SetOptions(_cx, JS_GetOptions(_cx) | JSOPTION_VAROBJFIX);
 	JS_SetErrorReporter(_cx, reportError);
 	globalObject = NewGlobalObject(_cx);
 

@@ -28,6 +28,7 @@
 
 #include <typeinfo>
 #include <string>
+#include <memory>
 #include "jsapi.h"
 
 void basic_object_finalize(JSFreeOp *freeOp, JSObject *obj);
@@ -37,9 +38,11 @@ typedef JSBool(*js_function)(JSContext* cx, unsigned argc, jsval* vp);
 
 JSContext* getGlobalContext();
 void createJSEnvironment();
-JSObject* getGlobalObject(const char* name);
+JSObject* getGlobalObject();
 bool runScript(const char *path, JSObject* glob = NULL, JSContext* cx = NULL);
 bool evalString(const char *string, jsval *outVal, const char *filename);
+void addDeferredCallback(JSObject* obj, jsval fval, unsigned argc, jsval* args);
+void executePendingCallbacks();
 
 size_t readFileInMemory(const char *path, unsigned char **buff);
 jsval getRequestAnimationFrameCallback();
