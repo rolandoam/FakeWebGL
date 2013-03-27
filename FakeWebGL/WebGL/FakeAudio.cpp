@@ -8,41 +8,92 @@
 
 #include <map>
 #include <string>
+#include <pthread.h>
+#include <unistd.h>
 #include "FakeAudio.h"
+
+using namespace std;
+
+static bool bgThreadAlive;
+static void* _checkBufferStatus(void* args);
 
 class AudioManager
 {
 	ALCdevice* device;
 	ALCcontext* context;
-	std::map<std::string, OpenALBuffer*> buffers;
+	map<string, OpenALBuffer*> buffers;
+	pthread_t bgThread;
+
 public:
 	AudioManager() {
 		device = alcOpenDevice(0);
 		context = alcCreateContext(device, NULL);
 		alcMakeContextCurrent(context);
+		bgThreadAlive = true;
+		int err = pthread_create(&bgThread, NULL, _checkBufferStatus, this);
+		if (err) {
+			fprintf(stderr, "Error creating background thread, there will be no notifications on audio ended (%d)\n", err);
+		}
 	}
 
 	~AudioManager() {
 		alcDestroyContext(context);
 		alcCloseDevice(device);
+		bgThreadAlive = false;
+		pthread_join(bgThread, NULL);
 	}
 
-	OpenALBuffer* getBuffer(std::string path)
+	OpenALBuffer* getBuffer(string path)
 	{
-		return buffers[path];
+		if (buffers.find(path) != buffers.end())
+			return buffers[path];
+		return NULL;
 	}
 
-	void setBuffer(OpenALBuffer* buffer, std::string path)
+	void setBuffer(OpenALBuffer* buffer, string path)
 	{
 		buffers[path] = buffer;
 	}
+	
+	void checkBuffers() {
+		map<string, OpenALBuffer*>::iterator it = buffers.begin();
+		for (; it != buffers.end(); it++) {
+			ALint value;
+			OpenALBuffer* b = it->second;
+			alGetSourcei(b->getBufferId(), AL_SOURCE_STATE, &value);
+			if (value == AL_STOPPED) {
+				b->notifyEvent(AudioEnded);
+			}
+		}
+	}
 };
+
+// background thread that will check the status of the buffers
+static void* _checkBufferStatus(void* args) {
+	AudioManager* manager = (AudioManager*)args;
+	while (bgThreadAlive) {
+		manager->checkBuffers();
+		usleep(32); // two frames (aprox, at 16fps)
+	}
+	return NULL;
+}
 
 static AudioManager manager;
 
+#pragma mark - OpenALCallback
+
+OpenALCallback::OpenALCallback(JSContext* cx, js::Value func, JSObject* thisObj) : jsfunction(cx, func), jsthis(cx, thisObj)
+{
+}
+
+void OpenALCallback::call(JSContext* cx) {
+	JS::Value rval;
+	JS_CallFunctionValue(cx, jsthis.get(), jsfunction.get(), 0, NULL, &rval);
+}
+
 #pragma mark - OpenALBuffer
 
-OpenALBuffer::OpenALBuffer(std::string path)
+OpenALBuffer::OpenALBuffer(string path)
 {
 	src = path;
 	void* data = getData();
@@ -65,15 +116,41 @@ ALuint OpenALBuffer::getBufferId()
 	return bufferId;
 }
 
+void OpenALBuffer::registerCallback(AudioCallbackType eventType, std::shared_ptr<OpenALCallback> callback) {
+	if (eventType == AudioEnded) {
+		audioEndedCallbacks.push_back(callback);
+	}
+}
+
+void OpenALBuffer::deregisterCallack(AudioCallbackType eventType, std::shared_ptr<OpenALCallback> callback) {
+	if (eventType == AudioEnded) {
+		vector<shared_ptr<OpenALCallback>>::iterator pos = std::find(audioEndedCallbacks.begin(), audioEndedCallbacks.end(), callback);
+		if (pos != audioEndedCallbacks.end()) {
+			audioEndedCallbacks.erase(pos);
+		}
+	}
+}
+
+void OpenALBuffer::notifyEvent(AudioCallbackType eventType) {
+	if (eventType == AudioEnded) {
+		vector<shared_ptr<OpenALCallback>>::iterator it = audioEndedCallbacks.begin();
+		JSContext* cx = getGlobalContext();
+		for (; it != audioEndedCallbacks.end(); it++) {
+			shared_ptr<OpenALCallback> callback = *it;
+			callback->call(cx);
+		}
+	}
+}
+
 #pragma mark - FakeAudio
 
-FakeAudio::FakeAudio() : onendedCallback(getGlobalContext())
+FakeAudio::FakeAudio()
 {
 	readyState = 0;
 	volume = 1.0f;
 }
 
-FakeAudio::FakeAudio(std::string aPath) : onendedCallback(getGlobalContext())
+FakeAudio::FakeAudio(string aPath)
 {
 	readyState = 0;
 	volume = 1.0f;
@@ -125,7 +202,7 @@ JS_BINDED_CONSTRUCTOR_IMPL(FakeAudio)
 	if (argc == 1 && argv[0].isString()) {
 		JSString* str = argv[0].toString();
 		JSStringWrapper wrapper(str);
-		std::string tmp = (const char *)wrapper;
+		string tmp = (const char *)wrapper;
 		audio = new FakeAudio(tmp);
 	} else {
 		audio = new FakeAudio();
@@ -182,7 +259,7 @@ JS_BINDED_PROP_SET_IMPL(FakeAudio, preload)
 	if (vp.isString()) {
 		JSString* str = vp.toString();
 		JSStringWrapper wrapper(str);
-		std::string tmp((const char*)wrapper);
+		string tmp((const char*)wrapper);
 		if (tmp == "none") {
 			preload = false;
 		} else if (tmp == "auto" || tmp == "metadata") {
@@ -311,7 +388,7 @@ JS_BINDED_FUNC_IMPL(FakeAudio, canPlayType)
 	if (argc == 1 && argv[0].isString()) {
 		JSString* str = argv[0].toString();
 		JSStringWrapper wrapper(str);
-		std::string tmp((const char*)wrapper);
+		string tmp((const char*)wrapper);
 		if (tmp == "audio/mpeg" || tmp == "audio/wav") {
 			out = JS_NewStringCopyZ(cx, "maybe");
 		} else {
@@ -346,13 +423,23 @@ JS_BINDED_FUNC_IMPL(FakeAudio, pause)
 }
 
 JS_BINDED_FUNC_IMPL(FakeAudio, addEventListener) {
-	if (argc >=2) {
-		jsval* argv = JS_ARGV(cx, vp);
-		JSStringWrapper wrapper(argv[0]);
-		std::string str((const char*)wrapper);
+	JS::CallArgs args = CallArgsFromVp(argc, vp);
+	if (args.length() >=2) {
+		JSStringWrapper wrapper(args[0]);
+		string str((const char*)wrapper);
 		if (str.compare("ended") == 0) {
-			onendedCallback = JSVAL_TO_OBJECT(argv[1]);
+			JS::Value jsthis = JS_THIS(cx, vp);
+			shared_ptr<OpenALCallback> cb(new OpenALCallback(cx, args[1], jsthis.toObjectOrNull()));
+			buffer->registerCallback(AudioEnded, cb);
 		}
+	}
+	return JS_TRUE;
+}
+
+JS_BINDED_FUNC_IMPL(FakeAudio, removeEventListener) {
+	JS::CallArgs args = CallArgsFromVp(argc, vp);
+	if (args.length() >= 2) {
+		// need to think this through
 	}
 	return JS_TRUE;
 }
@@ -387,6 +474,7 @@ void FakeAudio::_js_register(JSContext* cx, JSObject* global)
 		JS_BINDED_FUNC_FOR_DEF(FakeAudio, play),
 		JS_BINDED_FUNC_FOR_DEF(FakeAudio, pause),
 		JS_BINDED_FUNC_FOR_DEF(FakeAudio, addEventListener),
+		JS_BINDED_FUNC_FOR_DEF(FakeAudio, removeEventListener),
 		JS_FS_END
 	};
 	FakeAudio::js_parent = NULL;

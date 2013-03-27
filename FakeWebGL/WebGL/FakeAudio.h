@@ -13,6 +13,23 @@
 #include <OpenAL/alc.h>
 #include "WebGLRenderingContext.h"
 
+class OpenALBuffer;
+
+enum AudioCallbackType {
+	AudioEnded,
+	AudioStopped,
+	AudioPaused
+};
+
+class OpenALCallback
+{
+	js::RootedValue jsfunction;
+	js::RootedObject jsthis;
+public:
+	OpenALCallback(JSContext* cx, js::Value func, JSObject* thisObj);
+	void call(JSContext* cx);
+};
+
 class OpenALBuffer
 {
 	ALuint bufferId;
@@ -20,11 +37,15 @@ class OpenALBuffer
 	ALsizei size;
 	ALsizei sampleRate;
 	std::string src;
+	std::vector<std::shared_ptr<OpenALCallback>> audioEndedCallbacks;
 public:
 	OpenALBuffer(std::string path);
 	~OpenALBuffer();
 	ALuint getBufferId();
-	// this is platform dependent, for iOS is defined in FakeAudio.ios.mm
+	// this is platform dependent, for iOS this is defined in FakeAudio.ios.mm
+	void registerCallback(AudioCallbackType eventType, std::shared_ptr<OpenALCallback> callback);
+	void deregisterCallack(AudioCallbackType eventType, std::shared_ptr<OpenALCallback> callback);
+	void notifyEvent(AudioCallbackType eventType);
 	void* getData();
 };
 
@@ -41,7 +62,6 @@ class FakeAudio : public JSBindedObject
 	float volume;
 	float duration;
 
-	js::RootedObject onendedCallback;
 	OpenALBuffer* buffer;
 	ALuint sourceId;
 public:
@@ -71,6 +91,7 @@ public:
 	JS_BINDED_FUNC(FakeAudio, play);
 	JS_BINDED_FUNC(FakeAudio, pause);
 	JS_BINDED_FUNC(FakeAudio, addEventListener);
+	JS_BINDED_FUNC(FakeAudio, removeEventListener);
 };
 
 #endif /* defined(__webglshim__FakeAudio__) */
