@@ -58,6 +58,39 @@ void getDeviceWinSize(int* width, int* height)
 	*height = bounds.size.height * pixelRatio;
 }
 
+void localStorageSet(const std::string& key, jsval val) {
+	NSString* nskey = [NSString stringWithUTF8String:key.c_str()];
+	id nsval;
+	if (val.isString()) {
+		JSStringWrapper wrapper(val.toString());
+		nsval = [NSString stringWithUTF8String:wrapper];
+	} else if (val.isNumber()) {
+		nsval = [NSNumber numberWithDouble:val.toNumber()];
+	} else if (val.isBoolean()) {
+		nsval = [NSNumber numberWithBool:val.toBoolean()];
+	}
+	[[NSUserDefaults standardUserDefaults] setObject:nsval forKey:nskey];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+jsval localStorageGet(const std::string& key) {
+	NSString* nskey = [NSString stringWithUTF8String:key.c_str()];
+	id val = [[NSUserDefaults standardUserDefaults] objectForKey:nskey];
+	jsval outval;
+	if (!val) {
+		outval = JSVAL_NULL;
+	} else if ([val isKindOfClass:[NSString class]]) {
+		JSString* str = JS_NewStringCopyZ(getGlobalContext(), [(NSString*)val UTF8String]);
+		outval = STRING_TO_JSVAL(str);
+	} else if ([val isKindOfClass:[NSNumber class]]) {
+		outval = DOUBLE_TO_JSVAL([(NSNumber*)val doubleValue]);
+	} else {
+		NSLog(@"invalid val type: %@", val);
+		outval = JSVAL_NULL;
+	}
+	return outval;
+}
+
 // all the mat multiplication code "borrowed" from the closure library
 // http://closure-library.googlecode.com/svn/docs/closure_goog_vec_mat4.js.source.html
 

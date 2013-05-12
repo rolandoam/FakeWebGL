@@ -34,6 +34,11 @@
 #include <iconv.h>
 #include <errno.h>
 #include <assert.h>
+// AbsoluteTime
+#include <mach/mach.h>
+#include <mach/mach_time.h>
+
+
 #include "jsapi.h"
 #include "jsfriendapi.h"
 #include "jsdbgapi.h"
@@ -45,6 +50,7 @@
 #include "FakeCanvas.h"
 #include "FakeImage.h"
 #include "FakeAudio.h"
+#include "FakeLocalStorage.hh"
 
 JSContext *_cx, *dbgCtx;
 JSObject* globalObject;
@@ -179,6 +185,7 @@ bool runScript(const char *path, JSObject* glob, JSContext* cx) {
 	if (cx == NULL) {
 		cx = _cx;
 	}
+
 	size_t fsize;
 	shared_ptr<char> data = readFileInMemory(rpath.c_str(), fsize);
 	if (fsize > 0) {
@@ -189,6 +196,7 @@ bool runScript(const char *path, JSObject* glob, JSContext* cx) {
 		JSScript* script = js::Compile(cx, rootedGlob, options, (const char*)data.get(), fsize);
 		jsval rval;
 		JSBool evaluatedOK = false;
+
 		if (script) {
 			evaluatedOK = JS_ExecuteScript(cx, glob, script, &rval);
 			if (JS_FALSE == evaluatedOK) {
@@ -228,6 +236,47 @@ JSBool jslog(JSContext* cx, uint32_t argc, jsval *vp)
 		}
 	}
 	return JS_TRUE;
+}
+
+static map<string, uint64_t> __times;
+/**
+ * NOTE: these two functions are *very* OS dependent
+ */
+JSBool js_time(JSContext* cx, unsigned argc, jsval* vp)
+{
+	
+	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+	if (args.length() == 1 && args[0].isString()) {
+		JSStringWrapper str(args[0], cx);
+		string tmp = (const char*)str;
+		uint64_t begin = mach_absolute_time();
+		__times[tmp] = begin;
+	}
+	return true;
+}
+
+JSBool js_timeEnd(JSContext* cx, unsigned argc, jsval* vp)
+{
+	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+	if (args.length() == 1 && args[0].isString()) {
+		JSStringWrapper str(args[0], cx);
+		string tmp = (const char*)str;
+		if (__times.find(tmp) != __times.end()) {
+			static mach_timebase_info_data_t s_timebase_info;
+			if (s_timebase_info.denom == 0) {
+				(void) mach_timebase_info(&s_timebase_info);
+			}
+			uint64_t begin = __times[tmp];
+			uint64_t end = mach_absolute_time();
+			int elapsedMs = (end - begin) * s_timebase_info.numer / (1E6 * s_timebase_info.numer);
+			printf("%s: %dms\n", (const char*)str, elapsedMs);
+			// erase the timer in the map
+			__times.erase(tmp);
+		} else {
+			printf("%s: invalid timer\n", tmp.c_str());
+		}
+	}
+	return true;
 }
 
 JSBool jsRequestAnimationFrame(JSContext* cx, uint32_t argc, jsval *vp)
@@ -372,6 +421,8 @@ JSObject* NewGlobalObject(JSContext* cx)
 		return NULL;
 
 	JS_DefineFunction(cx, glob, "log", jslog, 0, JSPROP_READONLY | JSPROP_PERMANENT);
+	JS_DefineFunction(cx, glob, "time", js_time, 1, JSPROP_READONLY | JSPROP_PERMANENT);
+	JS_DefineFunction(cx, glob, "timeEnd", js_timeEnd, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "requestAnimationFrame", jsRequestAnimationFrame, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "runScript", jsRunScript, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 
@@ -393,6 +444,7 @@ JSObject* NewGlobalObject(JSContext* cx)
 	FakeImage::_js_register(_cx, glob);
 	FakeXMLHTTPRequest::_js_register(_cx, glob);
 	FakeAudio::_js_register(_cx, glob);
+	FakeLocalStorage::_js_register(cx, glob);
 
 	return glob;
 }

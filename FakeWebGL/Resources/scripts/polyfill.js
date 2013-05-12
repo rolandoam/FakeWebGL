@@ -58,13 +58,12 @@ _touchesEnded = function (event) {
 	}
 };
 
-var fakeHTML = true;
+var fakeHTML = false;
 
 // defining window is not enough for passing the isBrowser test in requirejs, which is a good thing
 window = this;
-window.navigator = undefined;
 window.document = undefined;
-
+window.navigator = undefined;
 self = this;
 
 if (fakeHTML) {
@@ -190,6 +189,8 @@ Stats = function () {
 
 HTMLCanvasElement = FakeCanvas;
 
+Audio = FakeAudio;
+
 FakeCanvas.prototype.__offset = {
 	top: 0,
 	left: 0
@@ -217,6 +218,20 @@ setTimeout = function FN_setTimeout(callback, delay) {
 alert = function FN_alert(txt) {
 	log(txt);
 };
+
+var googShim = true;
+if (googShim) {
+	goog = {};
+	goog.inherits = function(childCtor, parentCtor) {
+		/** @constructor */
+		function tempCtor() {};
+		tempCtor.prototype = parentCtor.prototype;
+		childCtor.superClass_ = parentCtor.prototype;
+		childCtor.prototype = new tempCtor();
+		/** @override */
+		childCtor.prototype.constructor = childCtor;
+	};
+}
 
 // adapted from https://gist.github.com/763999
 WebGLRenderingContext.prototype.ACTIVE_ATTRIBUTES = 35721;

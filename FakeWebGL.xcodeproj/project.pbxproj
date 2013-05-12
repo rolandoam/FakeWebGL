@@ -27,7 +27,6 @@
 		A92CD3B816229C7A002E6A62 /* lodepng.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A92CD3B616229C7A002E6A62 /* lodepng.cpp */; };
 		A95C3CD7162339C700386017 /* glue.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A95C3CD6162339C700386017 /* glue.ios.mm */; };
 		A95C3CE016235B6A00386017 /* images in Resources */ = {isa = PBXBuildFile; fileRef = A95C3CDD16235B6A00386017 /* images */; };
-		A95C3CE116235B6A00386017 /* js in Resources */ = {isa = PBXBuildFile; fileRef = A95C3CDE16235B6A00386017 /* js */; };
 		A95C3CE216235B6A00386017 /* shaders in Resources */ = {isa = PBXBuildFile; fileRef = A95C3CDF16235B6A00386017 /* shaders */; };
 		A98B1B03164424FD00E68C95 /* FakeAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A98B1B01164424FD00E68C95 /* FakeAudio.cpp */; };
 		A98B1B051644256E00E68C95 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A98B1B041644256E00E68C95 /* OpenAL.framework */; };
@@ -42,6 +41,9 @@
 		A998255B16C19FD1006888B6 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = A998255A16C19FD1006888B6 /* MainWindow.xib */; };
 		A998255D16C1A1C0006888B6 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = A998255C16C1A1C0006888B6 /* AppDelegate.mm */; };
 		A998256016C1B335006888B6 /* ES2Renderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = A998255F16C1B335006888B6 /* ES2Renderer.mm */; };
+		A9D095121703565D00A6D60F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D095111703565D00A6D60F /* Security.framework */; };
+		A9D095141703566B00A6D60F /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A9D095131703566B00A6D60F /* libiconv.dylib */; };
+		A9D09516170357FF00A6D60F /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = A9D09515170357FF00A6D60F /* scripts */; };
 		A9EB655E162F39B200EFEF45 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = A9EB655D162F39B200EFEF45 /* fonts */; };
 		A9FF1F8B1692579E00D2623E /* obj in Resources */ = {isa = PBXBuildFile; fileRef = A9FF1F8A1692579E00D2623E /* obj */; };
 /* End PBXBuildFile section */
@@ -74,7 +76,6 @@
 		A92CD3B716229C7A002E6A62 /* lodepng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lodepng.h; sourceTree = "<group>"; };
 		A95C3CD6162339C700386017 /* glue.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = glue.ios.mm; sourceTree = "<group>"; };
 		A95C3CDD16235B6A00386017 /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; name = images; path = FakeWebGL/Resources/images; sourceTree = "<group>"; };
-		A95C3CDE16235B6A00386017 /* js */ = {isa = PBXFileReference; lastKnownFileType = folder; name = js; path = FakeWebGL/Resources/js; sourceTree = "<group>"; };
 		A95C3CDF16235B6A00386017 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = FakeWebGL/Resources/shaders; sourceTree = "<group>"; };
 		A98B1B01164424FD00E68C95 /* FakeAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FakeAudio.cpp; sourceTree = "<group>"; };
 		A98B1B02164424FD00E68C95 /* FakeAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FakeAudio.h; sourceTree = "<group>"; };
@@ -96,6 +97,9 @@
 		A998255C16C1A1C0006888B6 /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AppDelegate.mm; sourceTree = "<group>"; };
 		A998255E16C1B2BC006888B6 /* ES2Renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ES2Renderer.h; path = WebGL/ES2Renderer.h; sourceTree = "<group>"; };
 		A998255F16C1B335006888B6 /* ES2Renderer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ES2Renderer.mm; path = WebGL/ES2Renderer.mm; sourceTree = "<group>"; };
+		A9D095111703565D00A6D60F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		A9D095131703566B00A6D60F /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
+		A9D09515170357FF00A6D60F /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = FakeWebGL/Resources/scripts; sourceTree = "<group>"; };
 		A9EB655D162F39B200EFEF45 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = FakeWebGL/Resources/fonts; sourceTree = "<group>"; };
 		A9FF1F8A1692579E00D2623E /* obj */ = {isa = PBXFileReference; lastKnownFileType = folder; name = obj; path = FakeWebGL/Resources/obj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -105,6 +109,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A9D095121703565D00A6D60F /* Security.framework in Frameworks */,
 				A998255916C199BD006888B6 /* QuartzCore.framework in Frameworks */,
 				A92CD36C161FD93A002E6A62 /* UIKit.framework in Frameworks */,
 				A92CD36E161FD93A002E6A62 /* Foundation.framework in Frameworks */,
@@ -112,6 +117,7 @@
 				A92CD374161FD93A002E6A62 /* OpenGLES.framework in Frameworks */,
 				A98B1B051644256E00E68C95 /* OpenAL.framework in Frameworks */,
 				A98B1B0E164436FA00E68C95 /* AudioToolbox.framework in Frameworks */,
+				A9D095141703566B00A6D60F /* libiconv.dylib in Frameworks */,
 				A92CD3B11620C56E002E6A62 /* libz.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -141,7 +147,9 @@
 		A92CD36A161FD93A002E6A62 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A9D095131703566B00A6D60F /* libiconv.dylib */,
 				A92CD3B01620C56E002E6A62 /* libz.dylib */,
+				A9D095111703565D00A6D60F /* Security.framework */,
 				A92CD36B161FD93A002E6A62 /* UIKit.framework */,
 				A92CD36D161FD93A002E6A62 /* Foundation.framework */,
 				A92CD36F161FD93A002E6A62 /* CoreGraphics.framework */,
@@ -216,11 +224,11 @@
 		A95C3CDC16235B5100386017 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				A9D09515170357FF00A6D60F /* scripts */,
 				A917DEFE16445A6200026B4A /* audio */,
 				A9EB655D162F39B200EFEF45 /* fonts */,
 				A95C3CDD16235B6A00386017 /* images */,
 				A9FF1F8A1692579E00D2623E /* obj */,
-				A95C3CDE16235B6A00386017 /* js */,
 				A95C3CDF16235B6A00386017 /* shaders */,
 			);
 			name = Resources;
@@ -282,7 +290,6 @@
 				A92CD384161FD93A002E6A62 /* Default@2x.png in Resources */,
 				A92CD386161FD93A002E6A62 /* Default-568h@2x.png in Resources */,
 				A95C3CE016235B6A00386017 /* images in Resources */,
-				A95C3CE116235B6A00386017 /* js in Resources */,
 				A95C3CE216235B6A00386017 /* shaders in Resources */,
 				A9EB655E162F39B200EFEF45 /* fonts in Resources */,
 				A917DEFF16445A6200026B4A /* audio in Resources */,
@@ -292,6 +299,7 @@
 				A91C75C516DFF9CD0069913F /* Icon-ipad@2x.png in Resources */,
 				A91C75C616DFF9CD0069913F /* Icon.png in Resources */,
 				A91C75C716DFF9CD0069913F /* Icon@2x.png in Resources */,
+				A9D09516170357FF00A6D60F /* scripts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,16 +364,25 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/spidermonkey/ios/include\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/spidermonkey/ios/include\"",
+					"\"$(SRCROOT)/libcurl/ios/include\"",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/spidermonkey/ios/lib\"";
+				LIBRARY_SEARCH_PATHS = (
+					"\"$(SRCROOT)/spidermonkey/ios/lib\"",
+					"\"$(SRCROOT)/libcurl/ios/lib\"",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-Wno-return-type-c-linkage",
 					"-Wno-invalid-offsetof",
 					"-DLODEPNG_NO_COMPILE_ENCODER",
 				);
-				OTHER_LDFLAGS = "-ljs_static";
+				OTHER_LDFLAGS = (
+					"-ljs_static",
+					"-lcurl",
+				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -388,9 +405,15 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/spidermonkey/ios/include\"";
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/spidermonkey/ios/include\"",
+					"\"$(SRCROOT)/libcurl/ios/include\"",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/spidermonkey/ios/lib\"";
+				LIBRARY_SEARCH_PATHS = (
+					"\"$(SRCROOT)/spidermonkey/ios/lib\"",
+					"\"$(SRCROOT)/libcurl/ios/lib\"",
+				);
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
@@ -398,7 +421,10 @@
 					"-Wno-invalid-offsetof",
 					"-DLODEPNG_NO_COMPILE_ENCODER",
 				);
-				OTHER_LDFLAGS = "-ljs_static";
+				OTHER_LDFLAGS = (
+					"-ljs_static",
+					"-lcurl",
+				);
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;

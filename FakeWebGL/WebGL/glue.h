@@ -83,6 +83,8 @@ typedef struct {
 
 const char* getFullPathFromRelativePath(const char* path);
 void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count);
+void localStorageSet(const std::string& key, jsval val);
+jsval localStorageGet(const std::string& key);
 
 #pragma mark - JSStringWrapper
 
@@ -131,7 +133,7 @@ public:
 };
 
 class JSBindedObject
-{	
+{
 };
 
 #pragma mark - Helpful Macros
