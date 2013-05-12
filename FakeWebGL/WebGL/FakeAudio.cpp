@@ -30,10 +30,12 @@ public:
 		context = alcCreateContext(device, NULL);
 		alcMakeContextCurrent(context);
 		bgThreadAlive = true;
+		/*
 		int err = pthread_create(&bgThread, NULL, _checkBufferStatus, this);
 		if (err) {
 			fprintf(stderr, "Error creating background thread, there will be no notifications on audio ended (%d)\n", err);
 		}
+		 */
 	}
 
 	~AudioManager() {
@@ -117,18 +119,18 @@ ALuint OpenALBuffer::getBufferId()
 }
 
 void OpenALBuffer::registerCallback(AudioCallbackType eventType, std::shared_ptr<OpenALCallback> callback) {
-	if (eventType == AudioEnded) {
-		audioEndedCallbacks.push_back(callback);
-	}
+//	if (eventType == AudioEnded) {
+//		audioEndedCallbacks.push_back(callback);
+//	}
 }
 
 void OpenALBuffer::deregisterCallack(AudioCallbackType eventType, std::shared_ptr<OpenALCallback> callback) {
-	if (eventType == AudioEnded) {
-		vector<shared_ptr<OpenALCallback>>::iterator pos = std::find(audioEndedCallbacks.begin(), audioEndedCallbacks.end(), callback);
-		if (pos != audioEndedCallbacks.end()) {
-			audioEndedCallbacks.erase(pos);
-		}
-	}
+//	if (eventType == AudioEnded) {
+//		vector<shared_ptr<OpenALCallback>>::iterator pos = std::find(audioEndedCallbacks.begin(), audioEndedCallbacks.end(), callback);
+//		if (pos != audioEndedCallbacks.end()) {
+//			audioEndedCallbacks.erase(pos);
+//		}
+//	}
 }
 
 void OpenALBuffer::notifyEvent(AudioCallbackType eventType) {
@@ -144,17 +146,12 @@ void OpenALBuffer::notifyEvent(AudioCallbackType eventType) {
 
 #pragma mark - FakeAudio
 
-FakeAudio::FakeAudio()
+FakeAudio::FakeAudio() : readyState(0), loaded(false), volume(1.0f), buffer(NULL), sourceId(0), linkedSourceId(0), preload(false), played(false), ended(true), autoplay(false)
 {
-	readyState = 0;
-	volume = 1.0f;
 }
 
-FakeAudio::FakeAudio(string aPath)
+FakeAudio::FakeAudio(string aPath) : readyState(0), loaded(false), volume(1.0f), buffer(NULL), sourceId(0), linkedSourceId(0), preload(false), played(false), ended(true)
 {
-	readyState = 0;
-	volume = 1.0f;
-	autoplay = false;
 	src = aPath;
 }
 
@@ -165,31 +162,40 @@ FakeAudio::~FakeAudio()
 	}
 }
 
+void genSource(ALuint sourceId, ALuint bufferId, bool looping)
+{
+	alSourcei(sourceId, AL_BUFFER, bufferId);
+	alSourcei(sourceId, AL_PITCH, 1.0f);
+	alSourcei(sourceId, AL_GAIN, 1.0f);
+	if (looping)
+		alSourcei(sourceId, AL_LOOPING, AL_TRUE);
+}
+
 void FakeAudio::loadAudio()
 {
-	// this might take some time, we should move this to a bg thread
 	buffer = manager.getBuffer(src);
 	if (!buffer) {
 		buffer = new OpenALBuffer(src);
 		manager.setBuffer(buffer, src);
 	}
 	alGenSources(1, &sourceId);
-	alSourcei(sourceId, AL_BUFFER, buffer->getBufferId());
-	alSourcei(sourceId, AL_PITCH, 1.0f);
-	alSourcei(sourceId, AL_GAIN, 1.0f);
+	genSource(sourceId, buffer->getBufferId(), loop);
 	loaded = true;
 	if (autoplay)
 		play(NULL, 0, NULL);
-	if (loop)
-		alSourcei(sourceId, AL_LOOPING, AL_TRUE);
+	updateDuration();
+}
+
+void FakeAudio::updateDuration()
+{
 	// get the duration
     ALint bufferID = buffer->getBufferId(),
-		bufferSize, frequency, bitsPerSample, channels;
+	bufferSize, frequency, bitsPerSample, channels;
     alGetBufferi(bufferID, AL_SIZE, &bufferSize);
     alGetBufferi(bufferID, AL_FREQUENCY, &frequency);
     alGetBufferi(bufferID, AL_CHANNELS, &channels);
     alGetBufferi(bufferID, AL_BITS, &bitsPerSample);
-	
+
     duration = ((float)bufferSize)/(frequency*channels*(bitsPerSample/8));
 }
 
@@ -412,13 +418,44 @@ JS_BINDED_FUNC_IMPL(FakeAudio, play)
 	if (!loaded) {
 		loadAudio();
 	}
-	alSourcePlay(sourceId);
+	if (sourceId > 0) {
+		alSourcePlay(sourceId);
+		if (linkedSourceId > 0) {
+			alSourcePlay(linkedSourceId);
+		}
+	} else {
+		printf("audio not loaded: %s\n", src.c_str());
+	}
 	return JS_TRUE;
 }
 
 JS_BINDED_FUNC_IMPL(FakeAudio, pause)
 {
 	alSourcePause(sourceId);
+	return JS_TRUE;
+}
+
+JS_BINDED_FUNC_IMPL(FakeAudio, linkAndLoop)
+{
+	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+	if (args.length() == 1) {
+		JSObject* obj = args[0].toObjectOrNull();
+		FakeAudio* audio = (FakeAudio*)JS_GetPrivate(obj);
+		if (audio) {
+			if (!loaded) {
+				loadAudio();
+			}
+			if (!audio->loaded) {
+				audio->loadAudio();
+			}
+			ALuint bids[2] = {
+				buffer->getBufferId(),
+				audio->buffer->getBufferId()
+			};
+			alSourceQueueBuffers(sourceId, 2, bids);
+			linkedSourceId = audio->sourceId;
+		}
+	}
 	return JS_TRUE;
 }
 
@@ -473,6 +510,7 @@ void FakeAudio::_js_register(JSContext* cx, JSObject* global)
 		JS_BINDED_FUNC_FOR_DEF(FakeAudio, load),
 		JS_BINDED_FUNC_FOR_DEF(FakeAudio, play),
 		JS_BINDED_FUNC_FOR_DEF(FakeAudio, pause),
+		JS_BINDED_FUNC_FOR_DEF(FakeAudio, linkAndLoop),
 		JS_BINDED_FUNC_FOR_DEF(FakeAudio, addEventListener),
 		JS_BINDED_FUNC_FOR_DEF(FakeAudio, removeEventListener),
 		JS_FS_END

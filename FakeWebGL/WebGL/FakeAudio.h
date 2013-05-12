@@ -64,13 +64,16 @@ class FakeAudio : public JSBindedObject
 
 	OpenALBuffer* buffer;
 	ALuint sourceId;
+	ALuint linkedSourceId;
 public:
 	FakeAudio();
 	FakeAudio(std::string aPath);
 	~FakeAudio();
-	
+
 	void loadAudio();
-	
+	void appendSourceToBuffer(const std::string& source);
+	void updateDuration();
+
 	JS_BINDED_CLASS_GLUE(FakeAudio);
 	JS_BINDED_CONSTRUCTOR(FakeAudio);
 	JS_BINDED_PROP_ACCESSOR(FakeAudio, autoplay);
@@ -90,6 +93,7 @@ public:
 	JS_BINDED_FUNC(FakeAudio, load);
 	JS_BINDED_FUNC(FakeAudio, play);
 	JS_BINDED_FUNC(FakeAudio, pause);
+	JS_BINDED_FUNC(FakeAudio, linkAndLoop);
 	JS_BINDED_FUNC(FakeAudio, addEventListener);
 	JS_BINDED_FUNC(FakeAudio, removeEventListener);
 };
