@@ -208,7 +208,8 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, open)
 		url = urlstr;
 		readyState = 1;
 		isAsync = async;
-		
+		std::string methodstr(method);
+
 		if (url.length() > 5 && url.compare(url.length() - 5, 5, ".json") == 0) {
 			responseType = kRequestResponseTypeJSON;
 		}
@@ -216,6 +217,9 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, open)
 			(url.length() > 8 && url.compare(0, 8, "https://") == 0))
 		{
 			curl_easy_setopt(curlHandle, CURLOPT_URL, url.c_str());
+			if (methodstr.compare("POST") == 0 || methodstr.compare("post") == 0) {
+				curl_easy_setopt(curlHandle, CURLOPT_POST, 1);
+			}
 			isNetwork = true;
 		}
 		return JS_TRUE;
@@ -250,6 +254,15 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, send)
 			JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &out);
 		}
 	} else {
+		if (argc == 1) {
+			jsval data = JS_ARGV(cx, vp)[0];
+			if (data.isString()) {
+				JSStringWrapper wrapper(data);
+				curl_easy_setopt(curlHandle, CURLOPT_POSTFIELDS, (const char*)wrapper);
+			} else {
+				// for now we just ignore objects, but we should stringify them
+			}
+		}
 		curl_easy_perform(curlHandle);
 	}
 	return JS_TRUE;
