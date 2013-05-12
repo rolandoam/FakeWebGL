@@ -30,8 +30,7 @@ Right now this works:
 * touch input (only when touch is supported on the js side, we're not emulating
   mouse input)
 * PNG support (non-compressed PNGs)
-* XMLHttpRequest, sort of... just working for local requests, and it's
-  non-async. Support for network requests and async mode is coming soon.
+* XMLHttpRequest, sort of... support async mode is coming soon.
 * audio (similar API to HTML5 Audio tag)
 
 Not working:
@@ -54,6 +53,8 @@ Yes please!
 If you want, you can keep adding WebGL/OpenGL-ES methods to the code, just look
 into `WebGLRenderingContext.cpp` and `WebGLRenderingContext.hpp`. It should be
 really straight-forward.
+
+We also need to work on the Android support for this :)
 
 ## How can I add my own classes to javascript?
 
