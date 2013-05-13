@@ -49,6 +49,8 @@ class FakeXMLHTTPRequest : public JSBindedObject
 	int readyState;
 	int status;
 	int responseType;
+	size_t dataLength;
+	size_t dataRead;
 	bool isAsync;
 	CURL* curlHandle;
 	bool isNetwork;

@@ -42,24 +42,41 @@ size_t FakeXMLHTTPRequest::gotHeader(void* ptr, size_t size, size_t nmemb, void 
 
 size_t FakeXMLHTTPRequest::gotData(char* ptr, size_t size, size_t nmemb, void *userdata) {
 	FakeXMLHTTPRequest* req = (FakeXMLHTTPRequest*)userdata;
-	req->_gotData(ptr, size * nmemb);
-	return size * nmemb;
+	size_t sz = size * nmemb;
+	req->_gotData(ptr, sz);
+	return sz;
 }
 
 void FakeXMLHTTPRequest::_gotData(char* ptr, size_t len) {
 	data.write(ptr, len);
+	dataRead += len;
+	if (dataRead >= dataLength) {
+		readyState = 4;
+		if (onreadystateCallback) {
+			jsval fval = OBJECT_TO_JSVAL(onreadystateCallback);
+			addDeferredCallback(NULL, fval, 0, NULL);
+		}
+	}
 }
 
 void FakeXMLHTTPRequest::_gotHeader(string header) {
-	regex re("([\\w-]+):\\s+(.+)\r\n");
+	regex re("([\\w-]+):\\s+(.+)\r\n"),
+		statusRe("HTTP/(1\\.1|1\\.0) (\\d{3}) (.+)\r\n");
 	smatch md;
 	if (regex_match(header, md, re)) {
 		string h = md[1],
 			v = md[2];
 		std::transform(h.begin(), h.end(), h.begin(), ::tolower);
 		if (h == "content-type") {
-			fprintf(stderr, "got content type: %s\n", v.c_str());
+			if (v.compare(0, 16, "application/json") == 0) {
+				responseType = kRequestResponseTypeJSON;
+			}
+		} else if (h == "content-length") {
+			dataLength = atol(v.c_str());
 		}
+	} else if (regex_match(header, md, statusRe)) {
+		string st = md[2];
+		status = atoi(st.c_str());
 	}
 }
 
@@ -69,6 +86,7 @@ FakeXMLHTTPRequest::FakeXMLHTTPRequest() : onreadystateCallback(getGlobalContext
 	curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, this);
 	curl_easy_setopt(curlHandle, CURLOPT_HEADERFUNCTION, FakeXMLHTTPRequest::gotHeader);
 	curl_easy_setopt(curlHandle, CURLOPT_WRITEHEADER, this);
+	dataRead = dataLength = 0;
 }
 
 FakeXMLHTTPRequest::~FakeXMLHTTPRequest() {
@@ -171,11 +189,16 @@ JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, response)
 {
 	if (responseType == kRequestResponseTypeJSON) {
 		jsval outVal;
-		JSString* str = JS_NewStringCopyN(cx, data.str().c_str(), dataSize);
-		if (JS_ParseJSON(cx, JS_GetStringCharsZ(cx, str), dataSize, &outVal)) {
+		std::string tmpstr = data.str();
+		size_t outLen;
+		std::shared_ptr<char> buff = convertToUTF16((char*)tmpstr.c_str(), outLen);
+		if (JS_ParseJSON(cx, (const jschar*)buff.get(), outLen / sizeof(jschar), &outVal)) {
 			vp.set(outVal);
-			return JS_TRUE;
+		} else {
+			JS_ReportPendingException(cx);
+			vp.set(JSVAL_NULL);
 		}
+		return JS_TRUE;
 	} else if (responseType == kRequestResponseTypeArrayBuffer) {
 		JSObject* tmp = JS_NewArrayBuffer(cx, dataSize);
 		uint8_t* tmpData = JS_GetArrayBufferData(tmp);
