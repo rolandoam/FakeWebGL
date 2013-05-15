@@ -61,16 +61,43 @@ using namespace std;
 
 
 struct DeferredCallback {
-	js::RootedObject obj;
-	js::RootedValue  fval;
-	js::AutoArrayRooter args;
+	JSObject* obj;
+	jsval  fval;
+	jsval* args;
 	unsigned argc;
 
-	DeferredCallback(JSContext* cx) : obj(cx, NULL), fval(cx), args(cx, 0, NULL), argc(0) {}
+	DeferredCallback(JSContext* cx) : obj(NULL), fval(JSVAL_NULL), args(NULL), argc(0) {}
+	void set(JSObject* obj, jsval fval, jsval* args = NULL, unsigned argc = 0) {
+		JSContext* cx = getGlobalContext();
+		if (obj) {
+			this->obj = obj;
+			JS_AddObjectRoot(cx, &this->obj);
+		}
+		if (!fval.isNull()) {
+			this->fval = fval;
+			JS_AddValueRoot(cx, &this->fval);
+		}
+		if (args) {
+			this->args = args;
+			this->argc = argc;
+			for (int i=0; i < argc; i++) {
+				JS_AddValueRoot(cx, &this->args[i]);
+			}
+		}
+	}
 	~DeferredCallback() {
-		jsval* arr = args.array;
-		if (arr) {
-			delete arr;
+		JSContext* cx = getGlobalContext();
+		if (obj) {
+			JS_RemoveObjectRoot(cx, &obj);
+		}
+		if (!fval.isNull()) {
+			JS_RemoveValueRoot(cx, &fval);
+		}
+		if (args) {
+			for (int i=0; i < argc; i++) {
+				JS_RemoveValueRoot(cx, &args[i]);
+			}
+			free(args);
 		}
 	}
 };
@@ -122,12 +149,13 @@ bool evalString(const char *string, jsval *outVal, const char *filename)
 	return false;
 }
 
+/**
+ * if args is not null, addDeferredCallback takes ownership of the array (will be deleted
+ * when it's done)
+ */
 void addDeferredCallback(JSObject* obj, jsval fval, unsigned argc, jsval* args) {
 	DeferredCallback* cb = new DeferredCallback(_cx);
-	cb->obj = obj;
-	cb->fval = fval;
-	cb->argc = argc;
-	cb->args.changeArray(args, argc);
+	cb->set(obj, fval, args, argc);
 
 	pthread_mutex_lock(&queue_mutex);
 	callbackQueue.push(cb);
@@ -140,7 +168,7 @@ void executePendingCallbacks() {
 		DeferredCallback* cb = callbackQueue.front();
 		jsval rval;
 		// we might find a deadlock if something we execute tries to add a deffered callback
-		JS_CallFunctionValue(_cx, cb->obj, cb->fval, cb->argc, cb->args.array, &rval);
+		JS_CallFunctionValue(_cx, cb->obj, cb->fval, cb->argc, cb->args, &rval);
 		JS_IsExceptionPending(_cx) && JS_ReportPendingException(_cx);
 		callbackQueue.pop();
 	}

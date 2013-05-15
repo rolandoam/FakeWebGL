@@ -40,8 +40,8 @@ class FakeImage : public JSBindedObject
 private:
 	std::vector<unsigned char> bytes;
 	std::string src;
-	js::RootedObject onloadCallback;
-	js::RootedObject onerrorCallback;
+	jsval onloadCallback;
+	jsval onerrorCallback;
 	bool flipped;
 	void load(std::string type);
 	void loadPNG();

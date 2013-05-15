@@ -29,8 +29,8 @@
 #pragma mark - FakeImage
 
 FakeImage::FakeImage() :
-	onloadCallback(getGlobalContext()),
-	onerrorCallback(getGlobalContext())
+	onloadCallback(JSVAL_NULL),
+	onerrorCallback(JSVAL_NULL)
 {
 	src = "invalid";
 	flipped = false;
@@ -111,30 +111,26 @@ JS_BINDED_PROP_SET_IMPL(FakeImage, src)
 
 JS_BINDED_PROP_GET_IMPL(FakeImage, onload)
 {
-	if (onloadCallback) {
-		vp.set(OBJECT_TO_JSVAL(onloadCallback));
-	} else {
-		vp.set(JSVAL_NULL);
-	}
+	vp.set(onloadCallback);
 	return JS_TRUE;
 }
 
 JS_BINDED_PROP_SET_IMPL(FakeImage, onload)
 {
 	jsval callback = vp.get();
-	if (callback != JSVAL_NULL) {
-		onloadCallback = JSVAL_TO_OBJECT(callback);
+	if (!callback.isNull()) {
+		if (!onloadCallback.isNull()) {
+			JS_RemoveValueRoot(cx, &onloadCallback);
+		}
+		onloadCallback = callback;
+		JS_AddValueRoot(cx, &onloadCallback);
 	}
 	return JS_TRUE;
 }
 
 JS_BINDED_PROP_GET_IMPL(FakeImage, onerror)
 {
-	if (onerrorCallback) {
-		vp.set(OBJECT_TO_JSVAL(onerrorCallback));
-	} else {
-		vp.set(JSVAL_NULL);
-	}
+	vp.set(onerrorCallback);
 	return JS_TRUE;
 }
 
@@ -142,7 +138,11 @@ JS_BINDED_PROP_SET_IMPL(FakeImage, onerror)
 {
 	jsval callback = vp.get();
 	if (callback != JSVAL_NULL && callback.isObject()) {
-		onerrorCallback = JSVAL_TO_OBJECT(callback);
+		if (!onerrorCallback.isNull()) {
+			JS_RemoveValueRoot(cx, &onerrorCallback);
+		}
+		onerrorCallback = callback;
+		JS_AddValueRoot(cx, &onerrorCallback);
 	}
 	return JS_TRUE;
 }
@@ -152,10 +152,18 @@ JS_BINDED_FUNC_IMPL(FakeImage, addEventListener) {
 		jsval* argv = JS_ARGV(cx, vp);
 		JSStringWrapper jsstr(argv[0]);
 		std::string str((const char*)jsstr);
-		if (str.compare("load") == 0) {
-			onloadCallback = JSVAL_TO_OBJECT(argv[1]);
-		} else if (str.compare("error") == 0) {
-			onerrorCallback = JSVAL_TO_OBJECT(argv[1]);
+		if (str.compare("load") == 0 && !argv[1].isNull()) {
+			if (!onloadCallback.isNull()) {
+				JS_RemoveValueRoot(cx, &onloadCallback);
+			}
+			onloadCallback = argv[1];
+			JS_AddValueRoot(cx, &onloadCallback);
+		} else if (str.compare("error") == 0 && !argv[1].isNull()) {
+			if (!onerrorCallback.isNull()) {
+				JS_RemoveValueRoot(cx, &onerrorCallback);
+			}
+			onerrorCallback = argv[1];
+			JS_AddValueRoot(cx, &onerrorCallback);
 		}
 	}
 	return JS_TRUE;
@@ -202,8 +210,7 @@ void FakeImage::loadPNG()
 	std::string fullPath = getFullPathFromRelativePath(src.c_str());
 	if (fullPath.empty()) {
 		fprintf(stderr, "PNG: File not found: %s\n", src.c_str());
-		if (onerrorCallback) {
-			jsval funcval = OBJECT_TO_JSVAL(onerrorCallback);
+		if (!onerrorCallback.isNull()) {
 			jsval out;
 			JSContext* cx = getGlobalContext();
 			// create error: object with a single property
@@ -213,7 +220,7 @@ void FakeImage::loadPNG()
 			JS_SetProperty(cx, err, "type", &strVal);
 			jsval errVal = OBJECT_TO_JSVAL(err);
 			// just execute the callback
-			JS_CallFunctionValue(cx, NULL, funcval, 1, &errVal, &out);
+			JS_CallFunctionValue(cx, NULL, onerrorCallback, 1, &errVal, &out);
 		}
 	} else {
 		unsigned error = lodepng::decode(bytes, width, height, fullPath);
@@ -221,10 +228,9 @@ void FakeImage::loadPNG()
 			printf("PNG: error %u decoding png: %s\n", error, lodepng_error_text(error));
 			return;
 		}
-		if (onloadCallback) {
-			jsval funcval = OBJECT_TO_JSVAL(onloadCallback);
+		if (!onloadCallback.isNull()) {
 			jsval out;
-			JS_CallFunctionValue(getGlobalContext(), NULL, funcval, 0, NULL, &out);
+			JS_CallFunctionValue(getGlobalContext(), NULL, onloadCallback, 0, NULL, &out);
 		}
 	}
 }
