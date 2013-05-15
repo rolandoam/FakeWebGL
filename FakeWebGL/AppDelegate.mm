@@ -148,7 +148,6 @@
 	runScript("js/three/RenderPass.js");
 	runScript("js/three/ShaderPass.js");
 	runScript("js/three/MaskPass.js");
-	runScript("js/three/MaskPass.js");
 	runScript("js/three/webgl_materials_bumpmap_skin.js");
 #endif
 	
