@@ -26,12 +26,46 @@
 
 #include <regex>
 #include <algorithm>
+#include <vector>
 #include "jsfriendapi.h"
 #include "XMLHTTPRequest.h"
 
 using namespace std;
 
 #pragma mark - FakeXMLHTTPRequest
+
+void* bgReadFile(void* arg) {
+	FakeXMLHTTPRequest* req = (FakeXMLHTTPRequest*)arg;
+	std::string path = getFullPathFromRelativePath(req->url.c_str());
+	if (path.empty()) {
+		// file not found
+		req->status = 404;
+	} else {
+		shared_ptr<char> tmp = readFileInMemory(path.c_str(), req->dataSize);
+		req->data.flush();
+		req->data << tmp.get();
+		if (req->dataSize > 0) {
+			req->status = 200;
+		} else {
+			printf("Error trying to read '%s'\n", path.c_str());
+			req->status = 404; // just issue any error
+		}
+	}
+	req->readyState = 4;
+	if (!req->onreadystateCallback.isNullOrUndefined()) {
+		if (req->isAsync) {
+			addDeferredCallback(NULL, req->onreadystateCallback, 0, NULL);
+			// just terminate this thread
+			pthread_cancel(pthread_self());
+		} else {
+			JSContext* cx = getGlobalContext();
+			JS_IsExceptionPending(cx) && JS_ReportPendingException(cx);
+			jsval out;
+			JS_CallFunctionValue(cx, NULL, req->onreadystateCallback, 0, NULL, &out);
+		}
+	}
+	return NULL;
+}
 
 size_t FakeXMLHTTPRequest::gotHeader(void* ptr, size_t size, size_t nmemb, void *userdata) {
 	FakeXMLHTTPRequest* req = (FakeXMLHTTPRequest*)userdata;
@@ -52,10 +86,6 @@ void FakeXMLHTTPRequest::_gotData(char* ptr, size_t len) {
 	dataRead += len;
 	if (dataRead >= dataLength) {
 		readyState = 4;
-		if (onreadystateCallback) {
-			jsval fval = OBJECT_TO_JSVAL(onreadystateCallback);
-			addDeferredCallback(NULL, fval, 0, NULL);
-		}
 	}
 }
 
@@ -80,7 +110,12 @@ void FakeXMLHTTPRequest::_gotHeader(string header) {
 	}
 }
 
-FakeXMLHTTPRequest::FakeXMLHTTPRequest() : onreadystateCallback(getGlobalContext(), NULL), isNetwork(false) {
+FakeXMLHTTPRequest::FakeXMLHTTPRequest() : onreadystateCallback(JSVAL_NULL), isNetwork(false) {
+	static bool __curlInit = false;
+	if (__curlInit) {
+		__curlInit = true;
+		curl_global_init(CURL_GLOBAL_ALL);
+	}
 	curlHandle = curl_easy_init();
 	curl_easy_setopt(curlHandle, CURLOPT_WRITEFUNCTION, FakeXMLHTTPRequest::gotData);
 	curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, this);
@@ -92,6 +127,9 @@ FakeXMLHTTPRequest::FakeXMLHTTPRequest() : onreadystateCallback(getGlobalContext
 FakeXMLHTTPRequest::~FakeXMLHTTPRequest() {
 	if (curlHandle) {
 		curl_easy_cleanup(curlHandle);
+	}
+	if (!onreadystateCallback.isNull()) {
+		JS_RemoveValueRoot(getGlobalContext(), &onreadystateCallback);
 	}
 }
 
@@ -108,21 +146,17 @@ JS_BINDED_CONSTRUCTOR_IMPL(FakeXMLHTTPRequest)
 
 JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, onreadystatechange)
 {
-	if (onreadystateCallback) {
-		jsval out = OBJECT_TO_JSVAL(onreadystateCallback);
-		vp.set(out);
-	} else {
-		vp.set(JSVAL_NULL);
-	}
+	vp.set(onreadystateCallback);
 	return JS_TRUE;
 }
 
 JS_BINDED_PROP_SET_IMPL(FakeXMLHTTPRequest, onreadystatechange)
 {
-	jsval callback = vp.get();
-	if (callback != JSVAL_NULL) {
-		onreadystateCallback = JSVAL_TO_OBJECT(callback);
+	if (!onreadystateCallback.isNull()) {
+		JS_RemoveValueRoot(cx, &onreadystateCallback);
 	}
+	onreadystateCallback = vp.get();
+	JS_AddValueRoot(cx, &onreadystateCallback);
 	return JS_TRUE;
 }
 
@@ -188,12 +222,12 @@ JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, responseText)
 JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, response)
 {
 	if (responseType == kRequestResponseTypeJSON) {
-		jsval outVal;
 		std::string tmpstr = data.str();
 		size_t outLen;
 		std::shared_ptr<char> buff = convertToUTF16((char*)tmpstr.c_str(), outLen);
-		if (JS_ParseJSON(cx, (const jschar*)buff.get(), outLen / sizeof(jschar), &outVal)) {
-			vp.set(outVal);
+		jsval outval;
+		if (JS_ParseJSON(cx, (const jschar*)buff.get(), outLen / sizeof(jschar), &outval)) {
+			vp.set(outval);
 		} else {
 			JS_ReportPendingException(cx);
 			vp.set(JSVAL_NULL);
@@ -209,6 +243,20 @@ JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, response)
 	}
 	// by default, return text
 	return _js_get_responseText(cx, id, vp);
+}
+
+JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, overrideMimeType)
+{
+	jsval* argv = JS_ARGV(cx, vp);
+	if (argc == 1 && argv[0].isString()) {
+		JSStringWrapper w1(argv[0]);
+		std::string mimeType = "Content-type: ";
+		mimeType += (const char*)w1;
+		struct curl_slist *slist = NULL;
+		slist = curl_slist_append(slist, mimeType.c_str());
+		curl_easy_setopt(curlHandle, CURLOPT_HTTPHEADER, slist);
+	}
+	return JS_TRUE;
 }
 
 JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, open)
@@ -254,39 +302,31 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, open)
 JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, send)
 {
 	if (!isNetwork) {
-		std::string path = getFullPathFromRelativePath(url.c_str());
-		readyState = 4;
-		if (path.empty()) {
-			// file not found
-			status = 404;
+		if (isAsync) {
+			pthread_t bgThread;
+			pthread_create(&bgThread, NULL, bgReadFile, this);
+			pthread_detach(bgThread);
 		} else {
-			shared_ptr<char> tmp = readFileInMemory(path.c_str(), dataSize);
-			data.flush();
-			data << tmp.get();
-			if (dataSize > 0) {
-				status = 200;
-			} else {
-				printf("Error trying to read '%s'\n", path.c_str());
-				status = 404; // just issue any error
-			}
-		}
-		if (onreadystateCallback) {
-			JS_IsExceptionPending(cx) && JS_ReportPendingException(cx);
-			jsval fval = OBJECT_TO_JSVAL(onreadystateCallback);
-			jsval out;
-			JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &out);
+			bgReadFile(this);
 		}
 	} else {
 		if (argc == 1) {
 			jsval data = JS_ARGV(cx, vp)[0];
 			if (data.isString()) {
 				JSStringWrapper wrapper(data);
-				curl_easy_setopt(curlHandle, CURLOPT_POSTFIELDS, (const char*)wrapper);
+				curl_easy_setopt(curlHandle, CURLOPT_COPYPOSTFIELDS, (const char*)wrapper);
 			} else {
 				// for now we just ignore objects, but we should stringify them
 			}
 		}
+		fprintf(stderr, "curl: %s\n", url.c_str());
 		curl_easy_perform(curlHandle);
+		readyState = 4;
+		if (!onreadystateCallback.isNullOrUndefined()) {
+			JS_IsExceptionPending(cx) && JS_ReportPendingException(cx);
+			jsval out;
+			JS_CallFunctionValue(cx, NULL, onreadystateCallback, 0, NULL, &out);
+		}
 	}
 	return JS_TRUE;
 }
@@ -310,6 +350,7 @@ void FakeXMLHTTPRequest::_js_register(JSContext *cx, JSObject *global)
 		{0, 0, 0, 0, 0}
 	};
 	static JSFunctionSpec funcs[] = {
+		JS_BINDED_FUNC_FOR_DEF(FakeXMLHTTPRequest, overrideMimeType),
 		JS_BINDED_FUNC_FOR_DEF(FakeXMLHTTPRequest, open),
 		JS_BINDED_FUNC_FOR_DEF(FakeXMLHTTPRequest, send),
 		JS_FS_END

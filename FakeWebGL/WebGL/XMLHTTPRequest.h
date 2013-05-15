@@ -39,13 +39,15 @@ enum FakeXMLHTTPRequestResponseType {
 	kRequestResponseTypeJSON
 };
 
+void* bgReadFile(void*);
+
 class FakeXMLHTTPRequest : public JSBindedObject
 {
 	std::string url;
 	std::string type;
 	std::stringstream data;
 	size_t dataSize;
-	js::RootedObject onreadystateCallback;
+	jsval onreadystateCallback;
 	int readyState;
 	int status;
 	int responseType;
@@ -68,11 +70,14 @@ public:
 	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, status);
 	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, responseText);
 	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, response);
+	JS_BINDED_FUNC(FakeXMLHTTPRequest, overrideMimeType);
 	JS_BINDED_FUNC(FakeXMLHTTPRequest, open);
 	JS_BINDED_FUNC(FakeXMLHTTPRequest, send);
 
 	static size_t gotHeader(void *ptr, size_t size, size_t nmemb, void *userdata);
 	static size_t gotData(char *ptr, size_t size, size_t nmemb, void *userdata);
+
+	friend void* ::bgReadFile(void*);
 };
 
 #endif
