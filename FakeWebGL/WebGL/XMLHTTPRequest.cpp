@@ -319,7 +319,6 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, send)
 				// for now we just ignore objects, but we should stringify them
 			}
 		}
-		fprintf(stderr, "curl: %s\n", url.c_str());
 		curl_easy_perform(curlHandle);
 		readyState = 4;
 		if (!onreadystateCallback.isNullOrUndefined()) {
