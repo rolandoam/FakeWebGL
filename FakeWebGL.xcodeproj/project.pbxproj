@@ -28,6 +28,7 @@
 		A95C3CD7162339C700386017 /* glue.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A95C3CD6162339C700386017 /* glue.ios.mm */; };
 		A95C3CE016235B6A00386017 /* images in Resources */ = {isa = PBXBuildFile; fileRef = A95C3CDD16235B6A00386017 /* images */; };
 		A95C3CE216235B6A00386017 /* shaders in Resources */ = {isa = PBXBuildFile; fileRef = A95C3CDF16235B6A00386017 /* shaders */; };
+		A97735E81743D9C4003E7B89 /* FakeLocalStorage.cc in Sources */ = {isa = PBXBuildFile; fileRef = A97735E61743D9C4003E7B89 /* FakeLocalStorage.cc */; };
 		A98B1B03164424FD00E68C95 /* FakeAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A98B1B01164424FD00E68C95 /* FakeAudio.cpp */; };
 		A98B1B051644256E00E68C95 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A98B1B041644256E00E68C95 /* OpenAL.framework */; };
 		A98B1B0C164436AE00E68C95 /* FakeAudio.ios.mm in Sources */ = {isa = PBXBuildFile; fileRef = A98B1B0B164436AE00E68C95 /* FakeAudio.ios.mm */; };
@@ -77,6 +78,8 @@
 		A95C3CD6162339C700386017 /* glue.ios.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = glue.ios.mm; sourceTree = "<group>"; };
 		A95C3CDD16235B6A00386017 /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; name = images; path = FakeWebGL/Resources/images; sourceTree = "<group>"; };
 		A95C3CDF16235B6A00386017 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shaders; path = FakeWebGL/Resources/shaders; sourceTree = "<group>"; };
+		A97735E61743D9C4003E7B89 /* FakeLocalStorage.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FakeLocalStorage.cc; path = FakeWebGL/WebGL/FakeLocalStorage.cc; sourceTree = SOURCE_ROOT; };
+		A97735E71743D9C4003E7B89 /* FakeLocalStorage.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = FakeLocalStorage.hh; path = FakeWebGL/WebGL/FakeLocalStorage.hh; sourceTree = SOURCE_ROOT; };
 		A98B1B01164424FD00E68C95 /* FakeAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FakeAudio.cpp; sourceTree = "<group>"; };
 		A98B1B02164424FD00E68C95 /* FakeAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FakeAudio.h; sourceTree = "<group>"; };
 		A98B1B041644256E00E68C95 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
@@ -216,6 +219,8 @@
 				A92CD3A3161FD9C4002E6A62 /* WebGLRenderingContext.h */,
 				A98B1B01164424FD00E68C95 /* FakeAudio.cpp */,
 				A98B1B02164424FD00E68C95 /* FakeAudio.h */,
+				A97735E61743D9C4003E7B89 /* FakeLocalStorage.cc */,
+				A97735E71743D9C4003E7B89 /* FakeLocalStorage.hh */,
 			);
 			name = FakeWebGL;
 			path = FakeWebGL/webgl;
@@ -324,6 +329,7 @@
 				A998255716C19651006888B6 /* EAGLView.mm in Sources */,
 				A998255D16C1A1C0006888B6 /* AppDelegate.mm in Sources */,
 				A998256016C1B335006888B6 /* ES2Renderer.mm in Sources */,
+				A97735E81743D9C4003E7B89 /* FakeLocalStorage.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
