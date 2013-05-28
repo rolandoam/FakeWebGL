@@ -150,7 +150,7 @@ function ta(a) {
   return a
 }
 function ua(a, b, c) {
-  var d = a[0], e = a[1], g = a[2], h = a[3], p = a[4], m = a[5], r = a[6], q = a[7], s = a[8], v = a[9], u = a[10], A = a[11], B = a[12], w = a[13], C = a[14], a = a[15], z = b[0], y = b[1], F = b[2], H = b[3], I = b[4], M = b[5], J = b[6], K = b[7], fa = b[8], ga = b[9], ha = b[10], ia = b[11], E = b[12], Va = b[13], Wa = b[14], b = b[15];
+  var d = a[0], e = a[1], g = a[2], h = a[3], p = a[4], m = a[5], r = a[6], q = a[7], s = a[8], v = a[9], u = a[10], A = a[11], B = a[12], w = a[13], C = a[14], a = a[15], z = b[0], y = b[1], F = b[2], H = b[3], I = b[4], M = b[5], J = b[6], K = b[7], fa = b[8], ga = b[9], ha = b[10], ia = b[11], E = b[12], Wa = b[13], Xa = b[14], b = b[15];
   c[0] = d * z + p * y + s * F + B * H;
   c[1] = e * z + m * y + v * F + w * H;
   c[2] = g * z + r * y + u * F + C * H;
@@ -163,10 +163,10 @@ function ua(a, b, c) {
   c[9] = e * fa + m * ga + v * ha + w * ia;
   c[10] = g * fa + r * ga + u * ha + C * ia;
   c[11] = h * fa + q * ga + A * ha + a * ia;
-  c[12] = d * E + p * Va + s * Wa + B * b;
-  c[13] = e * E + m * Va + v * Wa + w * b;
-  c[14] = g * E + r * Va + u * Wa + C * b;
-  c[15] = h * E + q * Va + A * Wa + a * b;
+  c[12] = d * E + p * Wa + s * Xa + B * b;
+  c[13] = e * E + m * Wa + v * Xa + w * b;
+  c[14] = g * E + r * Wa + u * Xa + C * b;
+  c[15] = h * E + q * Wa + A * Xa + a * b;
   return c
 }
 function va(a, b, c) {
@@ -226,7 +226,7 @@ function Ha(a, b) {
 }
 var Fa = k;
 "undefined" !== typeof runScript && (Fa = i, ua = _mat4mul, va = _mat4mulvec3, wa = _mat4translate, ya = _mat4rotate, xa = _mat4scale);
-var Ia = {useGoogleAnalytics:k, projection:"3d", webglMode:i, usesOffscreenBuffer:k, basePath:"", canvasOriginTopLeft:k, backgroundColor:[0, 0, 0, 1]}, Ja = "3d", x = i, Ka = "", La = k, D = oa([0, 0, 0, 1]), G = j, Ma = k, Na = {}, Oa = j, Pa = j, Qa = j, Da = j, Ra = k, Ea = k, L = {}, Sa = {}, Ta = {}, Ua = {}, Xa = Date.now(), Ya = 0, Za = {bc:0, ec:1, fc:2, cc:3, dc:4}, $a = j, N = [];
+var Ia = {useGoogleAnalytics:k, projection:"3d", webglMode:i, usesOffscreenBuffer:k, basePath:"", canvasOriginTopLeft:k, backgroundColor:[0, 0, 0, 1]}, Ja = "3d", x = i, Ka = "", La = k, D = oa([0, 0, 0, 1]), G = j, Ma = k, Na = {}, Oa = j, Pa = j, Qa = j, Da = j, Ra = k, Ea = k, L = {}, Sa = {}, Ta = {}, Ua = {}, Va = Date.now(), Ya = 0, Za = {bc:0, ec:1, fc:2, cc:3, dc:4}, $a = j, N = [];
 function ab(a) {
   var b = Na[a], c = G;
   if(a != Oa) {
@@ -363,7 +363,7 @@ function gb(a) {
       console.log("gl error " + d);
       c = k
     }
-    b.texParameteri(b.TEXTURE_2D, b.TEXTURE_MAG_FILTER, b.NEAREST);
+    b.texParameteri(b.TEXTURE_2D, b.TEXTURE_MAG_FILTER, b.LINEAR);
     b.texParameteri(b.TEXTURE_2D, b.TEXTURE_MIN_FILTER, b.LINEAR);
     b.texParameteri(b.TEXTURE_2D, b.TEXTURE_WRAP_S, b.CLAMP_TO_EDGE);
     b.texParameteri(b.TEXTURE_2D, b.TEXTURE_WRAP_T, b.CLAMP_TO_EDGE);
@@ -478,8 +478,8 @@ function lb() {
     }
   }
   a = Date.now();
-  Ya = a - Xa;
-  Xa = a
+  Ya = a - Va;
+  Va = a
 }
 var mb = new Float32Array(3);
 function nb(a, b) {
@@ -573,16 +573,16 @@ n("chesterGL.setup", function(a) {
   var b = 0, c = 0;
   try {
     if(window.devicePixelRatio && window.devicePixelRatio > 1) {
-      var d = window.devicePixelRatio;
-      console.log("using HighDPI resolution (devicePixelRatio: " + d + ")");
-      b = a.width;
-      c = a.height;
+      var d = window.devicePixelRatio, b = a.width, c = a.height;
+      console.log("canvas width: " + a.width);
       a.style.width = a.width + "px";
       a.style.height = a.height + "px";
       a.width = a.clientWidth * d;
       a.height = a.clientHeight * d;
       Ea = i;
-      t = window.devicePixelRatio
+      t = window.devicePixelRatio;
+      console.log("using HighDPI resolution (devicePixelRatio: " + d + ")");
+      console.log("  canvas size: " + a.width + "," + a.height)
     }else {
       b = a.width;
       c = a.height
@@ -691,6 +691,7 @@ n("chesterGL.setupPerspective", function() {
     var b = a.ma, c = a.P;
     a.viewport(0, 0, Da.width, Da.height);
     Pa = qa();
+    Ja = Ia.projection;
     if(Ja == "2d") {
       console.log("setting up 2d projection (" + b + "," + c + ")");
       ra(Pa, 2 / (b - 0), 0, 0, 0, 0, 2 / (c - 0), 0, 0, 0, 0, -2 / 2048, 0, -(b + 0) / (b - 0), -(c + 0) / (c - 0), -0, 1)
@@ -749,7 +750,7 @@ n("chesterGL.run", tb);
 n("chesterGL.togglePause", function() {
   if(Ma) {
     Ma = k;
-    Xa = Date.now();
+    Va = Date.now();
     tb()
   }else {
     Ma = i
@@ -761,7 +762,7 @@ n("chesterGL.isPaused", function() {
 n("chesterGL.setPause", function(a) {
   if(Ma && !a) {
     Ma = a;
-    Xa = Date.now();
+    Va = Date.now();
     tb()
   }else {
     Ma = a
