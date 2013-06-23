@@ -90,15 +90,20 @@
 		animationFrameInterval = 1;
 		displayLink = nil;
 		animationTimer = nil;
-		
+
+		float scale = [[UIScreen mainScreen] scale];
+		if (scale > 1.0) {
+			[eaglLayer setContentsScale:scale];
+		}
+
 		// A system version of 3.1 or greater is required to use CADisplayLink. The NSTimer
 		// class is used as fallback when it isn't available.
 		NSString *reqSysVer = @"3.1";
 		NSString *currSysVer = [[UIDevice currentDevice] systemVersion];
-		if ([currSysVer compare:reqSysVer options:NSNumericSearch] != NSOrderedAscending)
+		if ([currSysVer compare:reqSysVer options:NSNumericSearch] != NSOrderedAscending) {
 			displayLinkSupported = TRUE;
+		}
     }
-	
     return self;
 }
 
@@ -111,6 +116,8 @@
 	if (!initialized) {
 		initialized = true;
 		[((AppDelegate *)[UIApplication sharedApplication].delegate) initJS];
+		CGRect rect = [UIScreen mainScreen].bounds;
+		setInnerWidthAndHeight(getGlobalContext(), NULL, rect.size.width, rect.size.height);
 	}
     [renderer render];
 }
@@ -159,11 +166,10 @@
 			displayLink = [NSClassFromString(@"CADisplayLink") displayLinkWithTarget:self selector:@selector(run:)];
 			[displayLink setFrameInterval:animationFrameInterval];
 			[displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+		} else {
+			animationTimer = [NSTimer scheduledTimerWithTimeInterval:(NSTimeInterval)((1.0 / 60.0) * animationFrameInterval) target:self selector:@selector(run:) userInfo:nil repeats:TRUE];
 		}
-		else
-			animationTimer = [NSTimer scheduledTimerWithTimeInterval:(NSTimeInterval)((1.0 / 60.0) * animationFrameInterval) target:self selector:@selector(drawView:) userInfo:nil repeats:TRUE];
-		
-		animating = TRUE;
+		animating = YES;
 	}
 }
 
@@ -182,7 +188,7 @@
 			animationTimer = nil;
 		}
 		
-		animating = FALSE;
+		animating = NO;
 	}
 }
 

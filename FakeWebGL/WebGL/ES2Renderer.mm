@@ -76,10 +76,9 @@
 }
 
 - (void)render {    
-    [EAGLContext setCurrentContext:_context];
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer); CHECK_GL_ERROR();
-    
+	[EAGLContext setCurrentContext:_context];
+	glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer); CHECK_GL_ERROR();
+
 	jsval fval = getRequestAnimationFrameCallback();
 	if (fval != JSVAL_NULL) {
 		jsval outval;
@@ -87,17 +86,9 @@
 		JS_CallFunctionValue(cx, NULL, fval, 0, NULL, &outval);
 	}
 	executePendingCallbacks();
-#if 0
-	struct timeval now;
-	gettimeofday(&now, NULL);
-	if (now.tv_sec - lastInfoDisplay.tv_sec >= 1) {
-		lastInfoDisplay.tv_sec = now.tv_sec;
-		NSLog(@"FPS: %d", self.framesPerSecond);
-	}
-#endif
-    
-    glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer); CHECK_GL_ERROR();
-    [_context presentRenderbuffer:GL_RENDERBUFFER];
+
+	glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer); CHECK_GL_ERROR();
+	[_context presentRenderbuffer:GL_RENDERBUFFER];
 }
 
 - (bool)resizeFromLayer:(CAEAGLLayer *)layer
@@ -113,8 +104,6 @@
         NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
         return false;
     }
-
-	setInnerWidthAndHeight(getGlobalContext(), NULL, backingWidth, backingHeight);
 	return true;
 }
 

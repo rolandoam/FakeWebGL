@@ -53,9 +53,8 @@ void getDeviceWinSize(int* width, int* height)
 	CGRect bounds = [UIScreen mainScreen].bounds;
 
 	// retina not working yet...
-	float pixelRatio = [[UIScreen mainScreen] scale];
-	*width = bounds.size.width * pixelRatio;
-	*height = bounds.size.height * pixelRatio;
+	*width = bounds.size.width;
+	*height = bounds.size.height;
 }
 
 void localStorageSet(const std::string& key, jsval val) {

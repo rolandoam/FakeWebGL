@@ -23,6 +23,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
+#include "glue.h"
 #include "FakeCanvas.h"
 #include "WebGLRenderingContext.h"
 
@@ -46,15 +47,43 @@ JS_BINDED_CONSTRUCTOR_IMPL(FakeCanvas)
 	return JS_FALSE;
 }
 
+JS_BINDED_PROP_GET_IMPL(FakeCanvas, clientWidth)
+{
+	vp.set(INT_TO_JSVAL(width));
+	return JS_TRUE;
+}
+
+JS_BINDED_PROP_GET_IMPL(FakeCanvas, clientHeight)
+{
+	vp.set(INT_TO_JSVAL(height));
+	return JS_TRUE;
+}
+
 JS_BINDED_PROP_GET_IMPL(FakeCanvas, width)
 {
 	vp.set(INT_TO_JSVAL(width));
 	return JS_TRUE;
 }
 
+JS_BINDED_PROP_SET_IMPL(FakeCanvas, width)
+{
+	if (vp.isNumber()) {
+		width = vp.toNumber();
+	}
+	return JS_TRUE;
+}
+
 JS_BINDED_PROP_GET_IMPL(FakeCanvas, height)
 {
 	vp.set(INT_TO_JSVAL(height));
+	return JS_TRUE;
+}
+
+JS_BINDED_PROP_SET_IMPL(FakeCanvas, height)
+{
+	if (vp.isNumber()) {
+		height = JSVAL_TO_INT(vp.get());
+	}
 	return JS_TRUE;
 }
 
@@ -107,8 +136,10 @@ void FakeCanvas::_js_register(JSContext* cx, JSObject* global)
 		JSCLASS_NO_OPTIONAL_MEMBERS
 	};
 	static JSPropertySpec props[] = {
-		JS_BINDED_PROP_DEF_GETTER(FakeCanvas, width),
-		JS_BINDED_PROP_DEF_GETTER(FakeCanvas, height),
+		JS_BINDED_PROP_DEF_GETTER(FakeCanvas, clientWidth),
+		JS_BINDED_PROP_DEF_GETTER(FakeCanvas, clientHeight),
+		JS_BINDED_PROP_DEF_ACCESSOR(FakeCanvas, width),
+		JS_BINDED_PROP_DEF_ACCESSOR(FakeCanvas, height),
 		{0, 0, 0, 0, 0}
 	};
 	static JSFunctionSpec funcs[] = {

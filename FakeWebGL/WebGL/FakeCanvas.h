@@ -38,8 +38,10 @@ public:
 	FakeCanvas(int w, int h) : width(w), height(h) {};
 	JS_BINDED_CLASS_GLUE(FakeCanvas);
 	JS_BINDED_CONSTRUCTOR(FakeCanvas);
-	JS_BINDED_PROP_GET(FakeCanvas, width);
-	JS_BINDED_PROP_GET(FakeCanvas, height);
+	JS_BINDED_PROP_GET(FakeCanvas, clientWidth);
+	JS_BINDED_PROP_GET(FakeCanvas, clientHeight);
+	JS_BINDED_PROP_ACCESSOR(FakeCanvas, width);
+	JS_BINDED_PROP_ACCESSOR(FakeCanvas, height);
 	JS_BINDED_FUNC(FakeCanvas, getContext);
 	JS_BINDED_FUNC(FakeCanvas, getBoundingClientRect);
 };
