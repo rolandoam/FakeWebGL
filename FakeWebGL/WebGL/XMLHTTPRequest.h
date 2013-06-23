@@ -46,7 +46,6 @@ class FakeXMLHTTPRequest : public JSBindedObject
 	std::string url;
 	std::string type;
 	std::stringstream data;
-	size_t dataSize;
 	jsval onreadystateCallback;
 	int readyState;
 	int status;
@@ -71,6 +70,7 @@ public:
 	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, responseText);
 	JS_BINDED_PROP_GET(FakeXMLHTTPRequest, response);
 	JS_BINDED_FUNC(FakeXMLHTTPRequest, overrideMimeType);
+	JS_BINDED_FUNC(FakeXMLHTTPRequest, setRequestHeader);
 	JS_BINDED_FUNC(FakeXMLHTTPRequest, open);
 	JS_BINDED_FUNC(FakeXMLHTTPRequest, send);
 

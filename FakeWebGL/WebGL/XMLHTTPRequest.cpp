@@ -41,10 +41,10 @@ void* bgReadFile(void* arg) {
 		// file not found
 		req->status = 404;
 	} else {
-		shared_ptr<char> tmp = readFileInMemory(path.c_str(), req->dataSize);
+		shared_ptr<char> tmp = readFileInMemory(path.c_str(), req->dataLength);
 		req->data.flush();
 		req->data << tmp.get();
-		if (req->dataSize > 0) {
+		if (req->dataLength > 0) {
 			req->status = 200;
 		} else {
 			printf("Error trying to read '%s'\n", path.c_str());
@@ -209,7 +209,7 @@ JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, status)
 
 JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, responseText)
 {
-	JSString* str = JS_NewStringCopyN(cx, data.str().c_str(), dataSize);
+	JSString* str = JS_NewStringCopyN(cx, data.str().c_str(), dataLength);
 	if (str) {
 		vp.set(STRING_TO_JSVAL(str));
 		return JS_TRUE;
@@ -234,9 +234,9 @@ JS_BINDED_PROP_GET_IMPL(FakeXMLHTTPRequest, response)
 		}
 		return JS_TRUE;
 	} else if (responseType == kRequestResponseTypeArrayBuffer) {
-		JSObject* tmp = JS_NewArrayBuffer(cx, dataSize);
+		JSObject* tmp = JS_NewArrayBuffer(cx, dataLength);
 		uint8_t* tmpData = JS_GetArrayBufferData(tmp);
-		data.read((char*)tmpData, dataSize);
+		data.read((char*)tmpData, dataLength);
 		jsval outVal = OBJECT_TO_JSVAL(tmp);
 		vp.set(outVal);
 		return JS_TRUE;
@@ -249,11 +249,22 @@ JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, overrideMimeType)
 {
 	jsval* argv = JS_ARGV(cx, vp);
 	if (argc == 1 && argv[0].isString()) {
+		// TODO: this should change the responseType
+	}
+	return JS_TRUE;
+}
+
+JS_BINDED_FUNC_IMPL(FakeXMLHTTPRequest, setRequestHeader)
+{
+	jsval* argv = JS_ARGV(cx, vp);
+	if (argc == 2 && argv[0].isString() && argv[1].isString()) {
 		JSStringWrapper w1(argv[0]);
-		std::string mimeType = "Content-type: ";
-		mimeType += (const char*)w1;
+		JSStringWrapper w2(argv[1]);
+		std::string header = (const char*)w1;
+		header += ": ";
+		header += (const char*)w2;
 		struct curl_slist *slist = NULL;
-		slist = curl_slist_append(slist, mimeType.c_str());
+		slist = curl_slist_append(slist, header.c_str());
 		curl_easy_setopt(curlHandle, CURLOPT_HTTPHEADER, slist);
 	}
 	return JS_TRUE;
@@ -350,6 +361,7 @@ void FakeXMLHTTPRequest::_js_register(JSContext *cx, JSObject *global)
 	};
 	static JSFunctionSpec funcs[] = {
 		JS_BINDED_FUNC_FOR_DEF(FakeXMLHTTPRequest, overrideMimeType),
+		JS_BINDED_FUNC_FOR_DEF(FakeXMLHTTPRequest, setRequestHeader),
 		JS_BINDED_FUNC_FOR_DEF(FakeXMLHTTPRequest, open),
 		JS_BINDED_FUNC_FOR_DEF(FakeXMLHTTPRequest, send),
 		JS_FS_END
