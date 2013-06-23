@@ -1,4 +1,5 @@
 function setupGame() {
+	console.log("onSetup");
 	chesterGL.settings.useGoogleAnalytics = false;
 	chesterGL.setup("webgl");
 	var size = chesterGL.viewportSize();
@@ -20,8 +21,7 @@ function setupGame() {
 	var label = new chesterGL.BMFontLabelBlock("fonts/port_lligat", "This is a BM Label");
 	label.setRotation(Math.PI / 4);
 	label.setPosition(size.width/2, size.height / 2, 0);
-
-	// group.addChild(someBlock);
+	/*
 
 	// other test for atlas
 	var atlas = new chesterGL.BlockGroup("images/star.png"),
@@ -29,8 +29,8 @@ function setupGame() {
 	c2 = atlas.createBlock();
 	c1.setPosition(40, 100, 0);
 	c2.setPosition(40, 180, 0);
-	atlas.addChild(c1, c2);
-	group.addChild(atlas);
+	atlas.append(c1, c2);
+	group.append(atlas);
 
 	// add some action
 	var dz = 10,
@@ -48,7 +48,8 @@ function setupGame() {
 		}
 	});
 
-	sceneBlock.addChild(group, label);
+	sceneBlock.append(group, label);
+	*/
 	// sceneBlock.addChild(someBlock);
 	chesterGL.run();
 	// draw a single frame (for debug purposes)

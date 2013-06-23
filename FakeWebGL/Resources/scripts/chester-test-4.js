@@ -5,7 +5,8 @@ function setupGame() {
 
 	chesterGL.loadAsset("texture", "images/ship.png");
 	chesterGL.loadAsset("texture", "images/ship_non_hdpi.png");
-	chesterGL.assetsLoaded("texture", function () {
+	chesterGL.BMFontLabelBlock.loadFont("fonts/arial_demo");
+	chesterGL.assetsLoaded("all", function () {
 		// $("#loading").html("Test Single Block");
 		// finish with the setup and run the game
 		chesterGL.setupPerspective();
@@ -24,7 +25,9 @@ function setupGame() {
 		nonRetinaShip.setTexture("images/ship_non_hdpi.png");
 		nonRetinaShip.setPosition(size.width/2, size.height/2 + 100, 0);
 
-		sceneBlock.addChild(retinaShip, nonRetinaShip);
+		var label = new chesterGL.BMFontLabelBlock("walala", "fonts/arial_demo");
+		label.setPosition(20, 10, 0);
+		sceneBlock.append(retinaShip, nonRetinaShip, label);
 
 		chesterGL.run();
 		// draw a single frame (for debug purposes)
