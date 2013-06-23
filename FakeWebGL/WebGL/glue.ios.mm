@@ -69,7 +69,6 @@ void localStorageSet(const std::string& key, jsval val) {
 		nsval = [NSNumber numberWithBool:val.toBoolean()];
 	}
 	[[NSUserDefaults standardUserDefaults] setObject:nsval forKey:nskey];
-	[[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 jsval localStorageGet(const std::string& key) {

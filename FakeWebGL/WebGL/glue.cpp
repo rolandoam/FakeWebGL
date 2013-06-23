@@ -548,8 +548,8 @@ void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count)
 
 void createJSEnvironment() {
 	// create world
-	runtime = JS_NewRuntime(15 * 1024 * 1024, JS_NO_HELPER_THREADS);
-	_cx = JS_NewContext(runtime, 15360);
+	runtime = JS_NewRuntime(8 * 1024 * 1024, JS_NO_HELPER_THREADS);
+	_cx = JS_NewContext(runtime, 8192);
 
 	JS_SetVersion(_cx, JSVERSION_LATEST);
 	JS_SetOptions(_cx, JSOPTION_TYPE_INFERENCE);
@@ -561,7 +561,7 @@ void createJSEnvironment() {
 }
 
 void maybeGC() {
-	JS_MaybeGC(_cx);
+	JS_GC(runtime);
 }
 
 shared_ptr<char> convertToUTF8(char* utf16string, size_t len) {
