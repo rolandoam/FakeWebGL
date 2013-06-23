@@ -105,10 +105,6 @@
 - (void)initJS
 {
 	[EAGLContext setCurrentContext:[_glView getContext]];
-	// run all the files
-	if (0) {
-		runScript("js/debugger.js");
-	}
 	
 	/**
 	 * Three.js tests:
@@ -125,38 +121,37 @@
 	// three.js
 #if TEST_THREE
 	// required for all tests
-	runScript("js/three/three.js");
+	runScript("scripts/three/three.js");
 	
 #if TEST_THREE == 1
-	runScript("js/three/test-three.js");
+	runScript("scripts/three/test-three.js");
 #endif
 	
 #if TEST_THREE == 2
-	runScript("js/three/webgl_geometry_hierarchy2.js");
+	runScript("scripts/three/webgl_geometry_hierarchy2.js");
 #endif
 	
 #if TEST_THREE == 3
-	runScript("js/three/BinaryLoader.js");
-	runScript("js/three/materials_cubemap.js");
+	runScript("scripts/three/BinaryLoader.js");
+	runScript("scripts/three/materials_cubemap.js");
 #endif
-	
+
 #if TEST_THREE == 4
 	// NOT WORKING (YET)
-	runScript("js/three/ShaderSkin.js");
-	runScript("js/three/CopyShader.js");
-	runScript("js/three/EffectComposer.js");
-	runScript("js/three/RenderPass.js");
-	runScript("js/three/ShaderPass.js");
-	runScript("js/three/MaskPass.js");
-	runScript("js/three/webgl_materials_bumpmap_skin.js");
+	runScript("scripts/three/ShaderSkin.js");
+	runScript("scripts/three/CopyShader.js");
+	runScript("scripts/three/EffectComposer.js");
+	runScript("scripts/three/RenderPass.js");
+	runScript("scripts/three/ShaderPass.js");
+	runScript("scripts/three/MaskPass.js");
+	runScript("scripts/three/webgl_materials_bumpmap_skin.js");
 #endif
-	
 #endif
-	
+
 #if !TEST_THREE
 	// chester examples
-	runScript("js/chester.js");
-	runScript("js/chester-test-3.js");
+	runScript("scripts/chester.js");
+	runScript("scripts/chester-test-4.js");
 #endif
 }
 
