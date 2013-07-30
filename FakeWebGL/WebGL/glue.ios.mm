@@ -26,21 +26,24 @@
 #import <Foundation/Foundation.h>
 #include "glue.h"
 #include "glue.math.ios.h"
-#import "AppDelegate.h"
 
-#define RETINA_PREFIX @"@2x"
+extern NSDictionary* alternativePaths;
 
 const char* getFullPathFromRelativePath(const char* path)
 {
-	NSBundle* mainBundle = [NSBundle mainBundle];
 	NSString* aPath = [NSString stringWithUTF8String:path];
-	NSString* fullPath = [mainBundle pathForResource:aPath ofType:nil];
-	if (!fullPath) {
-		fullPath = [mainBundle pathForResource:aPath ofType:nil];
+	if (alternativePaths && [alternativePaths objectForKey:aPath]) {
+		return [[alternativePaths objectForKey:aPath] UTF8String];
+	} else {
+		NSBundle* mainBundle = [NSBundle mainBundle];
+		NSString* fullPath = [mainBundle pathForResource:aPath ofType:nil];
+		if (!fullPath) {
+			fullPath = [mainBundle pathForResource:aPath ofType:nil];
+		}
+		if (!fullPath)
+			return "";
+		return [fullPath UTF8String];
 	}
-	if (!fullPath)
-		return "";
-	return [fullPath UTF8String];
 }
 
 float getDevicePixelRatio()
