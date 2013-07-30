@@ -75,7 +75,7 @@ static void* _checkBufferStatus(void* args) {
 	AudioManager* manager = (AudioManager*)args;
 	while (bgThreadAlive) {
 		manager->checkBuffers();
-		usleep(32); // two frames (aprox, at 16fps)
+		usleep(500); // 500usec -> 0.5ms
 	}
 	return NULL;
 }
