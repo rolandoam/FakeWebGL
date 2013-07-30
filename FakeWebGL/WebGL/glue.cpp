@@ -31,9 +31,9 @@
 #include <queue>
 #include <string>
 #include <pthread.h>
-#include <iconv.h>
 #include <errno.h>
 #include <assert.h>
+#include <iconv.h>
 // AbsoluteTime
 #include <mach/mach.h>
 #include <mach/mach_time.h>
@@ -143,6 +143,9 @@ bool evalString(const char *string, jsval *outVal, const char *filename)
 		JSBool evaluatedOK = JS_ExecuteScript(_cx, globalObject, script, &rval);
 		if (JS_FALSE == evaluatedOK) {
 			fprintf(stderr, "(evaluatedOK == JS_FALSE)\n");
+			if (JS_IsExceptionPending(_cx)) {
+				JS_ReportPendingException(_cx);
+			}
 		}
 		return evaluatedOK;
 	}
@@ -229,11 +232,9 @@ bool runScript(const char *path, JSObject* glob, JSContext* cx) {
 			evaluatedOK = JS_ExecuteScript(cx, glob, script, &rval);
 			if (JS_FALSE == evaluatedOK) {
 				fprintf(stderr, "(evaluatedOK == JS_FALSE)\n");
+				// check pending exceptions
+				JS_IsExceptionPending(cx) && JS_ReportPendingException(cx);
 			}
-		}
-		// check pending exceptions
-		if (JS_IsExceptionPending(cx) && JS_ReportPendingException(cx)) {
-			fprintf(stderr, "***\n");
 		}
 		return evaluatedOK;
 	}
@@ -253,7 +254,7 @@ JSBool jsRunScript(JSContext* cx, unsigned argc, jsval*vp)
 	return JS_TRUE;
 }
 
-JSBool jslog(JSContext* cx, uint32_t argc, jsval *vp)
+JSBool js_log(JSContext* cx, uint32_t argc, jsval *vp)
 {
 	if (argc > 0) {
 		jsval* argv = JS_ARGV(cx, vp);
@@ -448,7 +449,7 @@ JSObject* NewGlobalObject(JSContext* cx)
 	if (!JS_DefineDebuggerObject(cx, glob))
 		return NULL;
 
-	JS_DefineFunction(cx, glob, "log", jslog, 0, JSPROP_READONLY | JSPROP_PERMANENT);
+	JS_DefineFunction(cx, glob, "log", js_log, 0, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "time", js_time, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "timeEnd", js_timeEnd, 1, JSPROP_READONLY | JSPROP_PERMANENT);
 	JS_DefineFunction(cx, glob, "requestAnimationFrame", jsRequestAnimationFrame, 1, JSPROP_READONLY | JSPROP_PERMANENT);
@@ -548,8 +549,8 @@ void injectTouches(webglTouchEventType type, webglTouch_t* touches, int count)
 
 void createJSEnvironment() {
 	// create world
-	runtime = JS_NewRuntime(8 * 1024 * 1024, JS_NO_HELPER_THREADS);
-	_cx = JS_NewContext(runtime, 8192);
+	runtime = JS_NewRuntime(10 * 1024 * 1024, JS_NO_HELPER_THREADS);
+	_cx = JS_NewContext(runtime, 10 * 1024);
 
 	JS_SetVersion(_cx, JSVERSION_LATEST);
 	JS_SetOptions(_cx, JSOPTION_TYPE_INFERENCE);
