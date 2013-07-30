@@ -27,6 +27,7 @@
 #include <regex>
 #include <algorithm>
 #include <vector>
+#include <pthread.h>
 #include "jsfriendapi.h"
 #include "XMLHTTPRequest.h"
 
@@ -42,9 +43,9 @@ void* bgReadFile(void* arg) {
 		req->status = 404;
 	} else {
 		shared_ptr<char> tmp = readFileInMemory(path.c_str(), req->dataLength);
-		req->data.flush();
-		req->data << tmp.get();
 		if (req->dataLength > 0) {
+			req->data.flush();
+			req->data << tmp.get();
 			req->status = 200;
 		} else {
 			printf("Error trying to read '%s'\n", path.c_str());
