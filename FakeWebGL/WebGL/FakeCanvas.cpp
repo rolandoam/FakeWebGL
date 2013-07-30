@@ -126,6 +126,19 @@ JS_BINDED_FUNC_IMPL(FakeCanvas, getBoundingClientRect) {
 	return JS_TRUE;
 }
 
+JS_BINDED_FUNC_IMPL(FakeCanvas, addEventListener) {
+	jsval* argv = JS_ARGV(cx, vp);
+	if (argc >= 2 && argv[0].isString()) {
+		JSStringWrapper str(argv[0].toString(), cx);
+		if (argv[1].isObject()) {
+			JSObject* cb = argv[1].toObjectOrNull();
+			JS_AddObjectRoot(cx, &cb);
+			this->listeners[(const char*)str] = (void *)cb;
+		}
+	}
+	return JS_TRUE;
+}
+
 void FakeCanvas::_js_register(JSContext* cx, JSObject* global)
 {
 	// create the class
@@ -145,8 +158,18 @@ void FakeCanvas::_js_register(JSContext* cx, JSObject* global)
 	static JSFunctionSpec funcs[] = {
 		JS_BINDED_FUNC_FOR_DEF(FakeCanvas, getContext),
 		JS_BINDED_FUNC_FOR_DEF(FakeCanvas, getBoundingClientRect),
+		JS_BINDED_FUNC_FOR_DEF(FakeCanvas, addEventListener),
 		JS_FS_END
 	};
 	FakeCanvas::js_parent = NULL;
 	FakeCanvas::js_proto = JS_InitClass(cx, global, NULL, &FakeCanvas::js_class, FakeCanvas::_js_constructor, 1, props, funcs, NULL, NULL);
+}
+
+FakeCanvas::~FakeCanvas() {
+	JSContext* cx = getGlobalContext();
+	for (auto it = listeners.cbegin(); it != listeners.cend();) {
+		JSObject* cb = (JSObject*)it->second;
+		JS_RemoveObjectRoot(cx, &cb);
+		listeners.erase(it++);
+	}
 }

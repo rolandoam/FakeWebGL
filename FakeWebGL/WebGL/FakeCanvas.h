@@ -26,16 +26,19 @@
 #ifndef __FAKE_CANVAS_H__
 #define __FAKE_CANVAS_H__
 
+#include <map>
 #include "jstypes.h"
 #include "glue.h"
 
 class FakeCanvas : public JSBindedObject
 {
+	std::map<std::string,void*> listeners;
 public:
 	int width;
 	int height;
 	
 	FakeCanvas(int w, int h) : width(w), height(h) {};
+	~FakeCanvas();
 	JS_BINDED_CLASS_GLUE(FakeCanvas);
 	JS_BINDED_CONSTRUCTOR(FakeCanvas);
 	JS_BINDED_PROP_GET(FakeCanvas, clientWidth);
@@ -44,6 +47,7 @@ public:
 	JS_BINDED_PROP_ACCESSOR(FakeCanvas, height);
 	JS_BINDED_FUNC(FakeCanvas, getContext);
 	JS_BINDED_FUNC(FakeCanvas, getBoundingClientRect);
+	JS_BINDED_FUNC(FakeCanvas, addEventListener);
 };
 
 #endif
